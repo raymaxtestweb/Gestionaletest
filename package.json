@@ -1,0 +1,8 @@
+{
+  "name": "raymax-netlify-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^9.0.6"
+  }
+}

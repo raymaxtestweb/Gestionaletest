@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Calendario — Massimo Inturrisi</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;
+  --ink:#1c1917;--ink2:#44403c;--ink3:#78716c;
+  --gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;
+  --white:#fff;--red:#b91c1c;--green:#166534;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;}
+
+/* ── HEADER ── */
+header{
+  background:var(--ink);
+  padding:0 16px;
+  height:54px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  padding-top:max(0px, env(safe-area-inset-top));
+  height:calc(54px + env(safe-area-inset-top, 0px));
+}
+.brand{font-family:'Libre Baskerville',serif;font-size:.95rem;color:#fff;font-weight:400;line-height:1.2;}
+.brand small{display:block;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);}
+.header-btn{color:rgba(255,255,255,.55);font-size:.72rem;text-decoration:none;padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.15);font-family:'DM Sans',sans-serif;background:none;cursor:pointer;display:flex;align-items:center;gap:5px;}
+
+/* ── MAIN SCROLL ── */
+.main{padding:0 0 120px;}
+
+/* ── CALENDARIO ── */
+.cal-wrap{background:var(--white);border-bottom:1px solid var(--bg3);}
+.cal-header{background:var(--ink);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.cal-month{font-family:'Libre Baskerville',serif;font-size:1.1rem;color:#fff;font-weight:400;}
+.cal-nav{display:flex;gap:6px;}
+.cal-nav button{background:rgba(255,255,255,.1);border:none;color:#fff;width:36px;height:36px;border-radius:9px;font-size:1.1rem;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;}
+
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg2);border-bottom:1px solid var(--bg3);}
+.cal-wd{text-align:center;padding:7px 2px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-day{min-height:52px;padding:5px 4px;border-right:1px solid var(--bg3);border-bottom:1px solid var(--bg3);position:relative;cursor:pointer;}
+.cal-day:nth-child(7n){border-right:none;}
+.cal-day.other-month{background:var(--bg);opacity:.4;pointer-events:none;}
+.cal-day.today .day-num{background:var(--ink);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.day-num{font-size:.75rem;font-weight:600;color:var(--ink2);margin-bottom:3px;display:inline-block;}
+.day-dots{display:flex;flex-direction:column;gap:1px;}
+.day-dot{width:100%;height:4px;border-radius:2px;}
+.day-dot.preventivo{background:#f59e0b;}
+.day-dot.confermato{background:#10b981;}
+/* Su schermi molto piccoli, mostra solo punti */
+@media(max-width:380px){
+  .cal-day{min-height:44px;}
+  .day-dots{flex-direction:row;flex-wrap:wrap;gap:2px;}
+  .day-dot{width:6px;height:6px;border-radius:50%;}
+}
+
+/* ── LISTA EVENTI MESE (sotto il calendario) ── */
+.month-events{padding:16px;}
+.month-events-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;}
+.ev-row{background:var(--white);border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--bg3);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s;}
+.ev-row:active{background:var(--gold5);}
+.ev-row-left{flex:1;min-width:0;}
+.ev-row-date{font-size:.72rem;font-weight:700;color:var(--ink3);margin-bottom:2px;}
+.ev-row-name{font-size:.9rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-row-sub{font-size:.75rem;color:var(--ink3);margin-top:1px;}
+.ev-row-badge{flex-shrink:0;}
+.stato-badge{display:inline-flex;align-items:center;padding:4px 9px;border-radius:20px;font-size:.68rem;font-weight:700;}
+.stato-badge.preventivo{background:#fef3c7;color:#92400e;}
+.stato-badge.confermato{background:#d1fae5;color:#065f46;}
+.no-events{text-align:center;padding:24px 16px;color:var(--ink3);font-size:.85rem;}
+
+/* ── RICERCA ── */
+.search-wrap{padding:0 16px 8px;}
+.search-box{background:var(--white);border-radius:var(--r);padding:14px;border:1px solid var(--bg3);box-shadow:0 1px 8px rgba(28,25,23,.05);}
+.search-box-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.srch-field{margin-bottom:10px;}
+.srch-field label{display:block;font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.srch-field input{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;}
+.srch-field input:focus{border-color:var(--gold);}
+.srch-btn{width:100%;padding:11px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;margin-top:4px;}
+.search-results{margin-top:12px;}
+
+/* ── BOTTOM SHEET PANEL ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(28,25,23,.55);z-index:500;display:none;}
+.sheet-overlay.on{display:block;}
+.sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:501;
+  background:var(--white);
+  border-radius:20px 20px 0 0;
+  max-height:88vh;
+  overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.32,.72,0,1);
+  padding-bottom:max(16px, env(safe-area-inset-bottom, 16px));
+}
+.sheet.on{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:12px auto 0;cursor:pointer;}
+.sheet-head{background:var(--ink);padding:16px 20px 18px;position:relative;}
+.sheet-title{font-family:'Libre Baskerville',serif;font-size:1rem;color:#fff;font-weight:400;}
+.sheet-sub{font-size:.7rem;color:rgba(255,255,255,.55);margin-top:3px;}
+.sheet-close{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.1);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:.95rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* slot tabs */
+.sheet-tabs{display:flex;gap:6px;padding:14px 16px 0;}
+.s-tab{flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg);font-size:.7rem;font-weight:600;text-align:center;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink3);transition:all .15s;}
+.s-tab.has-ev{color:var(--ink2);}
+.s-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.s-tab.prev-tab{border-color:#f59e0b;}
+.s-tab.conf-tab{border-color:#10b981;}
+
+.sheet-body{padding:14px 16px;}
+.detail-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2);}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);min-width:90px;padding-top:2px;}
+.detail-val{font-size:.86rem;color:var(--ink);flex:1;line-height:1.5;}
+.svc-list{display:flex;flex-direction:column;gap:3px;}
+.svc-line{display:flex;justify-content:space-between;font-size:.82rem;}
+.svc-line .sn{color:var(--ink2);}
+.svc-line .sv{font-weight:600;color:var(--gold);}
+.pay-mini{background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:4px;}
+.pay-mini-row{display:flex;justify-content:space-between;font-size:.78rem;padding:3px 0;border-bottom:1px dashed var(--bg3);}
+.pay-mini-row:last-child{border-bottom:none;font-weight:700;}
+.empty-slot{text-align:center;padding:20px;color:var(--ink3);font-size:.83rem;}
+
+.sheet-actions{padding:12px 16px;border-top:1px solid var(--bg2);display:flex;flex-direction:column;gap:8px;}
+.btn{padding:12px 16px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-green{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);}
+.btn-red{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--ink);
+  display:flex;
+  padding:10px 0;
+  padding-bottom:max(10px, env(safe-area-inset-bottom, 10px));
+  z-index:200;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.45);font-family:'DM Sans',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;padding:0;}
+.nav-btn.active{color:var(--gold2);}
+.nav-icon{font-size:1.15rem;line-height:1;}
+
+/* ── TOAST ── */
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(16px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:.78rem;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);transition:all .25s ease;z-index:1200;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── SEZIONI ── */
+.section{display:none;}
+.section.active{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Massimo Inturrisi<small>Fotografo</small></div>
+  <button class="header-btn" onclick="location.href='./preventivo.html'">+ Preventivo</button>
+</header>
+
+<div class="main" id="mainContent">
+
+  <!-- ── SEZIONE CALENDARIO ── -->
+  <div class="section active" id="secCalendario">
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <div class="cal-month" id="calMonthLabel">—</div>
+        <div class="cal-nav">
+          <button onclick="prevMonth()">‹</button>
+          <button onclick="goToday()" style="font-size:.65rem;width:auto;padding:0 10px">Oggi</button>
+          <button onclick="nextMonth()">›</button>
+        </div>
+      </div>
+      <div class="cal-weekdays">
+        <div class="cal-wd">L</div><div class="cal-wd">M</div><div class="cal-wd">M</div>
+        <div class="cal-wd">G</div><div class="cal-wd">V</div><div class="cal-wd">S</div>
+        <div class="cal-wd">D</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="month-events" id="monthEvents">
+      <div class="month-events-title">Eventi del mese</div>
+      <div id="monthEventsList"></div>
+    </div>
+  </div>
+
+  <!-- ── SEZIONE RICERCA ── -->
+  <div class="section" id="secRicerca">
+    <div class="search-wrap" style="padding-top:16px;">
+      <div class="search-box">
+        <div class="search-box-title">Cerca evento</div>
+        <div class="srch-field"><label>Data</label><input type="date" id="srchData"></div>
+        <div class="srch-field"><label>Tipo evento</label>
+          <select id="srchTipo" style="width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink);outline:none;">
+            <option value="">— Tutti —</option>
+            <option>Matrimonio</option>
+            <option>Battesimo</option>
+            <option>18° Compleanno</option>
+            <option>Comunione</option>
+            <option>Cresima</option>
+            <option>Fidanzamento</option>
+            <option>Laurea</option>
+            <option>Corporate</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="srch-field"><label>Nome riferimento</label><input type="text" id="srchNome" placeholder="es. Rossi"></div>
+        <button class="srch-btn" onclick="cercaEventi()">Cerca</button>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── BOTTOM SHEET RIEPILOGO ── -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle" onclick="closeSheet()"></div>
+  <div class="sheet-head">
+    <div class="sheet-title" id="sheetTitle">—</div>
+    <div class="sheet-sub" id="sheetSub">—</div>
+    <button class="sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="sheet-tabs" id="sheetTabs"></div>
+  <div class="sheet-body" id="sheetBody"></div>
+  <div class="sheet-actions" id="sheetActions"></div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navCal" onclick="showSection('calendario')">
+    <span class="nav-icon">📅</span>Calendario
+  </button>
+  <button class="nav-btn" id="navSrch" onclick="showSection('ricerca')">
+    <span class="nav-icon">🔍</span>Cerca
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// REDIRECT: se desktop, vai al calendario desktop
+// ══════════════════════════════════════════════════════
+if(window.innerWidth >= 1024){
+  window.location.replace('./calendario.html');
+}
+
+// ══════════════════════════════════════════════════════
+// DATI
+// ══════════════════════════════════════════════════════
+let BOOKINGS = {};
+let _cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000;
+const SLOT_LABELS = { MATTINA:'Mattina', POMERIGGIO:'Pomeriggio', SERALE:'Serale' };
+const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+async function fetchBookings(force=false){
+  const now = Date.now();
+  if(!force && Object.keys(BOOKINGS).length > 0 && (now - _cacheTime) < CACHE_TTL) return BOOKINGS;
+  try{
+    const res = await fetch('/.netlify/functions/bookings-get');
+    if(!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    BOOKINGS = data.bookings || {};
+    _cacheTime = now;
+  } catch(e){ console.warn('Calendario offline:', e.message); }
+  return BOOKINGS;
+}
+
+function normDate(v){
+  if(!v) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const d = new Date(v);
+  if(isNaN(d)) return '';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function pretty(v){ const n=normDate(v); if(!n) return '—'; const[y,m,d]=n.split('-'); return `${d}/${m}/${y}`; }
+function f2(v){ return '€ ' + Number(v||0).toFixed(2).replace('.',','); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove('on'), 2600);
+}
+
+// ══════════════════════════════════════════════════════
+// NAVIGAZIONE SEZIONI
+// ══════════════════════════════════════════════════════
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  document.getElementById('nav' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════════════
+// CALENDARIO MENSILE
+// ══════════════════════════════════════════════════════
+let _calYear = new Date().getFullYear();
+let _calMonth = new Date().getMonth();
+
+function renderCalendar(){
+  const today = normDate(new Date().toISOString().slice(0,10));
+  const year = _calYear, month = _calMonth;
+  document.getElementById('calMonthLabel').textContent = `${MESI_IT[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  let startDow = (firstDay.getDay() + 6) % 7;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  for(let i=0; i<startDow; i++){
+    const d = new Date(year, month, 1-(startDow-i));
+    grid.appendChild(buildDayCell(normDate(d.toISOString().slice(0,10)), d.getDate(), true, today));
+  }
+  for(let d=1; d<=lastDay.getDate(); d++){
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(buildDayCell(dateStr, d, false, today));
+  }
+  const total = grid.children.length;
+  const remaining = (7-(total%7))%7;
+  for(let i=1; i<=remaining; i++){
+    const d = new Date(year, month+1, i);
+    grid.appendChild(buildDayCell(normDate(d.toISOString().slice(0,10)), i, true, today));
+  }
+
+  renderMonthEvents(year, month);
+}
+
+function buildDayCell(dateStr, dayNum, otherMonth, today){
+  const div = document.createElement('div');
+  div.className = 'cal-day' + (otherMonth?' other-month':'') + (dateStr===today?' today':'');
+
+  const numEl = document.createElement('div');
+  numEl.className = 'day-num';
+  numEl.textContent = dayNum;
+  div.appendChild(numEl);
+
+  if(!otherMonth){
+    const day = BOOKINGS[dateStr] || {};
+    const slots = ['MATTINA','POMERIGGIO','SERALE'].filter(s => day[s] && day[s].occupied !== false);
+    if(slots.length){
+      const dots = document.createElement('div');
+      dots.className = 'day-dots';
+      slots.forEach(s => {
+        const dot = document.createElement('div');
+        dot.className = 'day-dot ' + (day[s].status === 'confermato' ? 'confermato' : 'preventivo');
+        dots.appendChild(dot);
+      });
+      div.appendChild(dots);
+      div.onclick = () => openSheet(dateStr, null);
+    }
+  }
+  return div;
+}
+
+function renderMonthEvents(year, month){
+  const list = document.getElementById('monthEventsList');
+  const prefix = `${year}-${String(month+1).padStart(2,'0')}-`;
+  const events = [];
+
+  Object.entries(BOOKINGS).forEach(([dateStr, day]) => {
+    if(!dateStr.startsWith(prefix)) return;
+    Object.entries(day).forEach(([slot, item]) => {
+      if(!item || item.occupied === false) return;
+      const fv = item.details?.formValues || {};
+      events.push({ dateStr, slot, item,
+        nome: item.customerName || fv.nomeCliente || '—',
+        tipo: item.eventType || fv.tipoEvento || 'Evento',
+        stato: item.status || 'preventivo'
+      });
+    });
+  });
+
+  events.sort((a,b) => a.dateStr.localeCompare(b.dateStr) || ['MATTINA','POMERIGGIO','SERALE'].indexOf(a.slot) - ['MATTINA','POMERIGGIO','SERALE'].indexOf(b.slot));
+
+  if(!events.length){
+    list.innerHTML = '<div class="no-events">Nessun evento questo mese</div>';
+    return;
+  }
+
+  list.innerHTML = events.map(ev => `
+    <div class="ev-row" onclick="openSheet('${ev.dateStr}','${ev.slot}')">
+      <div class="ev-row-left">
+        <div class="ev-row-date">${pretty(ev.dateStr)} · ${SLOT_LABELS[ev.slot]}</div>
+        <div class="ev-row-name">${ev.nome}</div>
+        <div class="ev-row-sub">${ev.tipo}</div>
+      </div>
+      <div class="ev-row-badge">
+        <span class="stato-badge ${ev.stato}">${ev.stato==='confermato'?'Confermato':'Preventivo'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function prevMonth(){ _calMonth--; if(_calMonth<0){_calMonth=11;_calYear--;} renderCalendar(); }
+function nextMonth(){ _calMonth++; if(_calMonth>11){_calMonth=0;_calYear++;} renderCalendar(); }
+function goToday(){ const n=new Date(); _calYear=n.getFullYear(); _calMonth=n.getMonth(); renderCalendar(); }
+
+// ══════════════════════════════════════════════════════
+// BOTTOM SHEET
+// ══════════════════════════════════════════════════════
+let _sheetDate = null;
+let _sheetSlot = null;
+
+function openSheet(dateStr, initialSlot){
+  _sheetDate = dateStr;
+  const day = BOOKINGS[dateStr] || {};
+  if(!initialSlot){
+    initialSlot = ['MATTINA','POMERIGGIO','SERALE'].find(s=>day[s]&&day[s].occupied!==false) || 'SERALE';
+  }
+  _sheetSlot = initialSlot;
+  document.getElementById('sheetTitle').textContent = pretty(dateStr);
+  document.getElementById('sheetSub').textContent = 'Dettaglio evento';
+  renderSheetTabs(dateStr, initialSlot);
+  renderSheetContent(dateStr, initialSlot);
+  document.getElementById('sheetOverlay').classList.add('on');
+  document.getElementById('sheet').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet(){
+  document.getElementById('sheetOverlay').classList.remove('on');
+  document.getElementById('sheet').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+function renderSheetTabs(dateStr, activeSlot){
+  const day = BOOKINGS[dateStr] || {};
+  document.getElementById('sheetTabs').innerHTML = ['MATTINA','POMERIGGIO','SERALE'].map(slot => {
+    const item = day[slot];
+    const hasEv = item && item.occupied !== false;
+    const cls = [
+      's-tab',
+      hasEv ? 'has-ev' : '',
+      hasEv ? (item.status==='confermato' ? 'conf-tab' : 'prev-tab') : '',
+      slot===activeSlot ? 'active' : ''
+    ].filter(Boolean).join(' ');
+    return `<button class="${cls}" onclick="switchSheetSlot('${slot}')">${SLOT_LABELS[slot]}</button>`;
+  }).join('');
+}
+
+function switchSheetSlot(slot){
+  _sheetSlot = slot;
+  renderSheetTabs(_sheetDate, slot);
+  renderSheetContent(_sheetDate, slot);
+}
+
+function renderSheetContent(dateStr, slot){
+  const item = (BOOKINGS[dateStr]||{})[slot];
+  const bodyEl = document.getElementById('sheetBody');
+  const actionsEl = document.getElementById('sheetActions');
+
+  if(!item || item.occupied===false){
+    bodyEl.innerHTML = '<div class="empty-slot">Nessun evento per questa fascia.</div>';
+    actionsEl.innerHTML = '';
+    return;
+  }
+
+  const d = item.details || {};
+  const fv = d.formValues || {};
+  const svcList = d.svcList || [];
+  const prezzi = d.prezzi || {};
+  const album = d.album || {};
+  const stato = item.status || 'preventivo';
+
+  const row = (lbl,val) => val ? `<div class="detail-row"><div class="detail-lbl">${lbl}</div><div class="detail-val">${val}</div></div>` : '';
+
+  let rows = '';
+  rows += row('Stato', `<span class="stato-badge ${stato}">${stato==='confermato'?'Confermato':'Preventivo'}</span>`);
+  rows += row('Tipo', item.eventType||fv.tipoEvento||'—');
+  rows += row('Cliente', item.customerName||fv.nomeCliente||'—');
+  rows += row('Luogo', fv.luogoEvento||'—');
+
+  if(svcList.length){
+    rows += row('Servizi', `<div class="svc-list">${svcList.map(s=>`<div class="svc-line"><span class="sn">${s.nome||'—'}</span><span class="sv">${f2(s.costo)}</span></div>`).join('')}</div>`);
+  }
+
+  if(!album.noAlbum && album.formato){
+    rows += row('Album', [album.formato, album.pagine?album.pagine+' pag.':'', album.copertina||''].filter(Boolean).join(' · '));
+  } else if(album.noAlbum){
+    rows += row('Album', 'Nessun album — file digitali');
+  }
+
+  if(prezzi.totaleNetto || prezzi.totale){
+    const tot = prezzi.totaleNetto||prezzi.totale||0;
+    const cap = prezzi.caparra||0;
+    const saldo = prezzi.saldoEntrEvento||0;
+    rows += row('Pagamenti', `<div class="pay-mini">
+      <div class="pay-mini-row"><span>Totale</span><span>${f2(tot)}</span></div>
+      ${cap?`<div class="pay-mini-row"><span>① Salva Data</span><span>${f2(cap)}</span></div>`:''}
+      ${saldo?`<div class="pay-mini-row"><span>② Saldo servizio</span><span>${f2(saldo)}</span></div>`:''}
+      ${prezzi.accontoGrafica?`<div class="pay-mini-row"><span>③ Acconto album</span><span>${f2(prezzi.accontoGrafica)}</span></div>`:''}
+      ${prezzi.saldoConsegna?`<div class="pay-mini-row"><span>④ Saldo consegna</span><span>${f2(prezzi.saldoConsegna)}</span></div>`:''}
+    </div>`);
+  }
+
+  if(item.note||fv.noteExtra) rows += row('Note', item.note||fv.noteExtra);
+
+  bodyEl.innerHTML = rows || '<div class="empty-slot">Nessun dettaglio disponibile.</div>';
+
+  // Azioni
+  const dataParam = encodeURIComponent(dateStr);
+  const slotParam = encodeURIComponent(slot);
+  const isManuale = item.source === 'manuale';
+  const isConfermato = stato === 'confermato';
+
+  let actHtml = '';
+  actHtml += `<a class="btn btn-primary" href="./contratto.html?date=${dataParam}&slot=${slotParam}" target="_blank">Procedi al Contratto</a>`;
+  if(!isConfermato){
+    actHtml += `<button class="btn btn-green" onclick="confirmFromSheet('${dateStr}','${slot}')">✓ Conferma Data</button>`;
+  }
+  actionsEl.innerHTML = actHtml;
+}
+
+async function confirmFromSheet(dateStr, slot){
+  try{
+    const item = (BOOKINGS[dateStr]||{})[slot];
+    if(!item) return;
+    const payload = {...item, date:dateStr, slot, status:'confermato'};
+    const res = await fetch('/.netlify/functions/bookings-upsert',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(!res.ok||!data.ok) throw new Error(data.error||'errore');
+    BOOKINGS[dateStr][slot].status = 'confermato';
+    renderCalendar();
+    openSheet(dateStr, slot);
+    showToast('Data confermata ✓');
+  } catch(e){ showToast('Errore: '+e.message); }
+}
+
+// ══════════════════════════════════════════════════════
+// RICERCA
+// ══════════════════════════════════════════════════════
+function cercaEventi(){
+  const data = normDate(document.getElementById('srchData').value);
+  const tipo = document.getElementById('srchTipo').value.trim().toLowerCase();
+  const nome = document.getElementById('srchNome').value.trim().toLowerCase();
+
+  if(!data && !tipo && !nome){
+    document.getElementById('searchResults').innerHTML = '<div style="font-size:.82rem;color:var(--ink3);padding:8px 0">Compila almeno un campo.</div>';
+    return;
+  }
+
+  const risultati = [];
+  Object.entries(BOOKINGS).forEach(([dateStr, day]) => {
+    if(data && dateStr!==data) return;
+    Object.entries(day).forEach(([slot, item]) => {
+      if(!item||item.occupied===false) return;
+      const fv = item.details?.formValues||{};
+      const tipoEv = (item.eventType||fv.tipoEvento||'').toLowerCase();
+      const nomeRef = (item.customerName||fv.nomeCliente||'').toLowerCase();
+      if(tipo && !tipoEv.includes(tipo)) return;
+      if(nome && !nomeRef.includes(nome)) return;
+      risultati.push({dateStr,slot,item});
+    });
+  });
+
+  const el = document.getElementById('searchResults');
+  if(!risultati.length){ el.innerHTML='<div style="text-align:center;padding:16px;font-size:.85rem;color:var(--ink3)">Nessun evento trovato.</div>'; return; }
+
+  risultati.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
+  el.innerHTML = risultati.map(({dateStr,slot,item}) => {
+    const fv = item.details?.formValues||{};
+    const stato = item.status||'preventivo';
+    return `<div class="ev-row" style="margin-top:8px" onclick="openSheet('${dateStr}','${slot}')">
+      <div class="ev-row-left">
+        <div class="ev-row-date">${pretty(dateStr)} · ${SLOT_LABELS[slot]}</div>
+        <div class="ev-row-name">${item.customerName||fv.nomeCliente||'—'}</div>
+        <div class="ev-row-sub">${item.eventType||fv.tipoEvento||'Evento'}</div>
+      </div>
+      <span class="stato-badge ${stato}">${stato==='confermato'?'Confermato':'Preventivo'}</span>
+    </div>`;
+  }).join('');
+}
+
+// Enter nei campi ricerca
+['srchData','srchTipo','srchNome'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('keydown', e=>{if(e.key==='Enter')cercaEventi();});
+});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+(async function init(){
+  await fetchBookings();
+  renderCalendar();
+})();
+</script>
+</body>
+</html>

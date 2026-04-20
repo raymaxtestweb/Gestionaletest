@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordine Stampa — Massimo Inturrisi</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;--ink:#1c1917;--ink2:#44403c;--ink3:#78716c;--gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;--white:#fff;--red:#b91c1c;--green:#166534;--r:12px;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.brand{font-family:'Libre Baskerville',serif;font-size:1.05rem;color:#fff;font-weight:400}.brand small{display:block;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);margin-top:1px}
+.header-links{display:flex;gap:10px}
+.header-link{color:rgba(255,255,255,.5);font-size:.72rem;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s}
+.header-link:hover{color:#fff;background:rgba(255,255,255,.08)}
+.layout{max-width:960px;margin:0 auto;padding:24px 40px 60px;display:flex;flex-direction:column;gap:20px}
+.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3)}
+.card-title{font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bg2)}
+.f{margin-bottom:13px}.f:last-child{margin-bottom:0}
+.f label{display:block;font-size:.63rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+.f input,.f select,.f textarea{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s}
+.f input:focus,.f select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(160,132,92,.12)}
+.fg{display:grid;gap:12px}.fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr 1fr}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--ink);color:#fff}.btn-primary:hover{background:#333}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:#8a7050}
+.btn-green{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green)}.btn-green:hover{background:#dcfce7}
+.btn-outline{background:transparent;border:1px solid var(--bg3);color:var(--ink2)}.btn-outline:hover{background:var(--bg2)}
+.btn-full{width:100%}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-left:6px;vertical-align:middle}
+.badge-foto{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.badge-pannello{background:var(--gold4);color:var(--gold);border:1px solid var(--gold3)}
+.badge-lab{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.badge-libero{background:#ede9e2;color:var(--ink2);border:1px solid var(--bg3)}
+.badge-fisso{background:#e8eaf0;color:#3a4a6b;border:1px solid #c7ccd6}
+.search-wrap{position:relative}
+.search-input{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:11px 14px 11px 38px;font-family:'DM Sans',sans-serif;font-size:.92rem;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+.search-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(160,132,92,.12)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--ink3);pointer-events:none}
+.search-hint{font-size:.72rem;color:var(--ink3);margin-top:6px}
+.search-results{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--white);border:1px solid var(--bg3);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.12);max-height:320px;overflow-y:auto;z-index:200;display:none}
+.search-results.active{display:block}
+.result-item{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bg2);transition:background .15s;gap:10px}
+.result-item:hover{background:var(--gold5)}.result-item:last-child{border-bottom:none}
+.result-code{font-weight:700;font-size:.82rem;color:var(--gold)}
+.result-desc{font-size:.74rem;color:var(--ink3)}
+.result-add{background:var(--ink);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+.result-add:hover{background:#444}
+.order-table{width:100%;border-collapse:collapse;margin-top:4px}
+.order-table thead th{background:var(--ink);color:#fff;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;padding:9px 12px;text-align:left;font-weight:600}
+.order-table thead th.r{text-align:right}.order-table thead th.c{text-align:center}
+.order-table tbody tr{border-bottom:1px solid var(--bg2);transition:background .12s}
+.order-table tbody tr:hover{background:var(--gold5)}
+.order-table td{padding:9px 12px;font-size:.84rem;vertical-align:middle}
+.order-table td.r{text-align:right}.order-table td.c{text-align:center}.order-table td.b{font-weight:700;color:var(--ink)}
+.qty-input{width:56px;text-align:center;padding:6px 4px;border:1px solid var(--bg3);border-radius:6px;font-family:inherit;font-size:.88rem;font-weight:700;outline:none;background:var(--bg)}
+.qty-input:focus{border-color:var(--gold)}
+.flag-check{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.btn-remove{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;opacity:.4;transition:opacity .15s}
+.btn-remove:hover{opacity:1}
+.empty-state{text-align:center;padding:32px;color:var(--ink3);font-size:.82rem}
+.manual-row{display:grid;grid-template-columns:1fr 2fr .6fr .8fr auto;gap:8px;align-items:end;margin-top:14px;padding-top:14px;border-top:1px solid var(--bg2)}
+.price-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:7px 0;border-bottom:1px solid var(--bg2);font-size:.86rem}
+.price-row:last-child{border-bottom:none}
+.price-row .label{color:var(--ink2)}.price-row .val{font-weight:600;color:var(--ink)}
+.price-row.total{font-size:1.15rem;font-weight:700;font-family:'Libre Baskerville',serif;padding-top:12px;border-top:2px solid var(--ink);margin-top:3px;border-bottom:none}
+.price-row.netto{font-size:.9rem;color:var(--green)}
+.pay-options{display:flex;gap:10px;margin-bottom:16px}
+.pay-opt{flex:1;padding:14px;border:2px solid var(--bg3);border-radius:10px;cursor:pointer;text-align:center;transition:all .2s;background:var(--bg)}
+.pay-opt.sel{border-color:var(--gold);background:var(--gold5)}.pay-opt:hover{border-color:var(--gold)}
+.pay-opt-title{font-weight:700;font-size:.88rem}.pay-opt-sub{font-size:.68rem;color:var(--ink3);margin-top:2px}
+.pay-detail{background:var(--bg);border:1px solid var(--bg2);border-radius:10px;padding:14px 16px;display:none}
+.pay-detail.active{display:block}
+.pay-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--bg3);font-size:.86rem}
+.pay-row:last-child{border-bottom:none}
+.pay-row.saldo{font-size:1.1rem;font-weight:700;color:var(--red);border-top:2px solid var(--red);margin-top:6px;padding-top:10px;border-bottom:none}
+.print-bar{text-align:center;padding:10px 0 0}
+.editable-val{cursor:pointer;border-bottom:1px dashed var(--gold);padding:2px 4px;border-radius:4px}
+.editable-val:hover{background:var(--gold5)}
+.save-bar{display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--bg2);margin-top:16px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:all .25s ease;z-index:1200;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  header,.no-print,.toast{display:none!important}
+  body{background:#fff;margin:0;padding:0}
+  .layout{display:none!important}
+  .print-page{display:block!important;width:297mm;height:210mm;margin:0;padding:0;page-break-after:always;position:relative;overflow:hidden}
+  .pcopy{position:absolute;width:148.5mm;height:210mm;overflow:hidden;padding:6mm;box-sizing:border-box;font-size:8pt;line-height:1.35;font-family:'DM Sans',sans-serif;color:#1c1917}
+  .pcopy.left{left:0;top:0;border-right:1px dashed #bbb}.pcopy.right{left:148.5mm;top:0}
+  .pcopy .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid #1c1917}
+  .pcopy .ph-name{font-family:'Libre Baskerville',serif;font-size:11pt;font-weight:700}
+  .pcopy .ph-qual{font-size:6.5pt;letter-spacing:.12em;text-transform:uppercase;color:#78716c;margin-top:1px}
+  .pcopy .ph-right{text-align:right;font-size:7pt;color:#78716c}
+  .pcopy .ph-right strong{font-size:9pt;color:#1c1917;display:block}
+  .pcopy .pclient{margin-bottom:3mm;font-size:8pt}
+  .pcopy .ptable{width:100%;border-collapse:collapse;margin-bottom:3mm;font-size:7.5pt}
+  .pcopy .ptable th{background:#1c1917;color:#fff;padding:1.5mm 2mm;text-align:left;font-size:6pt;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .pcopy .ptable th.r{text-align:right}.pcopy .ptable th.c{text-align:center}
+  .pcopy .ptable td{padding:1.2mm 2mm;border-bottom:.5pt solid #ede9e2;font-size:7.5pt}
+  .pcopy .ptable td.r{text-align:right}.pcopy .ptable td.c{text-align:center}.pcopy .ptable td.b{font-weight:700}
+  .pcopy .ptot{text-align:right;margin-bottom:3mm}
+  .pcopy .ptot-line{display:flex;justify-content:flex-end;gap:10mm;padding:1mm 0;font-size:8pt}
+  .pcopy .ptot-grand{font-size:12pt;font-weight:700;border-top:2px solid #1c1917;padding-top:2mm;margin-top:1mm;font-family:'Libre Baskerville',serif}
+  .pcopy .pbox{border:1pt solid #e2dcd3;border-radius:2mm;padding:2.5mm 3mm;margin-bottom:3mm;font-size:8pt}
+  .pcopy .pbox-title{font-size:6pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:1.5mm}
+  .pcopy .prow{display:flex;justify-content:space-between;padding:.8mm 0;border-bottom:.5pt dashed #e2dcd3;font-size:8pt}
+  .pcopy .prow:last-child{border-bottom:none}
+  .pcopy .prow.saldo{font-weight:700;font-size:10pt;color:#b91c1c;border-top:1pt solid #b91c1c;padding-top:1.5mm;margin-top:1mm;border-bottom:none}
+  .pcopy .pfooter{font-size:6pt;color:#aaa;text-align:center;margin-top:3mm;padding-top:2mm;border-top:.5pt solid #ede9e2;letter-spacing:.06em;text-transform:uppercase}
+  .pcopy .psign{margin-top:5mm;display:flex;justify-content:space-between;gap:10mm}
+  .pcopy .psign-box{border-top:.5pt solid #78716c;width:45%;text-align:center;padding-top:1.5mm;font-size:6.5pt;color:#78716c}
+  @page{size:A4 landscape;margin:0}
+}
+.print-page{display:none}
+@media(max-width:700px){.layout{padding:16px}.manual-row{grid-template-columns:1fr}header{padding:0 16px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Massimo Inturrisi<small>Fotografo</small></div>
+  <div class="header-links">
+    <a class="header-link" href="./ordini.html">📋 Ordini</a>
+    <a class="header-link" href="./index.html">Home</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- CLIENTE -->
+  <div class="card">
+    <div class="card-title">Dati cliente</div>
+    <div class="fg fg3">
+      <div class="f"><label>Nome e Cognome</label><input type="text" id="clientName" placeholder="Nome cliente"></div>
+      <div class="f"><label>Telefono</label><input type="text" id="clientPhone" placeholder="+39 ..."></div>
+      <div class="f"><label>Note ordine</label><input type="text" id="orderNote" placeholder="es. Album matrimonio, data consegna..."></div>
+    </div>
+  </div>
+
+  <!-- INSERIMENTO MANUALE -->
+  <div class="card no-print">
+    <div class="card-title">Inserimento manuale</div>
+    <div class="manual-row">
+      <div class="f"><label>Codice</label><input type="text" id="manCode" placeholder="LIBERO"></div>
+      <div class="f"><label>Descrizione</label><input type="text" id="manDesc" placeholder="Descrizione articolo"></div>
+      <div class="f"><label>Qtà</label><input type="number" id="manQty" value="1" min="1" style="text-align:center"></div>
+      <div class="f"><label>Prezzo unit. €</label><input type="text" id="manPrice" placeholder="0,00"></div>
+      <div class="f" style="display:flex;align-items:end"><button class="btn btn-gold" onclick="addManual()">Aggiungi</button></div>
+    </div>
+  </div>
+
+  <!-- RICERCA -->
+  <div class="card no-print">
+    <div class="card-title">Cerca articolo</div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Cerca per codice, dimensione o descrizione..." autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <div class="search-hint">Es: "pannello 30x40", "ingrandimento 25x35", "fototessera"</div>
+  </div>
+
+  <!-- RIEPILOGO -->
+  <div class="card">
+    <div class="card-title">Riepilogo ordine</div>
+    <table class="order-table">
+      <thead><tr>
+        <th>Articolo</th><th>Descrizione</th>
+        <th class="c" style="width:36px;display:none" title="Prezzo ×2 (pannelli)">×2</th>
+        <th class="c" style="width:70px">Qtà</th>
+        <th class="r">Prezzo</th><th class="r">Totale</th>
+        <th class="c no-print" style="width:36px">✕</th>
+      </tr></thead>
+      <tbody id="orderBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState">Nessun articolo aggiunto.</div>
+  </div>
+
+  <!-- TOTALE -->
+  <div class="card">
+    <div class="card-title">Totale</div>
+    <div class="price-row"><span class="label">Articoli</span><span class="val" id="totalItems">0</span></div>
+    <span id="totalCost" style="display:none">0</span>
+    <div class="price-row total"><span>TOTALE ORDINE</span><span id="totalPrice" class="editable-val" onclick="editTotal(this)" title="Clicca per modificare">€ 0,00</span></div>
+    <span id="totalNetto" style="display:none">0</span>
+  </div>
+
+  <!-- PAGAMENTO -->
+  <div class="card">
+    <div class="card-title">Pagamento</div>
+    <div class="pay-options">
+      <div class="pay-opt sel" data-type="anticipato" onclick="selectPayment('anticipato')">
+        <div class="pay-opt-title">Anticipato</div>
+        <div class="pay-opt-sub">Pagamento completo</div>
+      </div>
+      <div class="pay-opt" data-type="acconto" onclick="selectPayment('acconto')">
+        <div class="pay-opt-title">Acconto</div>
+        <div class="pay-opt-sub">Saldo alla consegna</div>
+      </div>
+    </div>
+    <div class="pay-detail" id="payDetail">
+      <div class="pay-row"><span>Totale ordine</span><span id="pdTotal">€ 0,00</span></div>
+      <div class="pay-row"><span>Acconto</span><span id="pdAcconto" class="editable-val" style="font-weight:700" onclick="editAcconto(this)" title="Clicca per modificare">€ 0,00</span></div>
+      <div class="pay-row saldo"><span>SALDO ALLA CONSEGNA</span><span id="pdSaldo">€ 0,00</span></div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn btn-primary btn-full" onclick="printOrder()">🖨️ Stampa ricevuta</button>
+      <button class="btn btn-green btn-full" onclick="saveOrder()">💾 Salva ordine</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toastMsg"></div>
+<div class="print-page" id="printPage">
+  <div class="pcopy left" id="printCopy1"></div>
+  <div class="pcopy right" id="printCopy2"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// LISTINO
+// ══════════════════════════════════════════════════════
+const stampeAmatoriali=[
+  {code:"10x",desc:"STAMPA FOTO 10x",dim:"10x (10x13, 10x15)",cat:"foto",prices:[1.00,0.70,0.50,0.35,0.30,0.25,0.23,0.20]},
+  {code:"12x13x",desc:"STAMPA FOTO 12x / 13x",dim:"12x-13x",cat:"foto",prices:[1.50,0.80,0.60,0.40,0.35,0.30,0.25,0.23]},
+  {code:"15x",desc:"STAMPA FOTO 15x",dim:"15x (15x20, 15x22, 15x23)",cat:"foto",prices:[2.00,1.70,1.00,0.75,0.60,0.55,0.50,0.45]},
+  {code:"20x",desc:"STAMPA FOTO 20x",dim:"20x (20x25, 20x30)",cat:"foto",prices:[3.70,3.60,3.50,3.00,2.50,2.30,2.00,1.70]},
+];
+const prodottiFissi=[
+  {code:"FT",desc:"FOTOTESSERA (6 stampe)",dim:"",cat:"fisso",sellPrice:10.00,prodCost:0.25},
+];
+const qtyB=[{min:1,max:5},{min:6,max:15},{min:16,max:35},{min:35,max:50},{min:51,max:100},{min:101,max:250},{min:251,max:500},{min:501,max:99999}];
+function getAmaPPU(code,qty){const a=stampeAmatoriali.find(x=>x.code===code);if(!a)return 0;for(let i=0;i<qtyB.length;i++){if(qty>=qtyB[i].min&&qty<=qtyB[i].max)return a.prices[i];}return a.prices[a.prices.length-1];}
+
+const stampeDigitali=[
+  {code:"2525",desc:"25X25 INGRANDIMENTO",dim:"25x25",cost:.90},{code:"2530",desc:"25X30 INGRANDIMENTO",dim:"25x30",cost:1.10},
+  {code:"2535",desc:"25X35 INGRANDIMENTO",dim:"25x35",cost:1.40},{code:"2538",desc:"25X38 INGRANDIMENTO",dim:"25x38",cost:1.50},
+  {code:"3030",desc:"30X30 INGRANDIMENTO",dim:"30x30",cost:1.40},{code:"3040",desc:"30X40 INGRANDIMENTO",dim:"30x40",cost:2.20},
+  {code:"3045",desc:"30X45 INGRANDIMENTO",dim:"30x45",cost:2.30},{code:"3060",desc:"30X60 INGRANDIMENTO",dim:"30x60",cost:4.20},
+  {code:"3537",desc:"35X37 INGRANDIMENTO",dim:"35x37",cost:2.60},{code:"3545",desc:"35X45 INGRANDIMENTO",dim:"35x45",cost:3.30},
+  {code:"4040",desc:"40X40 INGRANDIMENTO",dim:"40x40",cost:2.80},{code:"4050",desc:"40X50 INGRANDIMENTO",dim:"40x50",cost:5.00},
+  {code:"4060",desc:"40X60 INGRANDIMENTO",dim:"40x60",cost:5.50},{code:"4070",desc:"40X70 INGRANDIMENTO",dim:"40x70",cost:6.00},
+  {code:"5050",desc:"50X50 INGRANDIMENTO",dim:"50x50",cost:5.50},{code:"5060",desc:"50X60 INGRANDIMENTO",dim:"50x60",cost:7.00},
+  {code:"5070",desc:"50X70 INGRANDIMENTO",dim:"50x70",cost:7.50},{code:"70100",desc:"70X100 INGRANDIMENTO",dim:"70x100",cost:16.50},
+];
+const stampaPannello=[
+  {code:"SMP2030",desc:"STAMPA 20X30 + PANNELLO",dim:"20x30",cost:6.90},{code:"SMP2530",desc:"STAMPA 25X30 + PANNELLO",dim:"25x30",cost:8.10},
+  {code:"SMP2535",desc:"STAMPA 25X35 + PANNELLO",dim:"25x35",cost:9.40},{code:"STP3030",desc:"STAMPA 30X30 + PANNELLO",dim:"30x30",cost:9.40},
+  {code:"STP3040",desc:"STAMPA 30X40 + PANNELLO",dim:"30x40",cost:11.20},{code:"STP3045",desc:"STAMPA 30X45 + PANNELLO",dim:"30x45",cost:12.30},
+  {code:"STP3060",desc:"STAMPA 30X60 + PANNELLO",dim:"30x60",cost:16.20},{code:"STP3545",desc:"STAMPA 35X45 + PANNELLO",dim:"35x45",cost:14.30},
+  {code:"STP4040",desc:"STAMPA 40X40 + PANNELLO",dim:"40x40",cost:14.30},{code:"STP3570",desc:"STAMPA 35X70 + PANNELLO",dim:"35x70",cost:15.60},
+  {code:"STP4050",desc:"STAMPA 40X50 + PANNELLO",dim:"40x50",cost:17.50},{code:"STP4060",desc:"STAMPA 40X60 + PANNELLO",dim:"40x60",cost:19.50},
+  {code:"STP3090",desc:"STAMPA 30X90 + PANNELLO",dim:"30x90",cost:20.20},{code:"STP4070",desc:"STAMPA 40X70 + PANNELLO",dim:"40x70",cost:21.00},
+  {code:"STP5050",desc:"STAMPA 50X50 + PANNELLO",dim:"50x50",cost:21.50},{code:"STP5060",desc:"STAMPA 50X60 + PANNELLO",dim:"50x60",cost:23.00},
+  {code:"STP5070",desc:"STAMPA 50X70 + PANNELLO",dim:"50x70",cost:23.50},{code:"STP4080",desc:"STAMPA 40X80 + PANNELLO",dim:"40x80",cost:27.00},
+  {code:"STP4090",desc:"STAMPA 40X90 + PANNELLO",dim:"40x90",cost:28.00},{code:"STP40100",desc:"STAMPA 40X100 + PANNELLO",dim:"40x100",cost:29.00},
+  {code:"STP50100",desc:"STAMPA 50X100 + PANNELLO",dim:"50x100",cost:40.00},{code:"STP6090",desc:"STAMPA 60X90 + PANNELLO",dim:"60x90",cost:46.50},
+  {code:"STP70100",desc:"STAMPA 70X100 + PANNELLO",dim:"70x100",cost:46.50},
+];
+
+const allP=[];
+stampeAmatoriali.forEach(a=>allP.push({...a,type:'foto',search:(a.code+' '+a.desc+' '+a.dim+' foto cliente amatoriale').toLowerCase()}));
+stampeDigitali.forEach(s=>allP.push({...s,type:'lab',search:(s.code+' '+s.desc+' '+s.dim+' ingrandimento').toLowerCase()}));
+stampaPannello.forEach(s=>allP.push({...s,type:'pannello',search:(s.code+' '+s.desc+' '+s.dim+' pannello').toLowerCase()}));
+prodottiFissi.forEach(s=>allP.push({...s,type:'fisso',search:(s.code+' '+s.desc+' fototessera tessera documento').toLowerCase()}));
+
+// ══════════════════════════════════════════════════════
+// STATO
+// ══════════════════════════════════════════════════════
+let items=[],idSeq=0,payType='anticipato',lastF=[],totalOverride=null,accontoOverride=null;
+
+// ══════════════════════════════════════════════════════
+// RICERCA
+// ══════════════════════════════════════════════════════
+const sI=document.getElementById('searchInput'),sR=document.getElementById('searchResults');
+sI.addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  if(q.length<2){sR.classList.remove('active');return;}
+  const tok=q.split(/\s+/);
+  lastF=allP.filter(p=>tok.every(t=>p.search.includes(t))).slice(0,15);
+  if(!lastF.length){sR.innerHTML='<div style="padding:14px;color:#999;font-size:.82rem">Nessun risultato</div>';sR.classList.add('active');return;}
+  sR.innerHTML=lastF.map((p,i)=>{
+    const bc=p.type==='foto'?'badge-foto':p.type==='pannello'?'badge-pannello':p.type==='fisso'?'badge-fisso':'badge-lab';
+    const cl=p.type==='foto'?'Foto cliente':p.type==='pannello'?'Pannello':p.type==='fisso'?'Prodotto':'Ingrandimento';
+    let ph;
+    if(p.type==='foto') ph='a scaglione';
+    else if(p.type==='fisso') ph='€'+p.sellPrice.toFixed(2).replace('.',',');
+    else if(p.type==='pannello') ph='€'+( p.cost*2.2).toFixed(2).replace('.',',');
+    else { // lab/ingrandimento: costo + surcharge
+      const _parts=(p.dim||'').toLowerCase().split('x').map(s=>parseInt(s)).filter(n=>!isNaN(n));
+      const _short=_parts.length>=2?Math.min(..._parts):0;
+      const _sur=_short>=70?20:_short>=50?15:_short>=30?10:_short>=25?5:0;
+      ph='€'+(_sur>0?p.cost+_sur:p.cost).toFixed(2).replace('.',',');
+    }
+    return `<div class="result-item" onclick="addFS(${i})"><div><span class="result-code">${p.code}</span> <span class="result-desc">${p.desc} · ${ph}</span></div><span class="badge ${bc}">${cl}</span><button class="result-add" onclick="event.stopPropagation();addFS(${i})">+ Aggiungi</button></div>`;
+  }).join('');
+  sR.classList.add('active');
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))sR.classList.remove('active');});
+
+function addFS(i){
+  const p=lastF[i];if(!p)return;idSeq++;
+  items.push({id:idSeq,code:p.code,desc:p.desc,dim:p.dim||'',type:p.type,cost:p.cost||0,sellPrice:p.sellPrice||0,prodCost:p.prodCost||0,qty:1,flagX2:false,manual:false});
+  sI.value='';sR.classList.remove('active');render();showToast('Aggiunto: '+p.code);
+}
+
+function addManual(){
+  const code=document.getElementById('manCode').value.trim()||'LIBERO';
+  const desc=document.getElementById('manDesc').value.trim();
+  const qty=Math.max(1,parseInt(document.getElementById('manQty').value)||1);
+  const pr=parseFloat(document.getElementById('manPrice').value.replace(',','.'))||0;
+  if(!desc){showToast('Inserisci una descrizione');return;}
+  idSeq++;items.push({id:idSeq,code,desc,dim:'',type:'libero',cost:pr,qty,flagX2:false,manual:true,manualPrice:pr});
+  document.getElementById('manCode').value='';document.getElementById('manDesc').value='';
+  document.getElementById('manQty').value='1';document.getElementById('manPrice').value='';
+  render();showToast('Aggiunto: '+code);
+}
+
+function removeItem(id){items=items.filter(x=>x.id!==id);totalOverride=null;accontoOverride=null;render();}
+function updateQty(id,v){const it=items.find(x=>x.id===id);if(it){it.qty=Math.max(1,parseInt(v)||1);totalOverride=null;accontoOverride=null;render();}}
+function toggleFlag(id){const it=items.find(x=>x.id===id);if(it){it.flagX2=!it.flagX2;totalOverride=null;accontoOverride=null;render();}}
+
+// Surcharge per ingrandimenti (25x-70x100)
+function ingrandimentoSurcharge(dim){
+  if(!dim)return 0;
+  const parts=dim.toLowerCase().split('x').map(s=>parseInt(s)).filter(n=>!isNaN(n));
+  if(parts.length<2)return 0;
+  const short=Math.min(...parts);
+  if(short>=70)return 20;
+  if(short>=50)return 15;
+  if(short>=30)return 10;
+  if(short>=25)return 5;
+  return 0;
+}
+
+// Prezzo di vendita unitario
+function up(it){
+  if(it.manual)return it.manualPrice;
+  if(it.type==='foto')return getAmaPPU(it.code,it.qty);
+  if(it.type==='pannello')return it.cost*(it.flagX2?2:2.2);
+  if(it.type==='fisso')return it.sellPrice;
+  // Lab/digitali: ingrandimenti hanno surcharge fisso, altrimenti sono foto amatoriali
+  // Gli ingrandimenti (25x+) hanno surcharge
+  if(it.type==='lab'){
+    const sur=ingrandimentoSurcharge(it.dim);
+    return sur>0?it.cost+sur:it.cost; // se surcharge, applica; altrimenti solo costo (non è amatoriale)
+  }
+  return it.cost; // fallback
+}
+// Costo produzione unitario
+function cp(it){
+  if(it.manual)return 0; // libero: costo sconosciuto
+  if(it.type==='foto')return 0; // amatoriali: costo non tracciato
+  if(it.type==='pannello')return it.cost;
+  if(it.type==='fisso')return it.prodCost||0;
+  return it.cost; // lab: cost = costo reale
+}
+
+function lt(it){return up(it)*it.qty;}
+function lc(it){return cp(it)*it.qty;}
+function gtCalc(){let t=0;items.forEach(i=>t+=lt(i));return t;}
+function gcCalc(){let t=0;items.forEach(i=>t+=lc(i));return t;}
+function gt(){return totalOverride!==null?totalOverride:gtCalc();}
+
+function render(){
+  const tb=document.getElementById('orderBody'),es=document.getElementById('emptyState');
+  if(!items.length){
+    tb.innerHTML='';es.style.display='block';
+    document.getElementById('totalItems').textContent='0';
+    document.getElementById('totalPrice').textContent='€ 0,00';
+    document.getElementById('totalCost').textContent='0';
+    document.getElementById('totalNetto').textContent='0';
+    updatePay(0);return;
+  }
+  es.style.display='none';let grand=0,cost=0,tq=0;
+  tb.innerHTML=items.map(it=>{
+    const u=up(it),t=lt(it);grand+=t;cost+=lc(it);tq+=it.qty;
+    const isPan=it.type==='pannello';
+    const bc=it.type==='foto'?'badge-foto':it.type==='pannello'?'badge-pannello':it.type==='lab'?'badge-lab':it.type==='fisso'?'badge-fisso':'badge-libero';
+    const cl=it.type==='foto'?'Foto':it.type==='pannello'?'Pannello':it.type==='lab'?'Ingrandimento':it.type==='fisso'?'Prodotto':'Libero';
+    return `<tr>
+      <td><strong>${esc(it.code)}</strong><span class="badge ${bc}">${cl}</span></td>
+      <td>${esc(it.desc)}${it.dim?'<br><span style="color:var(--ink3);font-size:.72rem">'+esc(it.dim)+'</span>':''}</td>
+      ${isPan?`<td class="c"><input type="checkbox" class="flag-check" ${it.flagX2?'checked':''} onchange="toggleFlag(${it.id})"></td>`:'<td></td>'}
+      <td class="c"><input type="number" class="qty-input" value="${it.qty}" min="1" onfocus="this.select()" onchange="updateQty(${it.id},this.value)"></td>
+      <td class="r">€ ${fp(u)}</td><td class="r b">€ ${fp(t)}</td>
+      <td class="c no-print"><button class="btn-remove" onclick="removeItem(${it.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+  const displayTotal=totalOverride!==null?totalOverride:grand;
+  const netto=displayTotal-cost;
+  document.getElementById('totalItems').textContent=tq;
+  document.getElementById('totalPrice').textContent='€ '+fp(displayTotal);
+  document.getElementById('totalCost').textContent=fp(cost);
+  document.getElementById('totalNetto').textContent=fp(netto);
+  updatePay(displayTotal);
+}
+
+function fp(n){return Number(n||0).toFixed(2).replace('.',',');}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function selectPayment(t){payType=t;accontoOverride=null;document.querySelectorAll('.pay-opt').forEach(el=>el.classList.toggle('sel',el.dataset.type===t));updatePay(gt());}
+function roundUp5(v){return Math.ceil(v/5)*5;}
+function updatePay(total){
+  const d=document.getElementById('payDetail');
+  if(payType==='acconto'){
+    d.classList.add('active');
+    const acc=accontoOverride!==null?accontoOverride:roundUp5(total*0.5);
+    const saldo=Math.max(0,total-acc);
+    document.getElementById('pdTotal').textContent='€ '+fp(total);
+    document.getElementById('pdAcconto').textContent='€ '+fp(acc);
+    document.getElementById('pdSaldo').textContent='€ '+fp(saldo);
+  }else{d.classList.remove('active');}
+}
+
+function editTotal(el){
+  const cur=gt();
+  const inp=document.createElement('input');
+  inp.type='text';inp.value=fp(cur);
+  inp.style.cssText='width:120px;text-align:right;font-size:1.15rem;font-weight:700;font-family:Libre Baskerville,serif;border:1px solid var(--gold);border-radius:6px;padding:4px 8px;outline:none;background:var(--gold5);';
+  el.replaceWith(inp);inp.focus();inp.select();
+  function commit(){
+    const v=parseFloat(inp.value.replace(',','.'))||gtCalc();
+    totalOverride=v;accontoOverride=null;
+    const span=document.createElement('span');span.id='totalPrice';span.className='editable-val';
+    span.onclick=function(){editTotal(this);};span.title='Clicca per modificare';span.textContent='€ '+fp(v);
+    inp.replaceWith(span);
+    const netto=v-gcCalc();document.getElementById('totalNetto').textContent=fp(netto);
+    updatePay(v);
+  }
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}});
+}
+
+function editAcconto(el){
+  const total=gt();const curAcc=accontoOverride!==null?accontoOverride:roundUp5(total*0.5);
+  const inp=document.createElement('input');
+  inp.type='text';inp.value=fp(curAcc);
+  inp.style.cssText='width:100px;text-align:right;font-size:.86rem;font-weight:700;border:1px solid var(--gold);border-radius:6px;padding:4px 8px;outline:none;background:var(--gold5);';
+  el.replaceWith(inp);inp.focus();inp.select();
+  function commit(){
+    const v=parseFloat(inp.value.replace(',','.'))||roundUp5(total*0.5);
+    accontoOverride=v;
+    const span=document.createElement('span');span.id='pdAcconto';span.className='editable-val';
+    span.style.fontWeight='700';span.onclick=function(){editAcconto(this);};span.title='Clicca per modificare';span.textContent='€ '+fp(v);
+    inp.replaceWith(span);document.getElementById('pdSaldo').textContent='€ '+fp(Math.max(0,total-v));
+  }
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}});
+}
+
+// ══════════════════════════════════════════════════════
+// SALVA ORDINE SU NETLIFY
+// ══════════════════════════════════════════════════════
+async function saveOrder(){
+  if(!items.length){showToast('Aggiungi almeno un articolo');return;}
+  const clientName=document.getElementById('clientName').value.trim()||'Cliente sconosciuto';
+  const clientPhone=document.getElementById('clientPhone').value.trim()||'';
+  const orderNote=document.getElementById('orderNote').value.trim()||'';
+  const total=gt();
+  const cost=gcCalc();
+  const netto=total-cost;
+  const acc=payType==='acconto'?(accontoOverride!==null?accontoOverride:roundUp5(total*0.5)):total;
+  const saldo=payType==='acconto'?Math.max(0,total-acc):0;
+  const now=new Date();
+  const orderId='ORD-'+now.getTime();
+
+  const payload={
+    orderId,
+    createdAt:now.toISOString(),
+    clientName,clientPhone,orderNote,
+    payType,
+    incasso:total,
+    costo:cost,
+    netto,
+    acconto:acc,
+    saldo,
+    stato:'in_lavorazione',
+    items:items.map(it=>({code:it.code,desc:it.desc,qty:it.qty,unitPrice:up(it),total:lt(it),unitCost:cp(it)}))
+  };
+
+  const btn=document.querySelector('[onclick="saveOrder()"]');
+  if(btn){btn.disabled=true;btn.textContent='Salvataggio...';}
+
+  try{
+    const res=await fetch('/.netlify/functions/orders-upsert',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.error||'errore');
+    showToast('Ordine salvato ✓');
+    // Reset form
+    setTimeout(()=>{
+      items=[];idSeq=0;totalOverride=null;accontoOverride=null;payType='anticipato';
+      document.getElementById('clientName').value='';
+      document.getElementById('clientPhone').value='';
+      document.getElementById('orderNote').value='';
+      document.querySelectorAll('.pay-opt').forEach(el=>el.classList.toggle('sel',el.dataset.type==='anticipato'));
+      render();
+    },800);
+  }catch(e){
+    showToast('Errore: '+e.message);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='💾 Salva ordine';}
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// STAMPA
+// ══════════════════════════════════════════════════════
+function printOrder(){
+  const cn=document.getElementById('clientName').value||'—';
+  const cp=document.getElementById('clientPhone').value||'—';
+  const total=gt();
+  const now=new Date();
+  const ds=now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  let rows=items.map(it=>{const u=up(it),t=lt(it);const fl=it.flagX2?' [×2]':'';
+    return `<tr><td>${esc(it.code)}${fl}</td><td>${esc(it.desc)}</td><td class="c">${it.qty}</td><td class="r">€ ${fp(u)}</td><td class="r b">€ ${fp(t)}</td></tr>`;}).join('');
+  let payH='';
+  if(payType==='anticipato'){
+    payH=`<div class="prow"><span>Pagamento anticipato</span><span style="font-weight:700">€ ${fp(total)}</span></div><div class="prow" style="color:#aaa"><span>Saldo alla consegna</span><span>Nessuno</span></div>`;
+  }else{
+    const acc=accontoOverride!==null?accontoOverride:roundUp5(total*0.5),saldo=Math.max(0,total-acc);
+    payH=`<div class="prow"><span>Totale ordine</span><span>€ ${fp(total)}</span></div><div class="prow"><span>Acconto</span><span style="font-weight:700">€ ${fp(acc)}</span></div><div class="prow saldo"><span>SALDO ALLA CONSEGNA</span><span>€ ${fp(saldo)}</span></div>`;
+  }
+  const copy=`<div class="ph"><div><div class="ph-name">Massimo Inturrisi</div><div class="ph-qual">Fotografo</div></div><div class="ph-right"><strong>Ordine di stampa</strong><div>${ds}</div></div></div>
+  <div class="pclient"><strong style="font-size:12pt;font-family:Libre Baskerville,serif">Cliente:</strong> <span style="font-size:12pt;font-family:Libre Baskerville,serif;font-weight:700">${esc(cn)}</span> &nbsp;|&nbsp; <strong>Tel:</strong> ${esc(cp)}</div>
+  <table class="ptable"><thead><tr><th>Codice</th><th>Descrizione</th><th class="c">Qtà</th><th class="r">Prezzo</th><th class="r">Totale</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="ptot"><div class="ptot-line ptot-grand"><span>TOTALE ORDINE</span><span>€ ${fp(total)}</span></div></div>
+  <div class="pbox"><div class="pbox-title">Pagamento</div>${payH}</div>
+  <div class="psign"><div class="psign-box">Firma operatore</div><div class="psign-box">Firma cliente</div></div>
+  <div class="pfooter">Massimo Inturrisi · Fotografo · Tel 339 159 4106</div>`;
+  document.getElementById('printCopy1').innerHTML=copy;
+  document.getElementById('printCopy2').innerHTML=copy;
+  setTimeout(()=>window.print(),200);
+}
+
+function showToast(msg){const el=document.getElementById('toastMsg');el.textContent=msg;el.classList.add('on');clearTimeout(showToast._t);showToast._t=setTimeout(()=>el.classList.remove('on'),2400);}
+render();
+</script>
+</body>
+</html>

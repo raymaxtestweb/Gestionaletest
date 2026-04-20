@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Raymax — Preventivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;
+  --ink:#1c1917;--ink2:#44403c;--ink3:#78716c;
+  --gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;
+  --white:#fff;--red:#b91c1c;--r:14px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:var(--ink);color:var(--ink);}
+
+/* ── SHELL ── */
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--bg);}
+
+/* ── HEADER ── */
+.app-header{
+  background:var(--ink);padding:14px 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;padding-top:max(14px, env(safe-area-inset-top));
+}
+.app-logo{font-family:'Libre Baskerville',serif;font-size:1rem;color:#fff;font-weight:400;}
+.app-logo span{display:block;font-size:.55rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);margin-top:1px;}
+.step-badge{font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);}
+
+/* ── PROGRESS ── */
+.progress-bar{height:2px;background:rgba(255,255,255,.1);flex-shrink:0;}
+.progress-fill{height:100%;background:var(--gold);transition:width .4s ease;}
+
+/* ── SCROLL AREA ── */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 8px;}
+
+/* ── STEP TITLE ── */
+.step-title{font-family:'Libre Baskerville',serif;font-size:1.5rem;font-weight:400;color:var(--ink);margin-bottom:20px;letter-spacing:-.01em;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(28,25,23,.07);}
+.card-title{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+
+/* ── FIELDS ── */
+.f{margin-bottom:14px;}
+.f:last-child{margin-bottom:0;}
+.f label{display:block;font-size:.65rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;}
+.f input,.f select{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:10px;padding:13px 14px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;appearance:none;-webkit-appearance:none;}
+.f input:focus,.f select:focus{border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(160,132,92,.12);}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* ── SERVICE ROWS ── */
+.svc-group{margin-bottom:18px;}
+.svc-group:last-child{margin-bottom:0;}
+.svc-group-lbl{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bg2);}
+.svc-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--bg2);margin-bottom:6px;cursor:pointer;transition:all .15s;}
+.svc-row.editable{cursor:default;user-select:text;-webkit-user-select:text;}
+.svc-row.editable input{user-select:text;-webkit-user-select:text;pointer-events:auto;}
+.svc-row:active{transform:scale(.98);}
+.svc-row.on{background:var(--gold4);border-color:var(--gold2);}
+.svc-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .15s;}
+.svc-row.on .svc-check{background:var(--gold);border-color:var(--gold);color:#fff;}
+.svc-name{flex:1;font-size:.9rem;color:var(--ink2);line-height:1.3;}
+.svc-price{font-size:.88rem;font-weight:600;color:var(--gold);white-space:nowrap;}
+.svc-edit-row{display:flex;gap:8px;align-items:center;}
+.svc-edit-row input[type=text]{flex:1;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
+.svc-edit-row input[type=number]{width:80px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:9px 10px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:var(--gold);outline:none;}
+.svc-add-btn{width:100%;margin-top:6px;padding:10px;background:transparent;border:1.5px dashed var(--bg3);border-radius:10px;color:var(--ink3);font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer;}
+
+/* ── FORMATO GRID ── */
+.fmt-section-lbl{font-size:.6rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;margin-top:12px;}
+.fmt-section-lbl:first-child{margin-top:0;}
+.fmt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px;}
+.fmt-btn{padding:10px 4px;border-radius:9px;border:1px solid var(--bg3);background:var(--bg);font-size:.76rem;font-weight:500;color:var(--ink2);font-family:'DM Sans',sans-serif;text-align:center;cursor:pointer;transition:all .15s;}
+.fmt-btn:active{transform:scale(.95);}
+.fmt-btn.on{border-color:var(--gold);background:var(--gold4);color:var(--gold);font-weight:700;box-shadow:0 0 0 2px var(--gold3);}
+
+/* ── COPERTINE ── */
+.cop-search{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;margin-bottom:10px;}
+.cop-search:focus{border-color:var(--gold);}
+.cop-special-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.cop-normal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.cop-btn-special{padding:11px 12px;border-radius:10px;border:1px solid var(--bg3);font-size:.78rem;font-family:'DM Sans',sans-serif;text-align:left;background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .15s;}
+.cop-btn-special.on{border:2px solid rgba(255,255,255,.4);box-shadow:0 0 0 2px rgba(255,255,255,.5);color:#fff;}
+.cop-btn-special .cop-lbl{display:block;font-weight:600;font-size:.8rem;}
+.cop-btn-special .cop-sub{display:block;font-size:.65rem;opacity:.8;margin-top:2px;}
+.cop-btn-small{padding:8px 4px;border-radius:8px;border:1px solid var(--bg3);font-size:.62rem;font-family:'DM Sans',sans-serif;text-align:center;background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:48px;}
+.cop-btn-small.on{border:2px solid rgba(255,255,255,.4);box-shadow:0 0 0 2px rgba(255,255,255,.5);color:#fff;}
+.cop-sm-lbl{font-weight:600;font-size:.64rem;line-height:1.2;}
+.cop-sm-extra{font-size:.58rem;opacity:.8;margin-top:1px;}
+
+/* ── BOX ── */
+.box-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.box-btn{padding:12px 10px;border-radius:10px;border:1px solid var(--bg3);background:var(--bg);font-size:.8rem;color:var(--ink2);font-family:'DM Sans',sans-serif;text-align:center;cursor:pointer;transition:all .15s;}
+.box-btn:active{transform:scale(.97);}
+.box-btn.on{border-color:var(--gold);background:var(--gold4);color:var(--gold);font-weight:700;box-shadow:0 0 0 2px var(--gold3);}
+.box-btn small{display:block;font-size:.7rem;color:var(--ink3);margin-top:3px;}
+.box-btn.on small{color:var(--gold);}
+
+/* ── SPINNER ── */
+.spin{display:flex;align-items:center;gap:12px;margin-top:6px;}
+.spin-btn{width:40px;height:40px;border-radius:10px;background:var(--bg2);border:1px solid var(--bg3);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:var(--ink2);}
+.spin-val{font-size:1.1rem;font-weight:700;min-width:36px;text-align:center;}
+
+/* ── ALBUM PREVIEW ── */
+.alb-preview{background:linear-gradient(160deg,#f0ece4,#e8e0d4);border-radius:12px;padding:28px 16px 20px;display:flex;flex-direction:column;align-items:center;gap:16px;border:1px solid var(--bg3);margin-bottom:14px;}
+.no-album-btn{border:1.5px dashed var(--bg3);border-radius:8px;background:transparent;color:var(--ink3);font-family:'DM Sans',sans-serif;cursor:pointer;padding:8px 18px;font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+.no-album-btn.on{border-style:solid;border-color:var(--red);color:var(--red);background:rgba(185,28,28,.06);}
+
+/* ── TOTALI ── */
+.totals{background:var(--bg);border:1px solid var(--bg2);border-radius:10px;padding:14px 16px;}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.86rem;color:var(--ink2);border-bottom:1px solid var(--bg2);}
+.trow:last-child{border-bottom:none;}
+.trow.big{padding-top:12px;margin-top:2px;font-size:1.1rem;font-weight:700;color:var(--ink);font-family:'Libre Baskerville',serif;border-top:1px solid var(--bg3);border-bottom:none;}
+
+/* ── INFO NOTE ── */
+.info-note{background:var(--gold5);border:1px solid var(--gold3);border-radius:10px;padding:12px 14px;font-size:.78rem;color:var(--ink3);line-height:1.6;margin-bottom:14px;}
+.info-note strong{color:var(--gold);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  background:var(--white);border-top:1px solid var(--bg2);
+  padding:12px 16px;padding-bottom:max(12px, var(--safe-bottom));
+  display:flex;gap:10px;flex-shrink:0;
+}
+.btn{flex:1;padding:14px 10px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .2s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:active{background:var(--gold);}
+.btn-secondary{background:var(--bg2);color:var(--ink2);}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:active{background:var(--ink);}
+
+/* ── RIEPILOGO PREZZI ── */
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg2);font-size:.88rem;}
+.price-row:last-child{border-bottom:none;}
+.price-row.total{font-size:1.15rem;font-weight:700;font-family:'Libre Baskerville',serif;padding-top:12px;border-top:2px solid var(--ink);margin-top:4px;border-bottom:none;}
+.price-row .label{color:var(--ink2);}
+.price-row .val{font-weight:600;color:var(--gold);}
+.price-row.total .val{color:var(--ink);}
+.payment-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--bg3);font-size:.84rem;}
+.payment-row:last-child{border-bottom:none;}
+.payment-row .step{color:var(--ink3);}
+.payment-row .amount{font-weight:600;color:var(--ink);}
+
+/* ── SCONTO INPUT ── */
+.inline-input-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bg2);}
+.inline-input-row label{font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;}
+.inline-input-row input{width:90px;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;outline:none;}
+.inline-input-row input:focus{border-color:var(--gold);}
+.inline-input-row span{font-size:.75rem;color:var(--ink3);}
+
+/* ── PAGE TRANSITIONS ── */
+.page{display:none;}
+.page.on{display:block;animation:slideUp .3s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── ALBUM GENITORI ── */
+.alb-gen-fmts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+
+/* ── MODAL IMMAGINE ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.on{display:flex;}
+.modal-img-wrap{border-radius:12px;overflow:hidden;max-width:100%;max-height:65vh;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.modal-img-wrap img{display:block;max-width:100%;max-height:65vh;object-fit:contain;}
+.modal-actions{margin-top:20px;display:flex;gap:12px;width:100%;}
+.modal-actions .btn{flex:1;padding:15px;}
+.modal-loader{color:#fff;font-size:.9rem;text-align:center;}
+
+/* ── PREVENTIVO CARD (template per screenshot) ── */
+#prevCard{
+  position:fixed;left:-9999px;top:0;
+  width:390px;
+  font-family:'DM Sans',sans-serif;
+  background:#f5f3ef;
+}
+.pc-header{background:#1c1917;padding:24px 24px 20px;color:#fff;}
+.pc-logo{font-family:'Libre Baskerville',serif;font-size:1.2rem;color:#fff;font-weight:400;}
+.pc-logo small{display:block;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#c9a87a;margin-top:2px;}
+.pc-tipo{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-top:16px;margin-bottom:4px;}
+.pc-nome{font-family:'Libre Baskerville',serif;font-size:1.25rem;color:#fff;font-weight:400;}
+.pc-meta{font-size:.75rem;color:rgba(255,255,255,.6);margin-top:4px;}
+.pc-body{padding:20px 24px;}
+.pc-section{margin-bottom:16px;}
+.pc-section-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px;}
+.pc-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e2dcd3;font-size:.82rem;color:#44403c;}
+.pc-item:last-child{border-bottom:none;}
+.pc-item .pv{font-weight:600;color:#1c1917;}
+.pc-divider{height:1px;background:#e2dcd3;margin:14px 0;}
+.pc-total-box{background:#1c1917;border-radius:10px;padding:16px 20px;margin-bottom:16px;}
+.pc-total-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
+.pc-total-amt{font-family:'Libre Baskerville',serif;font-size:2rem;color:#fff;font-weight:400;}
+.pc-payments{background:#fff;border-radius:10px;padding:14px 16px;}
+.pc-pay-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.8rem;border-bottom:1px dashed #e2dcd3;}
+.pc-pay-row:last-child{border-bottom:none;}
+.pc-pay-step{color:#78716c;}
+.pc-pay-amt{font-weight:600;color:#1c1917;}
+.pc-footer{background:#1c1917;padding:12px 24px;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase;text-align:center;}
+.pc-validity{text-align:center;font-size:.7rem;color:#78716c;padding:10px 0;border-top:1px solid #e2dcd3;margin-top:8px;}
+
+.booking-alert{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;font-size:.78rem;line-height:1.5;border:1px solid var(--bg3);background:var(--bg)}
+.booking-alert.on{display:block;}
+.booking-alert.free{border-color:#bbf7d0;background:#f0fdf4;color:#166534;}
+.booking-alert.busy{border-color:#fecaca;background:#fef2f2;color:#991b1b;}
+.booking-alert.warn{border-color:#fde68a;background:#fffbeb;color:#92400e;}
+.quick-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.quick-link{display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:10px;background:var(--bg2);color:var(--ink2);text-decoration:none;font-size:.78rem;font-weight:600;}
+.toast{position:fixed;left:50%;bottom:calc(88px + var(--safe-bottom));transform:translateX(-50%) translateY(30px);opacity:0;pointer-events:none;background:#1c1917;color:#fff;padding:12px 16px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.18);transition:all .25s ease;z-index:1200;max-width:90vw;text-align:center;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="app-logo" id="brandLogo">
+      Massimo Inturrisi
+      <span>Fotografo</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="step-badge" id="stepBadge">Passo 1 di 4</div>
+      <a href="./index.html" style="color:rgba(255,255,255,.45);font-size:.65rem;font-weight:600;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);letter-spacing:.04em;transition:all .2s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.color='rgba(255,255,255,.45)';this.style.borderColor='rgba(255,255,255,.15)'">Home</a>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scrollArea">
+
+    <!-- STEP 0: EVENTO + SERVIZI -->
+    <div class="page on" id="p0">
+      <div class="step-title">Evento & Servizi</div>
+
+      <div class="card">
+        <div class="card-title">Evento</div>
+        <div class="f">
+          <label>Tipo Evento</label>
+          <select id="tipoEvento" onchange="onEvento()">
+            <option>Matrimonio</option>
+            <option>Battesimo</option>
+            <option>18° Compleanno</option>
+            <option>Comunione</option>
+            <option>Cresima</option>
+            <option>Fidanzamento</option>
+            <option>Laurea</option>
+            <option>Corporate</option>
+            <option>Altro</option>
+          </select>
+        </div>
+        <div class="f2">
+          <div class="f">
+            <label>Data</label>
+            <input type="date" id="dataEvento" onchange="checkSelectedDate()">
+            <div class="booking-alert" id="bookingAlert"></div>
+          </div>
+          <div class="f">
+            <label>Fascia</label>
+            <select id="orarioEvento">
+              <option value="MATTINA">Mattina</option>
+              <option value="POMERIGGIO">Pomeriggio</option>
+              <option value="SERALE" selected>Serale</option>
+            </select>
+          </div>
+        </div>
+        <div class="f">
+          <label>Luogo</label>
+          <input type="text" id="luogoEvento" placeholder="es. Siracusa">
+        </div>
+        <div class="f">
+          <label>Nome Cliente</label>
+          <input type="text" id="nomeCliente" placeholder="Nome e Cognome">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Servizi</div>
+        <div id="svcContainer"></div>
+      </div>
+    </div>
+
+    <!-- STEP 1: ALBUM -->
+    <div class="page" id="p1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div class="step-title" style="margin:0">Album</div>
+        <button class="no-album-btn" id="noAlbumBtn" onclick="toggleNoAlbum()">Nessun Album</button>
+      </div>
+
+      <div id="albumContent">
+        <div class="card">
+          <div class="card-title">Formato & Pagine</div>
+          <div id="fmtGrid"></div>
+          <div class="f" style="margin-top:14px">
+            <label>Pagine</label>
+            <div class="spin">
+              <button class="spin-btn" onclick="chgPag(-10)">−</button>
+              <span class="spin-val" id="pagVal">30</span>
+              <button class="spin-btn" onclick="chgPag(10)">+</button>
+              <button class="spin-btn" onclick="chgPag(-2)" style="font-size:.9rem">-2</button>
+              <button class="spin-btn" onclick="chgPag(2)" style="font-size:.9rem">+2</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Modello Copertina</div>
+                    <div id="copGrid"></div>
+          <div id="copNote" class="info-note" style="display:none;margin-top:10px;margin-bottom:0"></div>
+
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bg2)">
+            <div class="card-title" style="margin-bottom:10px">Box Coordinato</div>
+            <div class="box-grid" id="boxGrid"></div>
+          </div>
+        </div>
+
+        <div class="card" style="display:none" id="albPreviewCard">
+          <div class="alb-preview" id="albScene"></div>
+          <div id="albInfoWrap" style="text-align:center">
+            <div id="albInfoTitle" style="font-family:'Libre Baskerville',serif;font-size:.95rem;color:var(--ink);margin-bottom:2px"></div>
+            <div id="albInfoSub" style="font-size:.75rem;color:var(--ink3)"></div>
+          </div>
+        </div>
+
+        <!-- Album Genitori (solo Matrimonio) -->
+        <div class="card" id="cardAlbGen" style="display:none">
+          <div class="card-title">Album Genitori</div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+            <div>
+              <label style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px">Quantità</label>
+              <div class="spin">
+                <button class="spin-btn" onclick="chgAlbGen(-1)">−</button>
+                <span class="spin-val" id="albGenQty">2</span>
+                <button class="spin-btn" onclick="chgAlbGen(1)">+</button>
+              </div>
+            </div>
+            <div style="flex:1">
+              <label style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px">Formato</label>
+              <div class="alb-gen-fmts">
+                <button class="fmt-btn" id="agBtn_small" onclick="selAlbGenFmt('small')">Piccolo<small style="display:block;font-size:.6rem;color:var(--ink3);margin-top:1px">15×20/20×15/20×20</small></button>
+                <button class="fmt-btn" id="agBtn_big" onclick="selAlbGenFmt('big')">Grande<small style="display:block;font-size:.6rem;color:var(--ink3);margin-top:1px">20×30/30×20/25×25</small></button>
+                <button class="fmt-btn" id="agBtn_none" onclick="selAlbGenFmt('none')">No album genitori<small style="display:block;font-size:.6rem;color:var(--ink3);margin-top:1px">nessuna copia aggiuntiva</small></button>
+              </div>
+            </div>
+          </div>
+          <div class="info-note" id="albGenNote">—</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Riepilogo Album</div>
+          <div class="totals">
+            <div class="trow"><span>Formato</span><span id="t_fmt" style="font-weight:600">—</span></div>
+            <div class="trow"><span>Pagine <span id="t_npag" style="font-weight:600">0</span></span><span id="t_albcost">€ 0,00</span></div>
+            <div class="trow"><span>Copertina base</span><span id="t_cop_base">€ 0,00</span></div>
+            <div class="trow"><span>Suppl. modello</span><span id="t_cop_extra">€ 0,00</span></div>
+            <div class="trow"><span>Box</span><span id="t_box">€ 0,00</span></div>
+            <div class="trow sub" id="t_alb_gen_row" style="display:none"><span id="t_alb_gen_lbl">Album genitori</span><span id="t_alb_gen">€ 0,00</span></div>
+            <div class="trow big"><span>Totale Album</span><span id="t_alb_sub">€ 0,00</span></div>
+          </div>
+          <input type="hidden" id="accontoAlbum" value="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: RIEPILOGO -->
+    <div class="page" id="p2">
+      <div class="step-title">Riepilogo</div>
+
+      <div class="card">
+        <div class="card-title">Totale Preventivo</div>
+        <div id="finalTotals"></div>
+        <div class="inline-input-row">
+          <label>Sconto €</label>
+          <input type="number" id="scontoVal" min="0" step="10" value="0" oninput="renderFinalTotals()">
+          <span>sull'acconto grafica</span>
+        </div>
+        <div class="inline-input-row">
+          <label>Salva Data €</label>
+          <input type="number" id="caparra" min="0" step="10" value="50" oninput="calcTot();renderFinalTotals()">
+          <span>caparra</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Note</div>
+        <textarea id="noteExtra" placeholder="Note, accordi particolari..." style="width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;min-height:80px;resize:none;color:var(--ink)"></textarea>
+      </div>
+    </div>
+
+    <!-- STEP 3: GENERA -->
+    <div class="page" id="p3">
+      <div class="step-title">Genera Preventivo</div>
+
+      <div class="info-note">
+        Verrà creata un'immagine del preventivo da condividere direttamente su <strong>WhatsApp</strong> o salvare nella galleria.
+      </div>
+
+      <div class="card">
+        <div class="card-title">Riepilogo Finale</div>
+        <div id="summaryPreview"></div>
+      </div>
+
+      <button class="btn btn-gold" style="width:100%;padding:16px;font-size:1rem;margin-bottom:12px;border-radius:14px" onclick="generaImmagine()">
+        Genera immagine preventivo
+      </button>
+
+      <div class="quick-links">
+        <a class="quick-link" href="./calendario.html">Apri calendario</a>
+        <a class="quick-link" href="./index.html">Home</a>
+      </div>
+    </div>
+
+  </div><!-- /scroll-area -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="btn btn-secondary" id="btnBack" onclick="stepBack()" style="display:none">Indietro</button>
+    <button class="btn btn-primary" id="btnNext" onclick="stepNext()">Avanti</button>
+  </div>
+</div>
+
+<!-- MODAL IMMAGINE -->
+<div class="modal-overlay" id="modalImg">
+  <div class="modal-loader" id="imgLoader">Generazione in corso...</div>
+  <div class="modal-img-wrap" id="imgWrap" style="display:none">
+    <img id="imgResult" src="" alt="Preventivo">
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>
+    <button class="btn btn-gold" id="btnShare" onclick="condividi()">Condividi</button>
+    <button class="btn btn-primary" id="btnSave" onclick="salvaImmagine()">Salva</button>
+  </div>
+</div>
+
+<!-- PREVENTIVO CARD (template per screenshot) -->
+<div id="prevCard"></div>
+
+<div class="toast" id="toastMsg"></div>
+
+<script src="config.js" onerror="console.warn('config.js non trovato')"></script>
+<script>
+// ══════════════════════════════════════════════════════
+// DATI (stessi del desktop, caricati da config.js)
+// ══════════════════════════════════════════════════════
+let FORMATI=[], BOX_PER_FAMIGLIA={}, COPERTINE=[], SERVIZI_PER_EVENTO={}, SERVIZI_GENERICO=[], PRESET_EVENTO={};
+let CFG_STUDIO={nome:'Massimo Inturrisi',qualifica:'Fotografo',indirizzo:'Via A. Carrubba 8/9',citta:'96010 Solarino (SR)',piva:'01726290891',tel:'339 159 4106'};
+const SVC_CUSTOM={};
+const SVC_PRICE_OVERRIDES={};
+
+const S={page:0,fmtId:null,pagine:30,copCod:null,boxCod:null,boxCosto:0,svc:{},noAlbum:false,albGen:{qty:2,upgradeSize:'small',disabled:false}};
+
+// ── Applica config ──
+function applyConfig(){
+  const cfg=window.RAYMAX_CONFIG||{};
+  if(cfg.studio) CFG_STUDIO=Object.assign(CFG_STUDIO,cfg.studio);
+  if(cfg.formati) FORMATI=cfg.formati;
+  if(cfg.box) BOX_PER_FAMIGLIA=cfg.box;
+  if(cfg.copertine) COPERTINE=cfg.copertine;
+  if(cfg.servizi) SERVIZI_PER_EVENTO=cfg.servizi;
+  if(cfg.preset_evento) PRESET_EVENTO=cfg.preset_evento;
+  if(cfg.servizi_generico) SERVIZI_GENERICO=cfg.servizi_generico;
+  else if(cfg.servizi?.Matrimonio){
+    const extra=cfg.servizi.Matrimonio.find(g=>g.icona==='extra');
+    SERVIZI_GENERICO=[
+      {gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'g_f1',nome:'Servizio fotografico',costo:0,editabile:true},{id:'g_f2',nome:'Servizio fotografico aggiuntivo',costo:0,editabile:true}]},
+      {gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'g_v1',nome:'Servizio video',costo:0,editabile:true},{id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}]},
+      ...(extra?[extra]:[])
+    ];
+  }
+  if(!window.RAYMAX_CONFIG){
+    // FALLBACK
+    FORMATI=[{id:'20x30',label:'20x30',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'30x20',label:'30x20',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'25x25',label:'25x25',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'25x35',label:'25x35',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'35x25',label:'35x25',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'30x30',label:'30x30',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'30x40',label:'30x40',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'40x30',label:'40x30',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'35x35',label:'35x35',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'35x45',label:'35x45',pagina:7.5,copertina:100,famiglia:'35x45'},{id:'45x35',label:'45x35',pagina:7.5,copertina:100,famiglia:'35x45'},{id:'40x40',label:'40x40',pagina:7.5,copertina:100,famiglia:'35x45'}];
+    BOX_PER_FAMIGLIA={'20x30':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:70},{cod:'C-CL-E-FL-P-N-Z',costo:100},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:150}],'25x35':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:75},{cod:'C-CL-E-FL-P-N-Z',costo:105},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:155}],'30x40':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:90},{cod:'C-CL-E-FL-P-N-Z',costo:120},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:170}],'35x45':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:110},{cod:'C-CL-E-FL-P-N-Z',costo:135},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:185}]};
+    COPERTINE=[{cod:'COPERTINA STANDARD',extra:0},{cod:'COPERTINA ECO',extra:0,eco:true},{cod:'F04',extra:10},{cod:'F09',extra:10},{cod:'F10',extra:10},{cod:'F13',extra:10},{cod:'F24',extra:10},{cod:'F11',extra:20},{cod:'F12',extra:20},{cod:'F27',extra:20},{cod:'F02',extra:25},{cod:'F05',extra:25},{cod:'F06',extra:25},{cod:'F14',extra:25},{cod:'F16',extra:25},{cod:'L130',extra:25},{cod:'F15',extra:30},{cod:'F25',extra:30},{cod:'L135',extra:30},{cod:'P378',extra:30},{cod:'F17',extra:35},{cod:'F18',extra:35},{cod:'F19',extra:35},{cod:'F21',extra:35},{cod:'F22',extra:35},{cod:'F23',extra:35},{cod:'L120',extra:35},{cod:'L120V',extra:35},{cod:'L122',extra:35},{cod:'L129',extra:35},{cod:'L136',extra:35},{cod:'L143',extra:35},{cod:'P373',extra:35},{cod:'V440',extra:35},{cod:'F20',extra:45},{cod:'L131',extra:45},{cod:'L133',extra:45},{cod:'L138',extra:45},{cod:'L141',extra:45},{cod:'L142',extra:45},{cod:'P370',extra:45},{cod:'P375',extra:45},{cod:'P377',extra:45},{cod:'L121',extra:55},{cod:'L126',extra:55},{cod:'L127',extra:55},{cod:'L128',extra:55},{cod:'L137',extra:55},{cod:'L139N',extra:55},{cod:'L139R',extra:55},{cod:'P371',extra:55},{cod:'P374',extra:55},{cod:'P376',extra:55}];
+    SERVIZI_PER_EVENTO={'Battesimo':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'b_f1',nome:'Preparazione a Casa · Rito in chiesa · Foto torta al locale',costo:150},{id:'b_f2',nome:'Permanenza al locale',costo:50},{id:'b_f3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'b_v1',nome:'Riprese e montaggio: Prep. Casa · Rito · Torta al locale',costo:250},{id:'b_v2',nome:'',costo:0,editabile:true},{id:'b_v0',nome:'Nessun video',costo:0,noVideo:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}],'18° Compleanno':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'d_f1',nome:'Foto intera festa (no foto regali)',costo:150},{id:'d_f2',nome:'Pre servizio base',costo:100},{id:'d_f3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:false,items:[{id:'d_v1',nome:'Riprese e montaggio: intera festa',costo:250},{id:'d_v2',nome:'Riprese e montaggio: preservizio',costo:100},{id:'d_v3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}],'Matrimonio':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'m_f1',nome:'Pre matrimonio',costo:100},{id:'m_f2',nome:'Intero servizio',costo:700},{id:'m_f3',nome:'Preparativi casa sposi',costo:150},{id:'m_f4',nome:'Cerimonia',costo:200},{id:'m_f5',nome:'Esterne',costo:200},{id:'m_f6',nome:'Ricevimento',costo:150}]},{gruppo:'Servizio Video',icona:'video',radio:false,items:[{id:'m_v1',nome:'Riprese pre matrimonio',costo:100},{id:'m_v2',nome:'Riprese e montaggio intera giornata wedding',costo:500},{id:'m_v3',nome:'Trailer della giornata da proiettare (proiettore escluso)',costo:100}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}]};
+    SERVIZI_GENERICO=[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'g_f1',nome:'',costo:0,editabile:true},{id:'g_f2',nome:'',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'g_v1',nome:'',costo:0,editabile:true},{id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}];
+    PRESET_EVENTO={'Matrimonio':{fmtId:'35x25',pagine:60,boxCod:'C-CL-E-FL-P-N-Z',caparra:200},'Battesimo':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50},'18° Compleanno':{fmtId:'25x25',pagine:40,boxCod:'G-SE-F',caparra:50},'Comunione':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50},'Cresima':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50}};
+  }
+  ensureStandaloneServices();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function f2(v){return '€ '+v.toFixed(2).replace('.',',');}
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+
+function cloneData(v){return JSON.parse(JSON.stringify(v));}
+function getDefaultGenericServices(){
+  return [
+    {gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[
+      {id:'g_f1',nome:'Servizio fotografico',costo:0,editabile:true},
+      {id:'g_f2',nome:'Servizio fotografico aggiuntivo',costo:0,editabile:true}
+    ]},
+    {gruppo:'Servizio Video',icona:'video',radio:true,items:[
+      {id:'g_v1',nome:'Servizio video',costo:0,editabile:true},
+      {id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}
+    ]},
+    {gruppo:'Servizi Extra',icona:'extra',radio:false,items:[
+      {id:'x_drone',nome:'Drone',costo:200},
+      {id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},
+      {id:'x_trasf',nome:'Trasferta',costo:50}
+    ]}
+  ];
+}
+function ensureStandaloneServices(){
+  if(!Array.isArray(SERVIZI_GENERICO)||!SERVIZI_GENERICO.length||!SERVIZI_GENERICO.some(g=>g?.items?.some(i=>(i.nome||'').trim()))){
+    SERVIZI_GENERICO=getDefaultGenericServices();
+  }
+  const tipi=['Matrimonio','Battesimo','18° Compleanno','Comunione','Cresima','Fidanzamento','Laurea','Corporate','Altro'];
+  tipi.forEach(t=>{if(!SERVIZI_PER_EVENTO[t])SERVIZI_PER_EVENTO[t]=cloneData(SERVIZI_GENERICO);});
+}
+
+function getGruppi(){const t=document.getElementById('tipoEvento')?.value||'';return SERVIZI_PER_EVENTO[t]||SERVIZI_GENERICO;}
+
+// ══════════════════════════════════════════════════════
+// NAVIGAZIONE
+// ══════════════════════════════════════════════════════
+const TOTAL_STEPS=4;
+function goTo(n){
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('on',i===n));
+  S.page=n;
+  document.getElementById('stepBadge').textContent=`Passo ${n+1} di ${TOTAL_STEPS}`;
+  document.getElementById('progressFill').style.width=((n+1)/TOTAL_STEPS*100)+'%';
+  document.getElementById('btnBack').style.display=n>0?'':'none';
+  document.getElementById('btnNext').textContent=n===TOTAL_STEPS-1?'':'Avanti';
+  document.getElementById('btnNext').style.display=n===TOTAL_STEPS-1?'none':'';
+  document.getElementById('scrollArea').scrollTop=0;
+  if(n===2) renderFinalTotals();
+  if(n===3) renderSummary();
+}
+function stepNext(){
+  if(S.page<TOTAL_STEPS-1) goTo(S.page+1);
+}
+function stepBack(){
+  if(S.page>0) goTo(S.page-1);
+}
+
+// ══════════════════════════════════════════════════════
+// SERVIZI
+// ══════════════════════════════════════════════════════
+function buildSvcUI(){
+  const gruppi=getGruppi();
+  document.getElementById('svcContainer').innerHTML=gruppi.map(g=>`
+    <div class="svc-group">
+      <div class="svc-group-lbl">${g.gruppo}${g.radio?' <span style="font-weight:400;font-size:.6rem;color:var(--ink3)">(scegli uno)</span>':''}</div>
+      ${g.items.map(s=>buildSvcRow(g,s)).join('')}
+      ${(g.icona==='foto'||g.icona==='video')&&!g.radio?`<button class="svc-add-btn" onclick="addSvc('${g.icona}')">+ Aggiungi voce</button>`:''}
+    </div>`).join('');
+}
+
+function buildSvcRow(g,s){
+  const currentPrice=s.editabile
+    ?((SVC_CUSTOM[s.id]&&typeof SVC_CUSTOM[s.id].costo!=='undefined')?SVC_CUSTOM[s.id].costo:(s.costo||0))
+    :((typeof SVC_PRICE_OVERRIDES[s.id]!=='undefined')?SVC_PRICE_OVERRIDES[s.id]:(s.costo||0));
+  if(s.editabile){
+    const c=SVC_CUSTOM[s.id]||{nome:'',costo:0};
+    const on=S.svc[s.id]?'on':'';
+    return `<div class="svc-row editable ${on}" id="row_${s.id}">
+      <div class="svc-check" id="chk_${s.id}" onclick="toggleSvc('${g.icona}','${s.id}',${g.radio})" style="cursor:pointer">${S.svc[s.id]?'✓':''}</div>
+      <div class="svc-edit-row" style="flex:1">
+        <input type="text" placeholder="Descrizione servizio" value="${c.nome||''}"
+          oninput="SVC_CUSTOM['${s.id}']={...(SVC_CUSTOM['${s.id}']||{}),nome:this.value};activateMobileCustomSvc('${s.id}')" style="flex:1;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;">
+        <input type="number" placeholder="€" value="${currentPrice||''}"
+          oninput="SVC_CUSTOM['${s.id}']={...(SVC_CUSTOM['${s.id}']||{}),costo:parseFloat(this.value)||0};activateMobileCustomSvc('${s.id}');calcTot();renderFinalTotals();if(S.page===3)renderSummary();" style="width:82px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:9px 8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:var(--gold);outline:none;">
+      </div>
+    </div>`;
+  }
+  const on=S.svc[s.id]?'on':'';
+  return `<div class="svc-row ${on}" id="row_${s.id}" onclick="toggleSvc('${g.icona}','${s.id}',${g.radio})">
+    <div class="svc-check" id="chk_${s.id}">${S.svc[s.id]?'✓':''}</div>
+    <div class="svc-name">${s.nome||'—'}</div>
+    ${!s.noVideo?`<input type="number" class="svc-price" value="${currentPrice||0}" onclick="event.stopPropagation()" oninput="SVC_PRICE_OVERRIDES['${s.id}']=parseFloat(this.value)||0;calcTot();renderFinalTotals();if(S.page===3)renderSummary();" style="width:86px;background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:7px 8px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;color:var(--gold);outline:none;text-align:right;"/>`:''}
+  </div>`;
+}
+
+function toggleSvc(icona,id,radio){
+  if(radio){
+    getGruppi().forEach(g=>{if(g.icona===icona)g.items.forEach(s=>{S.svc[s.id]=false;});});
+  }
+  S.svc[id]=!S.svc[id];
+  buildSvcUI(); calcTot();
+}
+
+let _svcCounter=100;
+function addSvc(icona){
+  const id='custom_'+(_svcCounter++);
+  const gruppi=getGruppi();
+  const g=gruppi.find(g=>g.icona===icona);
+  if(g){g.items.push({id,nome:'',costo:0,editabile:true});SVC_CUSTOM[id]={nome:'',costo:0};}
+  // Auto-attiva subito la nuova voce
+  S.svc[id]=true;
+  buildSvcUI();calcTot();renderFinalTotals();if(S.page===3)renderSummary();
+  // Focus sul campo nome
+  setTimeout(()=>{const el=document.querySelector(`#row_${id} input[type=text]`);if(el)el.focus();},50);
+}
+// Attiva voce custom anche quando si inizia a scrivere
+function activateMobileCustomSvc(id){
+  if(!S.svc[id]){
+    S.svc[id]=true;
+    const row=document.getElementById('row_'+id);
+    const chk=document.getElementById('chk_'+id);
+    if(row)row.classList.add('on');
+    if(chk)chk.textContent='✓';
+    calcTot();renderFinalTotals();if(S.page===3)renderSummary();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// EVENTO
+// ══════════════════════════════════════════════════════
+function onEvento(){
+  window._caparraManuale=false; // reset flag al cambio tipo evento
+  const tipo=document.getElementById('tipoEvento')?.value||'Matrimonio';
+  const preset=PRESET_EVENTO[tipo];
+  if(preset){
+    S.fmtId=preset.fmtId; S.pagine=preset.pagine;
+    document.getElementById('caparra').value=preset.caparra;
+    const fmt=FORMATI.find(f=>f.id===preset.fmtId);
+    const boxes=fmt?(BOX_PER_FAMIGLIA[fmt.famiglia]||[]):[];
+    const box=boxes.find(b=>b.cod===preset.boxCod)||boxes[1]||boxes[0];
+    if(box){S.boxCod=box.cod;S.boxCosto=box.costo;}
+  }
+  if(!['COPERTINA STANDARD','COPERTINA ECO'].includes(S.copCod)) S.copCod='COPERTINA STANDARD';
+  buildSvcUI(); buildFmtGrid(); buildCopGrid(); buildBoxGrid();
+  document.getElementById('pagVal').textContent=S.pagine;
+  updateAlbGenUI(); calcTot();
+}
+
+// ══════════════════════════════════════════════════════
+// FORMATO
+// ══════════════════════════════════════════════════════
+function buildFmtGrid(){
+  const quadrati=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return a===b;});
+  const orizz=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return a>b;});
+  const vert=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return b>a;});
+  const row=arr=>arr.map(f=>`<button class="fmt-btn${S.fmtId===f.id?' on':''}" onclick="selFmt('${f.id}')">${f.label}</button>`).join('');
+  document.getElementById('fmtGrid').innerHTML=`
+    <div class="fmt-section-lbl">Quadrato</div><div class="fmt-grid">${row(quadrati)}</div>
+    <div class="fmt-section-lbl">Orizzontale</div><div class="fmt-grid">${row(orizz)}</div>
+    <div class="fmt-section-lbl">Verticale</div><div class="fmt-grid">${row(vert)}</div>`;
+}
+
+function selFmt(id){
+  S.fmtId=id;
+  buildFmtGrid(); buildBoxGrid(); updateAlbPreview(); calcTot();
+}
+
+function chgPag(d){
+  S.pagine=Math.max(10,S.pagine+d);
+  if(S.pagine%2!==0)S.pagine+=(d>=0?1:-1);
+  document.getElementById('pagVal').textContent=S.pagine;
+  calcTot(); updateAlbPreview(); updateAlbGenUI();
+}
+
+// ══════════════════════════════════════════════════════
+// COPERTINE
+// ══════════════════════════════════════════════════════
+const BOOK_COLORS_BY_EXTRA={'STANDARD':'linear-gradient(135deg,#1a6b2e,#2d9e4a)','ECO':'linear-gradient(135deg,#7a8a7a,#9aaa9a)',10:'linear-gradient(135deg,#1565a0,#2980c0)',20:'linear-gradient(135deg,#0e7490,#0ea5c9)',25:'linear-gradient(135deg,#0f766e,#14b8a6)',30:'linear-gradient(135deg,#92610a,#c98b1a)',35:'linear-gradient(135deg,#9a3d12,#d4621e)',45:'linear-gradient(135deg,#7c3a1a,#b5622e)',55:'linear-gradient(135deg,#6b1a2d,#9e2d4a)'};
+function getAlbumColor(cod){if(!cod)return'linear-gradient(135deg,#2c3e50,#34495e)';if(cod==='COPERTINA STANDARD')return BOOK_COLORS_BY_EXTRA['STANDARD'];if(cod==='COPERTINA ECO')return BOOK_COLORS_BY_EXTRA['ECO'];const cop=COPERTINE.find(c=>c.cod===cod);if(!cop)return'linear-gradient(135deg,#2c3e50,#34495e)';return BOOK_COLORS_BY_EXTRA[cop.extra]||'linear-gradient(135deg,#2c3e50,#34495e)';}
+
+function buildCopGrid(){
+  const lista=COPERTINE.filter(c=>c.cod==='COPERTINA STANDARD'||c.cod==='COPERTINA ECO');
+  const rS=lista.map(cop=>{const isOn=S.copCod===cop.cod;const sw=isOn?`background:${getAlbumColor(cop.cod)};`:'';const lbl=cop.eco?'Cartoncino fotografico':'Foto copertina o tessuto';return`<button class="cop-btn-special${isOn?' on':''}" onclick="selCop('${cop.cod}')" style="${sw}"><span class="cop-lbl">${cop.cod}</span><span class="cop-sub">${lbl}</span></button>`;}).join('');
+  document.getElementById('copGrid').innerHTML=rS?`<div class="cop-special-row">${rS}</div>`:'';
+  updateCopNote();
+}
+
+function selCop(cod){S.copCod=cod;buildCopGrid();updateAlbPreview();calcTot();}
+
+function updateCopNote(){
+  const note=document.getElementById('copNote');
+  if(!note)return;
+  if(!S.copCod||S.noAlbum){note.style.display='none';return;}
+  const cop=COPERTINE.find(c=>c.cod===S.copCod);
+  if(!cop){note.style.display='none';return;}
+  note.style.display='';
+  note.innerHTML=cop.eco?`<strong>Copertina ECO</strong> — Cartoncino fotografico. Il costo è calcolato come 2×pag + €10.`:`<strong>${cop.cod}</strong>${cop.extra>0?` — Supplemento <strong>€${cop.extra}</strong>`:'  — Nessun supplemento'}`;
+}
+
+// ══════════════════════════════════════════════════════
+// BOX
+// ══════════════════════════════════════════════════════
+const BOX_COLORS=['linear-gradient(135deg,#8d6e63,#a1887f)','linear-gradient(135deg,#6b7c59,#8a9b7a)','linear-gradient(135deg,#4a5568,#718096)','linear-gradient(135deg,#5d4037,#8d6e63)'];
+function buildBoxGrid(){
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);
+  const boxes=fmt?(BOX_PER_FAMIGLIA[fmt.famiglia]||[]):[];
+  document.getElementById('boxGrid').innerHTML=boxes.map((b,i)=>{const on=S.boxCod===b.cod;return`<button class="box-btn${on?' on':''}" onclick="selBox('${b.cod}',${b.costo})">${b.cod}<small>${b.costo>0?f2(b.costo):'Incluso'}</small></button>`;}).join('');
+}
+
+function selBox(cod,costo){S.boxCod=cod;S.boxCosto=costo;buildBoxGrid();updateAlbPreview();calcTot();}
+
+// ══════════════════════════════════════════════════════
+// ALBUM PREVIEW
+// ══════════════════════════════════════════════════════
+function updateAlbPreview(){
+  const card=document.getElementById('albPreviewCard');
+  if(!card)return;
+  if(S.noAlbum||!S.fmtId){card.style.display='none';return;}
+  card.style.display='';
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);
+  if(!fmt)return;
+  const albBg=getAlbumColor(S.copCod);
+  const[w,h]=fmt.id.split('x').map(Number);
+  const ratio=h/w;
+  const aW=110,aH=Math.round(aW*ratio);
+  const bW=Math.round(aW*1.22),bH=Math.round(aH*1.22);
+  const hasBox=S.boxCod&&S.boxCod!=='NO BOX';
+  const boxBg=hasBox?BOX_COLORS[Math.min(2,Math.floor((S.boxCosto||0)/80))]:'transparent';
+  const scene=document.getElementById('albScene');
+  if(hasBox){
+    scene.innerHTML=`<div style="position:relative;width:${bW}px;height:${bH}px"><div style="position:absolute;inset:0;background:${boxBg};border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.25)"></div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${aW}px;height:${aH}px;background:${albBg};border-radius:4px;box-shadow:inset -3px 0 8px rgba(0,0,0,.3)"></div></div>`;
+  } else {
+    scene.innerHTML=`<div style="width:${aW}px;height:${aH}px;background:${albBg};border-radius:4px;box-shadow:0 6px 20px rgba(0,0,0,.25),inset -3px 0 8px rgba(0,0,0,.3)"></div>`;
+  }
+  document.getElementById('albInfoTitle').textContent=fmt.label+(S.copCod?` · ${S.copCod}`:'');
+  document.getElementById('albInfoSub').textContent=S.pagine+' pagine'+(hasBox?` · Box ${S.boxCod}`:'');
+}
+
+// ══════════════════════════════════════════════════════
+// NESSUN ALBUM
+// ══════════════════════════════════════════════════════
+function toggleNoAlbum(){
+  S.noAlbum=!S.noAlbum;
+  const btn=document.getElementById('noAlbumBtn');
+  btn.classList.toggle('on',S.noAlbum);
+  btn.textContent=S.noAlbum?'Ripristina Album':'Nessun Album';
+  const content=document.getElementById('albumContent');
+  if(content) content.style.opacity=S.noAlbum?'.35':'1';
+  if(content) content.style.pointerEvents=S.noAlbum?'none':'';
+  updateAlbGenUI(); calcTot(); updateAlbPreview();
+}
+
+// ══════════════════════════════════════════════════════
+// ALBUM GENITORI
+// ══════════════════════════════════════════════════════
+function getAlbGenFmtId(){const sposiFmt=S.fmtId||'25x25';const[a,b]=sposiFmt.split('x').map(Number);const isQuad=a===b;const isOrizz=a>b;if(S.albGen.upgradeSize==='big'){if(isQuad)return'25x25';return isOrizz?'30x20':'20x30';}if(isQuad)return'20x20';return isOrizz?'20x15':'15x20';}
+function getAlbGenPagCosto(){return S.albGen.upgradeSize==='big'?3:2;}
+function calcAlbGen(){const tipo=document.getElementById('tipoEvento')?.value||'';if(tipo!=='Matrimonio'||S.noAlbum||S.albGen.disabled||S.albGen.qty===0)return{cost:0,fmtId:null,ppag:0};const fmtId=getAlbGenFmtId();const ppag=getAlbGenPagCosto();const costOne=(S.pagine*ppag)+30;return{cost:costOne*S.albGen.qty,fmtId,ppag,costOne};}
+function updateAlbGenUI(){
+  const tipo=document.getElementById('tipoEvento')?.value||'';
+  const card=document.getElementById('cardAlbGen');
+  const row=document.getElementById('t_alb_gen_row');
+  if(!card)return;
+  if(tipo!=='Matrimonio'||S.noAlbum){card.style.display='none';if(row)row.style.display='none';return;}
+  card.style.display='';if(row)row.style.display='';
+  const ag=calcAlbGen();
+  document.getElementById('albGenQty').textContent=S.albGen.qty;
+  ['agBtn_small','agBtn_big','agBtn_none'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
+  const selBtn=S.albGen.disabled?'agBtn_none':(S.albGen.upgradeSize==='big'?'agBtn_big':'agBtn_small');
+  const selEl=document.getElementById(selBtn);if(selEl)selEl.classList.add('on');
+  const note=document.getElementById('albGenNote');
+  if(note&&S.albGen.disabled)note.textContent='Nessun album genitori';
+  else if(note&&ag.cost>0)note.textContent=`Formato: ${ag.fmtId} · ${S.pagine} pag. · ${S.albGen.qty} album · Totale: ${f2(ag.cost)}`;
+  else if(note)note.textContent='Quantità: 0 — nessun album genitori';
+  const lbl=document.getElementById('t_alb_gen_lbl');if(lbl)lbl.textContent='Album genitori (×'+(S.albGen.disabled?0:S.albGen.qty)+')';
+  const tot=document.getElementById('t_alb_gen');if(tot)tot.textContent=f2(ag.cost);
+}
+function chgAlbGen(d){if(S.albGen.disabled)return;S.albGen.qty=Math.max(0,S.albGen.qty+d);updateAlbGenUI();calcTot();}
+function selAlbGenFmt(v){if(v==='none'){S.albGen.disabled=true;S.albGen.qty=0;}else{S.albGen.disabled=false;S.albGen.upgradeSize=v||'small';if(S.albGen.qty===0)S.albGen.qty=2;}updateAlbGenUI();calcTot();}
+
+// ══════════════════════════════════════════════════════
+// CALCOLO COSTI
+// ══════════════════════════════════════════════════════
+function calcCosts(){
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);
+  const cop=COPERTINE.find(c=>c.cod===S.copCod);
+  const albCost=(!S.noAlbum&&fmt)?S.pagine*fmt.pagina:0;
+  let copBase=(!S.noAlbum&&fmt)?fmt.copertina:0;
+  let copExtra=(!S.noAlbum&&cop)?cop.extra:0;
+  let isEco=false;
+  if(!S.noAlbum&&cop&&cop.eco&&fmt){copBase=0;copExtra=(2*fmt.pagina)+10;isEco=true;}
+  const boxCost=(!S.noAlbum)?(S.boxCosto||0):0;
+  const albSub=albCost+copBase+copExtra+boxCost;
+  const albGenData=calcAlbGen();const albGenCost=albGenData.cost||0;
+  let svcTot=0,svcVideoTot=0;const svcList=[];
+  getGruppi().forEach(g=>g.items.forEach(s=>{
+    if(S.svc[s.id]&&!s.noVideo){
+      const cust=SVC_CUSTOM[s.id]||{};
+      const costo=s.editabile
+        ?(((typeof cust.costo!=='undefined')?cust.costo:0)||0)
+        :(((typeof SVC_PRICE_OVERRIDES[s.id]!=='undefined')?SVC_PRICE_OVERRIDES[s.id]:s.costo)||0);
+      const nome=s.editabile?(cust.nome||'Servizio personalizzato'):s.nome;
+      svcTot+=costo;svcList.push({nome,costo,isVideo:g.icona==='video'});
+      if(g.icona==='video')svcVideoTot+=costo;
+    }
+  }));
+  const totale=albSub+albGenCost+svcTot;
+  const tipoEvento=document.getElementById('tipoEvento')?.value||'';
+  if(tipoEvento!=='Matrimonio'&&!window._caparraManuale){
+    const hasFoto=getGruppi().some(g=>g.icona==='foto'&&g.items.some(s=>S.svc[s.id]&&!s.noVideo));
+    const hasVideo=getGruppi().some(g=>g.icona==='video'&&g.items.some(s=>S.svc[s.id]&&!s.noVideo));
+    const caparraEl=document.getElementById('caparra');
+    if(caparraEl){const presetCaparra=(PRESET_EVENTO[tipoEvento]?.caparra)||50;const autoCaparra=(hasFoto&&hasVideo)?100:presetCaparra;if(parseFloat(caparraEl.value)===presetCaparra||parseFloat(caparraEl.value)===100)caparraEl.value=autoCaparra;}
+  }
+  const caparra=parseFloat(document.getElementById('caparra')?.value)||0;
+  const hasAlbum=!S.noAlbum&&albSub>0;
+  const saldo50video=hasAlbum?Math.round(svcVideoTot*0.5*100)/100:0;
+  const sconto=Math.max(0,parseFloat(document.getElementById('scontoVal')?.value)||0);
+  const totaleNetto=Math.max(0,totale-sconto);
+  const scontoSuAlbumGen=(tipoEvento==='Matrimonio'&&albGenCost>0)?Math.min(sconto,albGenCost):0;
+  const scontoSuAlbum=(hasAlbum&&scontoSuAlbumGen===0)?Math.min(sconto,albSub):0;
+  const scontoSuAlbumTot=scontoSuAlbum+scontoSuAlbumGen;
+  const scontoResiduo=Math.max(0,sconto-scontoSuAlbumTot);
+  const albSubNetto=Math.max(0,albSub-scontoSuAlbum);
+  const albGenCostNetto=Math.max(0,albGenCost-scontoSuAlbumGen);
+  const saldoEntrEvento=Math.max(0,svcTot-caparra-saldo50video-scontoResiduo);
+  const A2=hasAlbum?(albSubNetto+albGenCostNetto+saldo50video):0;
+  const saldoConsegna=tipoEvento==='Matrimonio'?200:(hasAlbum?50:0);
+  const accontoGrafica=A2>0?Math.max(0,A2-saldoConsegna):0;
+  const accontoGraficaScontato=accontoGrafica;
+  const saldoEntrEventoScontato=saldoEntrEvento;
+  const albumDetails=(function(){
+    if(S.noAlbum)return 'Nessun album';
+    const parts=[];
+    if(fmt) parts.push('Album '+fmt.label);
+    if(S.pagine) parts.push(S.pagine+' pag.');
+    parts.push('Copertina '+(S.copCod||'non definita'));
+    parts.push((S.boxCod&&S.boxCod!=='NO BOX')?('Box '+S.boxCod):'No box');
+    return parts.join(' · ');
+  })();
+  const albumGenDetails=(albGenCost>0)?('Album genitori ×'+S.albGen.qty+' · '+(albGenData.fmtId||'')+' · '+S.pagine+' pag.') : '';
+  return{fmt,cop,albCost,copBase,copExtra,isEco,boxCost,albSub,albSubNetto,albGenCost,albGenCostNetto,svcTot,svcVideoTot,saldo50video,svcList,totale,totaleNetto,caparra,saldoEntrEvento,saldoEntrEventoScontato,A2,accontoGrafica,accontoGraficaScontato,sconto,scontoSuAlbum,scontoSuAlbumGen,scontoResiduo,saldoConsegna,tipoEvento,albumDetails,albumGenDetails};
+}
+
+function calcTot(){
+  const c=calcCosts();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const accontoAlbEl=document.getElementById('accontoAlbum');if(accontoAlbEl)accontoAlbEl.value=c.accontoGrafica.toFixed(2);
+  set('t_fmt',c.fmt&&!S.noAlbum?c.fmt.label:S.noAlbum?'Nessun album':'—');
+  set('t_npag',S.pagine);
+  set('t_albcost',c.fmt&&!S.noAlbum?f2(c.albCost):'€ 0,00');
+  set('t_cop_base',c.isEco?'€ 0,00 (ECO)':f2(c.copBase));
+  set('t_cop_extra',c.isEco?`+${f2(c.copExtra)} (2pag+€10)`:f2(c.copExtra));
+  set('t_box',f2(c.boxCost));
+  set('t_alb_sub',f2(c.albSub+c.albGenCost));
+  updateAlbGenUI();
+}
+
+// ══════════════════════════════════════════════════════
+// RIEPILOGO FINALE
+// ══════════════════════════════════════════════════════
+function fmtRowPrice(originale,netto){if(originale>0&&netto>=0&&netto<originale){return `<span class="val" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1"><span style="text-decoration:line-through;color:var(--ink3)">${f2(originale)}</span><span style="font-size:.82em;margin-top:2px">${f2(netto)}</span></span>`;}return `<span class="val">${f2(originale)}</span>`;}
+function fmtPcPrice(originale,netto){if(originale>0&&netto>=0&&netto<originale){return `<span class="pv" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1"><span style="text-decoration:line-through;color:#8b8175">${f2(originale)}</span><span style="font-size:.82em;margin-top:2px">${f2(netto)}</span></span>`;}return `<span class="pv">${f2(originale)}</span>`;}
+
+function getSaldoServizioLabel(tipoEvento){return tipoEvento==='Matrimonio'?"② Saldo Servizio — 15 gg prima dell'evento":"② Saldo Servizio — 7 giorni prima dell'evento";}
+
+function renderFinalTotals(){
+  const c=calcCosts();
+  const tipo=document.getElementById('tipoEvento')?.value||'—';
+  const dataEv=document.getElementById('dataEvento')?.value?new Date(document.getElementById('dataEvento').value).toLocaleDateString('it-IT'):'—';
+  let html=`
+    <div class="price-row"><span class="label">Tipo evento</span><span class="val" style="color:var(--ink)">${tipo}</span></div>
+    <div class="price-row"><span class="label">Data</span><span class="val" style="color:var(--ink)">${dataEv}</span></div>`;
+  if(c.svcList.length){
+    html+=c.svcList.map(s=>`<div class="price-row"><span class="label">${s.nome||'—'}</span><span class="val">${f2(s.costo)}</span></div>`).join('');
+  }
+  if(!S.noAlbum&&c.albSub>0){
+    html+=`<div class="price-row"><span class="label">${c.albumDetails}</span>${fmtRowPrice(c.albSub,c.albSubNetto)}</div>`;
+    if(c.albGenCost>0)html+=`<div class="price-row"><span class="label">${c.albumGenDetails}</span>${fmtRowPrice(c.albGenCost,c.albGenCostNetto)}</div>`;
+  } else if(S.noAlbum){
+    html+=`<div class="price-row"><span class="label" style="font-style:italic">Nessun album</span><span class="val" style="color:var(--ink3)">file digitali</span></div>`;
+  }
+  html+=`${(!S.noAlbum&&c.scontoResiduo>0)?`<div class="price-row"><span class="label">Adeguamento</span><span class="val">− ${f2(c.scontoResiduo)}</span></div>`:(c.sconto>0&&!S.noAlbum?'':(c.sconto>0?`<div class="price-row"><span class="label">Sconto</span><span class="val">− ${f2(c.sconto)}</span></div>`:''))}<div class="price-row total"><span>Totale</span><span>${f2(c.totaleNetto)}</span></div>`;
+  html+=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bg2)">
+    <div style="font-size:.65rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Piano di Pagamento</div>
+    <div class="payment-row"><span class="step">① Salva Data — alla firma</span><span class="amount">${f2(c.caparra)}</span></div>
+    <div class="payment-row"><span class="step">${getSaldoServizioLabel(c.tipoEvento)}</span><span class="amount">${f2(c.saldoEntrEventoScontato)}</span></div>
+    ${c.A2>0?`<div class="payment-row"><span class="step">③ Acconto stampa album</span><span class="amount">${f2(c.accontoGraficaScontato)}</span></div><div class="payment-row"><span class="step">④ Saldo alla consegna</span><span class="amount">${f2(c.saldoConsegna)}</span></div>`:''}
+  </div>`;
+  const noteExtra=document.getElementById('noteExtra')?.value||'';
+  if(noteExtra.trim()){
+    html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bg2)"><div style="font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px">Note</div><div style="font-size:.8rem;color:var(--ink2);line-height:1.5">${noteExtra}</div></div>`;
+  }
+  document.getElementById('finalTotals').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════
+// SUMMARY STEP 3
+// ══════════════════════════════════════════════════════
+function renderSummary(){
+  const c=calcCosts();
+  const tipo=document.getElementById('tipoEvento')?.value||'—';
+  const cliente=document.getElementById('nomeCliente')?.value||'—';
+  const dataEv=document.getElementById('dataEvento')?.value?new Date(document.getElementById('dataEvento').value).toLocaleDateString('it-IT'):'—';
+  const luogo=document.getElementById('luogoEvento')?.value||'—';
+  let html=`
+    <div class="price-row"><span class="label">Cliente</span><span class="val" style="color:var(--ink);font-weight:600">${cliente}</span></div>
+    <div class="price-row"><span class="label">Evento</span><span class="val" style="color:var(--ink)">${tipo} · ${dataEv}</span></div>
+    <div class="price-row"><span class="label">Luogo</span><span class="val" style="color:var(--ink)">${luogo}</span></div>`;
+  if(c.svcList.length)html+=c.svcList.map(s=>`<div class="price-row"><span class="label">${s.nome}</span><span class="val">${f2(s.costo)}</span></div>`).join('');
+  if(!S.noAlbum&&c.albSub>0)html+=`<div class="price-row"><span class="label">${c.albumDetails}</span>${fmtRowPrice(c.albSub,c.albSubNetto)}</div>`;
+  if(c.albGenCost>0)html+=`<div class="price-row"><span class="label">${c.albumGenDetails}</span>${fmtRowPrice(c.albGenCost,c.albGenCostNetto)}</div>`;
+  html+=`${(!S.noAlbum&&c.scontoResiduo>0)?`<div class="price-row"><span class="label">Adeguamento</span><span class="val">− ${f2(c.scontoResiduo)}</span></div>`:(c.sconto>0&&!S.noAlbum?'':(c.sconto>0?`<div class="price-row"><span class="label">Sconto</span><span class="val">− ${f2(c.sconto)}</span></div>`:''))}<div class="price-row total"><span>Totale</span><span>${f2(c.totaleNetto)}</span></div>`;
+  const noteExtraS=document.getElementById('noteExtra')?.value||'';
+  if(noteExtraS.trim()){
+    html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bg2)"><div style="font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">Note</div><div style="font-size:.8rem;color:var(--ink2);line-height:1.5">${noteExtraS}</div></div>`;
+  }
+  document.getElementById('summaryPreview').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════
+// GENERA IMMAGINE PREVENTIVO
+// ══════════════════════════════════════════════════════
+function buildPrevCard(){
+  const c=calcCosts();
+  const tipo=gv('tipoEvento')||'—';
+  const cliente=document.getElementById('nomeCliente')?.value||'—';
+  const dataEv=document.getElementById('dataEvento')?.value?new Date(document.getElementById('dataEvento').value).toLocaleDateString('it-IT'):'—';
+  const luogo=document.getElementById('luogoEvento')?.value||'—';
+  const dataDoc=new Date().toLocaleDateString('it-IT');
+  const scadenza=(()=>{const d=new Date();d.setDate(d.getDate()+10);return d.toLocaleDateString('it-IT');})();
+
+  const svcRows=c.svcList.length?c.svcList.map(s=>`<div class="pc-item"><span>${s.nome||'—'}</span><span class="pv">${f2(s.costo)}</span></div>`).join(''):'';
+  const albRows=S.noAlbum
+    ?'<div class="pc-item"><span style="font-style:italic">Nessun album</span><span class="pv">file digitali</span></div>'
+    :(c.albSub>0?`<div class="pc-item"><span>${c.albumDetails}</span>${fmtPcPrice(c.albSub,c.albSubNetto)}</div>`
+      +(c.albGenCost>0?`<div class="pc-item"><span>${c.albumGenDetails}</span>${fmtPcPrice(c.albGenCost,c.albGenCostNetto)}</div>`:''):'' );
+
+  const payRows=`
+    <div class="pc-pay-row"><span class="pc-pay-step">① Salva Data — alla firma</span><span class="pc-pay-amt">${f2(c.caparra)}</span></div>
+    <div class="pc-pay-row"><span class="pc-pay-step">${c.tipoEvento==='Matrimonio'?"② Saldo Servizio — 15 gg prima dell'evento":"② Saldo Servizio — 7 giorni prima dell'evento"}</span><span class="pc-pay-amt">${f2(c.saldoEntrEventoScontato)}</span></div>
+    ${c.A2>0?`<div class="pc-pay-row"><span class="pc-pay-step">③ Acconto stampa album</span><span class="pc-pay-amt">${f2(c.accontoGraficaScontato)}</span></div><div class="pc-pay-row"><span class="pc-pay-step">④ Saldo alla consegna</span><span class="pc-pay-amt">${f2(c.saldoConsegna)}</span></div>`:''}`;
+
+  document.getElementById('prevCard').innerHTML=`
+    <div class="pc-header">
+      <div class="pc-logo">${CFG_STUDIO.nome}<small>${CFG_STUDIO.qualifica}</small></div>
+      <div class="pc-tipo">${tipo} · ${luogo}</div>
+      <div class="pc-nome">${cliente}</div>
+      <div class="pc-meta">${dataEv} · Preventivo del ${dataDoc}</div>
+    </div>
+    <div class="pc-body">
+      ${svcRows?`<div class="pc-section"><div class="pc-section-lbl">Servizi</div>${svcRows}</div>`:''}
+      ${albRows?`<div class="pc-section"><div class="pc-section-lbl">Album</div>${albRows}</div>`:''}
+      <div class="pc-divider"></div>
+      ${(!S.noAlbum&&c.scontoResiduo>0)?`<div class="pc-item"><span>Adeguamento</span><span class="pv">− ${f2(c.scontoResiduo)}</span></div>`:(c.sconto>0&&!S.noAlbum?'':(c.sconto>0?`<div class="pc-item"><span>Sconto</span><span class="pv">− ${f2(c.sconto)}</span></div>`:''))}
+      <div class="pc-total-box">
+        <div class="pc-total-lbl">Totale Preventivo</div>
+        <div class="pc-total-amt">${f2(c.totaleNetto)}</div>
+      </div>
+      <div class="pc-payments">
+        <div class="pc-section-lbl" style="margin-bottom:8px">Piano di Pagamento</div>
+        ${payRows}
+      </div>
+      <div class="pc-validity">Preventivo valido 10 giorni · scadenza ${scadenza}</div>
+    </div>
+    ${(document.getElementById('noteExtra')?.value||'').trim()?`<div style="padding:8px 24px;font-size:.7rem;color:#78716c;background:#fff;border-top:1px solid #e2dcd3"><strong style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:#a0845c">Note</strong><br>${document.getElementById('noteExtra').value}</div>`:''}
+    <div class="pc-footer">${CFG_STUDIO.nome} · ${CFG_STUDIO.indirizzo}, ${CFG_STUDIO.citta} · P.IVA ${CFG_STUDIO.piva}</div>`;
+}
+
+async function generaImmagine(){
+  const modal=document.getElementById('modalImg');
+  const loader=document.getElementById('imgLoader');
+  const wrap=document.getElementById('imgWrap');
+  modal.classList.add('on');
+  loader.style.display='block';
+  wrap.style.display='none';
+
+  buildPrevCard();
+  const el=document.getElementById('prevCard');
+  el.style.left='0px';
+
+  await new Promise(r=>setTimeout(r,200));
+  try{
+    const canvas=await html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#f5f3ef',logging:false});
+    el.style.left='-9999px';
+    const img=document.getElementById('imgResult');
+    img.src=canvas.toDataURL('image/png');
+    window._canvasData=canvas.toDataURL('image/png');
+    loader.style.display='none';
+    wrap.style.display='block';
+    const saved=await saveBookingFromPreventivo();
+    if(saved.ok){showToast('Preventivo generato e data salvata nel calendario');checkSelectedDate();}
+    else if(saved.skipped){showToast('Preventivo generato');}
+    else{showToast('Preventivo generato. Calendario non aggiornato');}
+  }catch(e){
+    el.style.left='-9999px';
+    loader.textContent='Errore: '+e.message;
+  }
+}
+
+async function condividi(){
+  if(!window._canvasData)return;
+  try{
+    const res=await fetch(window._canvasData);
+    const blob=await res.blob();
+    const file=new File([blob],'preventivo.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Preventivo '+CFG_STUDIO.nome,text:'Ecco il preventivo fotografico.'});
+    } else {
+      salvaImmagine();
+    }
+  }catch(e){if(e.name!=='AbortError')salvaImmagine();}
+}
+
+function salvaImmagine(){
+  if(!window._canvasData)return;
+  const a=document.createElement('a');
+  a.download=`preventivo_${(document.getElementById('nomeCliente')?.value||'cliente').replace(/\s+/g,'_')}.png`;
+  a.href=window._canvasData;a.click();
+}
+
+function closeModal(){
+  document.getElementById('modalImg').classList.remove('on');
+}
+
+
+// ══════════════════════════════════════════════════════
+// CALENDARIO ONLINE
+// ══════════════════════════════════════════════════════
+let BOOKINGS_CACHE={};
+function normalizeDate(v){
+  if(!v) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const d=new Date(v);
+  if(Number.isNaN(d.getTime())) return '';
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function prettyDate(v){
+  const n=normalizeDate(v);
+  if(!n) return '—';
+  const [y,m,d]=n.split('-');
+  return `${d}/${m}/${y}`;
+}
+function showToast(msg){
+  const el=document.getElementById('toastMsg');
+  if(!el) return;
+  el.textContent=msg;
+  el.classList.add('on');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>el.classList.remove('on'),2400);
+}
+function renderBookingAlert(type,msg){
+  const el=document.getElementById('bookingAlert');
+  if(!el) return;
+  if(!msg){el.className='booking-alert';el.textContent='';return;}
+  el.className=`booking-alert on ${type||''}`;
+  el.innerHTML=msg;
+}
+async function fetchBookings(){
+  try{
+    const res=await fetch('/.netlify/functions/bookings-get',{cache:'no-store'});
+    if(!res.ok) throw new Error('get failed');
+    const data=await res.json();
+    BOOKINGS_CACHE=data.bookings||{};
+    return BOOKINGS_CACHE;
+  }catch(e){
+    console.warn('Calendario non disponibile',e);
+    return BOOKINGS_CACHE;
+  }
+}
+const SLOT_LABELS={MATTINA:'Mattina',POMERIGGIO:'Pomeriggio',SERALE:'Serale'};
+function selectedSlot(){return (gv('orarioEvento')||'SERALE').toUpperCase();}
+async function checkSelectedDate(){
+  const date=normalizeDate(gv('dataEvento'));
+  if(!date){renderBookingAlert('','');return;}
+  await fetchBookings();
+  const day=BOOKINGS_CACHE[date]||{};
+  const slot=selectedSlot();
+  const item=day[slot];
+  if(item&&item.occupied!==false){
+    const note=(item.note||'Fascia già impegnata').replace(/</g,'&lt;');
+    const stato=item.status==='confermato'?'Confermato':'Preventivo';
+    renderBookingAlert('busy',`${SLOT_LABELS[slot]} impegnata: <strong>${prettyDate(date)}</strong><br>${stato} · ${note}`);
+  }else{
+    renderBookingAlert('free',`${SLOT_LABELS[slot]} libera: <strong>${prettyDate(date)}</strong>`);
+  }
+}
+function buildPreventivoCalendarNote(){
+  const tipo=gv('tipoEvento')||'Evento';
+  const nome=gv('nomeCliente')||'Cliente';
+  const luogo=gv('luogoEvento')||'luogo da definire';
+  const oggi=new Date().toLocaleDateString('it-IT');
+  return `Preventivo del ${oggi} — ${tipo} — ${nome} — ${luogo}`;
+}
+async function saveBookingFromPreventivo(){
+  const date=normalizeDate(gv('dataEvento'));
+  if(!date) return {ok:false, skipped:true, message:'Nessuna data evento selezionata'};
+  const _c=calcCosts();
+  const _albGenFmt=(()=>{const[a,b]=(S.fmtId||'25x25').split('x').map(Number);const isQ=a===b,isO=a>b;if(S.albGen.upgradeSize==='big'){if(isQ)return'25x25';return isO?'30x20':'20x30';}if(isQ)return'20x20';return isO?'20x15':'15x20';})();
+  const payload={
+    date,
+    slot:selectedSlot(),
+    status:'preventivo',
+    occupied:true,
+    source:'preventivo-mobile',
+    eventType:gv('tipoEvento')||'',
+    customerName:gv('nomeCliente')||'',
+    note:buildPreventivoCalendarNote(),
+    quoteCreatedAt:new Date().toISOString(),
+    details:{
+      origin:'mobile',
+      generatedAs:'image',
+      svcList:_c.svcList,
+      prezzi:{
+        totale:_c.totale,totaleNetto:_c.totaleNetto,caparra:_c.caparra,
+        sconto:_c.sconto,svcTot:_c.svcTot,svcVideoTot:_c.svcVideoTot,
+        albSub:_c.albSub,albGenCost:_c.albGenCost,
+        saldoEntrEvento:_c.saldoEntrEventoScontato,
+        accontoGrafica:_c.accontoGraficaScontato,
+        saldoConsegna:_c.saldoConsegna,A2:_c.A2
+      },
+      album:{
+        noAlbum:S.noAlbum,fmtId:S.fmtId,
+        formato:_c.fmt?_c.fmt.label:'—',pagine:S.pagine,
+        copCod:S.copCod,copertina:S.copCod||'—',
+        boxCod:S.boxCod,box:S.boxCod||'—',boxCosto:S.boxCosto,
+        albSub:_c.albSub,albGenCost:_c.albGenCost,
+        genitori:_c.albGenCost>0?('×'+S.albGen.qty+' '+_albGenFmt):'Nessuno'
+      },
+      formValues:{
+        tipoEvento:gv('tipoEvento')||'',
+        dataEvento:date,
+        orarioEvento:selectedSlot(),
+        luogoEvento:gv('luogoEvento')||'',
+        nomeCliente:gv('nomeCliente')||'',
+        scontoVal:gv('scontoVal')||'',
+        noteExtra:gv('noteExtra')||''
+      }
+    }
+  };
+  try{
+    const res=await fetch('/.netlify/functions/bookings-upsert',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok) throw new Error(data.error||'save failed');
+    BOOKINGS_CACHE[date]=data.day;
+    return {ok:true};
+  }catch(e){
+    console.warn('Salvataggio calendario fallito',e);
+    return {ok:false, error:e.message};
+  }
+}
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+(function init(){
+  // Redirect automatico: se desktop, vai al preventivo desktop
+  if(window.innerWidth>=1024 && !window.location.search.includes('nomobile')){
+    const params=window.location.search;
+    window.location.replace('./preventivo-desktop.html'+params);
+    return;
+  }
+  applyConfig();
+  const bn=document.getElementById('brandLogo');
+  if(bn){bn.childNodes[0].textContent=CFG_STUDIO.nome;const sp=bn.querySelector('span');if(sp)sp.textContent=CFG_STUDIO.qualifica;}
+  document.getElementById('dataEvento')?.addEventListener('change',checkSelectedDate);
+  document.getElementById('orarioEvento')?.addEventListener('change',checkSelectedDate);
+  // Traccia modifiche manuali alla caparra
+  document.getElementById('caparra')?.addEventListener('input',()=>{window._caparraManuale=true;calcTot();renderFinalTotals();if(S.page===3)renderSummary();});
+  fetchBookings().then(checkSelectedDate);
+  onEvento();
+})();
+</script>
+</body>
+</html>

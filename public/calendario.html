@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massimo Inturrisi — Calendario</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;
+  --ink:#1c1917;--ink2:#44403c;--ink3:#78716c;
+  --gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;
+  --white:#fff;--red:#b91c1c;--green:#166534;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);}
+
+/* ── HEADER ── */
+header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.brand{font-family:'Libre Baskerville',serif;font-size:1.05rem;color:#fff;font-weight:400;}
+.brand small{display:block;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);margin-top:1px;}
+.header-links{display:flex;gap:10px;}
+.header-link{color:rgba(255,255,255,.5);font-size:.72rem;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s;}
+.header-link:hover{color:#fff;background:rgba(255,255,255,.08);}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1100px;margin:0 auto;padding:28px 40px 60px;}
+.section-title{font-family:'Libre Baskerville',serif;font-size:1.1rem;font-weight:400;color:var(--ink);margin-bottom:16px;letter-spacing:-.01em;}
+
+/* ── CALENDAR CARD ── */
+.cal-card{background:var(--white);border-radius:var(--r);box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3);overflow:hidden;margin-bottom:24px;}
+.cal-header{background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+.cal-month{font-family:'Libre Baskerville',serif;font-size:1.15rem;color:#fff;font-weight:400;letter-spacing:.01em;}
+.cal-nav{display:flex;gap:8px;}
+.cal-nav button{background:rgba(255,255,255,.1);border:none;color:#fff;width:34px;height:34px;border-radius:8px;font-size:1rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.cal-nav button:hover{background:var(--gold);}
+
+/* ── WEEKDAY LABELS ── */
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg2);}
+.cal-wd{text-align:center;padding:9px 4px;font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);}
+
+/* ── DAYS GRID ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--bg3);}
+.cal-day{min-height:82px;padding:7px 8px;border-right:1px solid var(--bg3);border-bottom:1px solid var(--bg3);cursor:pointer;transition:background .15s;position:relative;}
+.cal-day:nth-child(7n){border-right:none;}
+.cal-day:hover{background:var(--gold5);}
+.cal-day.other-month{background:var(--bg);opacity:.45;cursor:default;}
+.cal-day.other-month:hover{background:var(--bg);}
+.cal-day.today .day-num{background:var(--ink);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.day-num{font-size:.82rem;font-weight:600;color:var(--ink2);margin-bottom:5px;display:inline-block;}
+.cal-day.other-month .day-num{color:var(--ink3);}
+
+/* ── EVENT DOTS ── */
+.day-events{display:flex;flex-direction:column;gap:2px;}
+.ev-chip{padding:2px 6px;border-radius:4px;font-size:.64rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;cursor:pointer;transition:opacity .15s;}
+.ev-chip:hover{opacity:.8;}
+.ev-chip.preventivo{background:#fef3c7;color:#92400e;border-left:2px solid #f59e0b;}
+.ev-chip.confermato{background:#d1fae5;color:#065f46;border-left:2px solid #10b981;}
+
+/* ── DETAIL PANEL ── */
+.panel-overlay{position:fixed;inset:0;background:rgba(28,25,23,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.panel-overlay.on{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel{background:var(--white);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:slideUp .25s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.panel-head{background:var(--ink);padding:20px 24px;border-radius:16px 16px 0 0;position:relative;}
+.panel-title{font-family:'Libre Baskerville',serif;font-size:1.1rem;color:#fff;font-weight:400;}
+.panel-sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:3px;letter-spacing:.04em;}
+.panel-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+.panel-close:hover{background:rgba(255,255,255,.2);}
+.panel-body{padding:20px 24px;}
+.panel-slot-tabs{display:flex;gap:6px;margin-bottom:18px;}
+.slot-tab{flex:1;padding:8px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg);font-size:.72rem;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;font-family:'DM Sans',sans-serif;color:var(--ink3);}
+.slot-tab.has-event{color:var(--ink2);}
+.slot-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.slot-tab.preventivo-tab{border-color:#f59e0b;}
+.slot-tab.confermato-tab{border-color:#10b981;}
+
+/* ── DETAIL ROWS ── */
+.detail-row{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--bg2);}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);min-width:110px;padding-top:2px;}
+.detail-val{font-size:.88rem;color:var(--ink);flex:1;line-height:1.5;}
+.stato-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
+.stato-badge.preventivo{background:#fef3c7;color:#92400e;}
+.stato-badge.confermato{background:#d1fae5;color:#065f46;}
+.svc-list{display:flex;flex-direction:column;gap:3px;}
+.svc-line{display:flex;justify-content:space-between;font-size:.83rem;}
+.svc-line .sn{color:var(--ink2);}
+.svc-line .sv{font-weight:600;color:var(--gold);}
+.pay-mini{background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:4px;}
+.pay-mini-row{display:flex;justify-content:space-between;font-size:.8rem;padding:3px 0;border-bottom:1px dashed var(--bg3);}
+.pay-mini-row:last-child{border-bottom:none;font-weight:700;}
+.empty-slot{text-align:center;padding:24px;color:var(--ink3);font-size:.85rem;}
+
+/* ── PANEL ACTIONS ── */
+.panel-actions{padding:16px 24px;border-top:1px solid var(--bg2);display:flex;gap:10px;flex-wrap:wrap;}
+.btn{padding:10px 18px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:#333;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#8a7050;}
+.btn-out{background:transparent;border:1px solid var(--bg3);color:var(--ink2);}
+.btn-out:hover{background:var(--bg2);}
+.btn-red{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
+.btn-red:hover{background:#fee2e2;}
+.btn-green{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);}
+.btn-green:hover{background:#dcfce7;}
+
+/* ── SEARCH ── */
+.search-card{background:var(--white);border-radius:var(--r);box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3);padding:22px;margin-bottom:24px;}
+.search-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;}
+.sf label{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:5px;}
+.sf input{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;transition:border-color .2s;}
+.sf input:focus{border-color:var(--gold);}
+
+/* ── SEARCH RESULTS ── */
+.search-results{margin-top:14px;}
+.res-item{padding:12px 14px;border:1px solid var(--bg3);border-radius:9px;background:var(--bg);margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;}
+.res-item:hover{border-color:var(--gold2);background:var(--gold5);}
+.res-info{flex:1;}
+.res-date{font-size:.78rem;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.res-meta{font-size:.75rem;color:var(--ink3);}
+
+/* ── MANAGE SECTION ── */
+.manage-card{background:var(--white);border-radius:var(--r);box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3);padding:22px;margin-bottom:24px;}
+.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.mf label{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:5px;}
+.mf input,.mf select,.mf textarea{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;transition:border-color .2s;}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold);}
+.mf textarea{min-height:72px;resize:vertical;line-height:1.6;}
+.slot-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.slot-btn{padding:10px 8px;border-radius:9px;border:1px solid var(--bg3);background:var(--bg);font-size:.78rem;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;font-family:'DM Sans',sans-serif;color:var(--ink3);}
+.slot-btn:hover{border-color:var(--gold2);background:var(--gold5);}
+.slot-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.slot-btn .sb-state{display:block;font-size:.62rem;font-weight:400;margin-top:2px;opacity:.7;}
+.slot-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.slot-check{font-size:.75rem;margin-right:3px;transition:opacity .15s;}
+.manage-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.status-msg{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.78rem;display:none;}
+.status-msg.on{display:block;}
+.status-msg.ok{background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0;}
+.status-msg.err{background:#fef2f2;color:var(--red);border:1px solid #fecaca;}
+.status-msg.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+
+/* ── TOAST ── */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:all .25s ease;z-index:1200;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Massimo Inturrisi<small>Fotografo</small></div>
+  <div class="header-links">
+    <a class="header-link" href="./preventivo.html">Preventivo</a>
+    <a class="header-link" href="./contratto.html">Contratto</a>
+    <a class="header-link" href="./index.html">Home</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ── CALENDARIO MENSILE ── -->
+  <div class="cal-card">
+    <div class="cal-header">
+      <div class="cal-month" id="calMonthLabel">—</div>
+      <div class="cal-nav">
+        <button onclick="prevMonth()" title="Mese precedente">‹</button>
+        <button onclick="goToday()" title="Oggi" style="font-size:.7rem;width:auto;padding:0 10px">Oggi</button>
+        <button onclick="nextMonth()" title="Mese successivo">›</button>
+      </div>
+    </div>
+    <div class="cal-weekdays">
+      <div class="cal-wd">Lun</div><div class="cal-wd">Mar</div><div class="cal-wd">Mer</div>
+      <div class="cal-wd">Gio</div><div class="cal-wd">Ven</div><div class="cal-wd">Sab</div>
+      <div class="cal-wd">Dom</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- ── RICERCA ── -->
+  <div class="search-card">
+    <div class="section-title">Ricerca</div>
+    <div class="search-grid">
+      <div class="sf"><label>Data evento</label><input type="date" id="srchData"></div>
+      <div class="sf"><label>Tipo evento</label>
+        <select id="srchTipo" style="width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;">
+          <option value="">— Tutti —</option>
+          <option>Matrimonio</option>
+          <option>Battesimo</option>
+          <option>18° Compleanno</option>
+          <option>Comunione</option>
+          <option>Cresima</option>
+          <option>Fidanzamento</option>
+          <option>Laurea</option>
+          <option>Corporate</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div class="sf"><label>Nome riferimento</label><input type="text" id="srchNome" placeholder="es. Rossi"></div>
+      <button class="btn btn-primary" onclick="cercaEventi()" style="height:42px;align-self:end">Cerca</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- ── GESTIONE MANUALE ── -->
+  <div class="manage-card" id="manageCard">
+    <div class="section-title">Gestione manuale</div>
+    <div class="manage-grid">
+      <div class="mf"><label>Data</label><input type="date" id="mgmtDate" onchange="onMgmtDateChange()"></div>
+      <div class="mf"><label>Stato</label>
+        <select id="mgmtStatus" onchange="onMgmtStatusChange()">
+          <option value="preventivo">Preventivo</option>
+          <option value="confermato">Confermato</option>
+        </select>
+      </div>
+    </div>
+    <!-- FASCE: selezione multipla con checkbox -->
+    <div style="margin-bottom:14px">
+      <div style="font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Fasce orarie (seleziona una o più)</div>
+      <div class="slot-btns" id="slotBtns">
+        <button class="slot-btn active" data-slot="MATTINA" onclick="toggleMgmtSlot('MATTINA')">
+          <span class="slot-check" id="slotchk_MATTINA">✓</span> Mattina
+          <span class="sb-state" id="sbstate_MATTINA">Libera</span>
+        </button>
+        <button class="slot-btn" data-slot="POMERIGGIO" onclick="toggleMgmtSlot('POMERIGGIO')">
+          <span class="slot-check" id="slotchk_POMERIGGIO" style="opacity:0">✓</span> Pomeriggio
+          <span class="sb-state" id="sbstate_POMERIGGIO">Libera</span>
+        </button>
+        <button class="slot-btn" data-slot="SERALE" onclick="toggleMgmtSlot('SERALE')">
+          <span class="slot-check" id="slotchk_SERALE" style="opacity:0">✓</span> Serale
+          <span class="sb-state" id="sbstate_SERALE">Libera</span>
+        </button>
+      </div>
+    </div>
+    <div class="manage-grid">
+      <div class="mf"><label>Tipo evento</label><input type="text" id="mgmtType" placeholder="es. Matrimonio"></div>
+      <div class="mf"><label>Nome riferimento</label><input type="text" id="mgmtName" placeholder="es. Rossi"></div>
+    </div>
+    <div class="mf" style="margin-bottom:12px"><label>Note</label><textarea id="mgmtNote" placeholder="Note operative..."></textarea></div>
+    <div class="manage-actions">
+      <button class="btn btn-primary" onclick="mgmtSave()">Salva</button>
+      <button class="btn btn-green" onclick="mgmtConfirm()">Conferma evento</button>
+      <button class="btn btn-red" onclick="mgmtDelete()">Elimina fascia</button>
+    </div>
+    <div class="status-msg" id="mgmtStatusMsg"></div>
+  </div>
+
+</div>
+
+<!-- ── DETAIL PANEL ── -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel(event)">
+  <div class="panel" id="panel">
+    <div class="panel-head">
+      <div class="panel-title" id="panelTitle">—</div>
+      <div class="panel-sub" id="panelSub">—</div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="panel-slot-tabs" id="panelTabs"></div>
+      <div id="panelContent"></div>
+    </div>
+    <div class="panel-actions" id="panelActions"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CACHE con TTL 5 minuti — minimizza chiamate Netlify
+// ══════════════════════════════════════════════════════
+let BOOKINGS = {};
+let _cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000;
+
+async function fetchBookings(force = false) {
+  const now = Date.now();
+  if (!force && Object.keys(BOOKINGS).length > 0 && (now - _cacheTime) < CACHE_TTL) {
+    return BOOKINGS;
+  }
+  try {
+    const res = await fetch('/.netlify/functions/bookings-get');
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    BOOKINGS = data.bookings || {};
+    _cacheTime = now;
+  } catch(e) {
+    console.warn('Calendario offline:', e.message);
+  }
+  return BOOKINGS;
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+const SLOT_LABELS = { MATTINA:'Mattina', POMERIGGIO:'Pomeriggio', SERALE:'Serale' };
+const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+function normDate(v) {
+  if (!v) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const d = new Date(v);
+  if (isNaN(d)) return '';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function pretty(v) { const n=normDate(v); if(!n) return '—'; const[y,m,d]=n.split('-'); return `${d}/${m}/${y}`; }
+function f2(v) { return '€ ' + Number(v||0).toFixed(2).replace('.',','); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(window._tt); window._tt = setTimeout(() => t.classList.remove('on'), 2600);
+}
+
+// ══════════════════════════════════════════════════════
+// CALENDARIO MENSILE
+// ══════════════════════════════════════════════════════
+let _calYear = new Date().getFullYear();
+let _calMonth = new Date().getMonth(); // 0-based
+
+function renderCalendar() {
+  const today = normDate(new Date().toISOString().slice(0,10));
+  const year = _calYear, month = _calMonth;
+  document.getElementById('calMonthLabel').textContent = `${MESI_IT[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  // Lunedì = 0 per griglia lun-dom
+  let startDow = (firstDay.getDay() + 6) % 7;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Giorni mese precedente
+  for (let i = 0; i < startDow; i++) {
+    const d = new Date(year, month, 1 - (startDow - i));
+    const dateStr = normDate(d.toISOString().slice(0,10));
+    grid.appendChild(buildDayCell(dateStr, d.getDate(), true, today));
+  }
+  // Giorni mese corrente
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(buildDayCell(dateStr, d, false, today));
+  }
+  // Completamento griglia
+  const total = grid.children.length;
+  const remaining = (7 - (total % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    const d = new Date(year, month+1, i);
+    const dateStr = normDate(d.toISOString().slice(0,10));
+    grid.appendChild(buildDayCell(dateStr, i, true, today));
+  }
+}
+
+function buildDayCell(dateStr, dayNum, otherMonth, today) {
+  const div = document.createElement('div');
+  div.className = 'cal-day' + (otherMonth ? ' other-month' : '') + (dateStr === today ? ' today' : '');
+
+  const numEl = document.createElement('div');
+  numEl.className = 'day-num';
+  numEl.textContent = dayNum;
+  div.appendChild(numEl);
+
+  if (!otherMonth) {
+    const day = BOOKINGS[dateStr] || {};
+    const eventsDiv = document.createElement('div');
+    eventsDiv.className = 'day-events';
+
+    ['MATTINA','POMERIGGIO','SERALE'].forEach(slot => {
+      const item = day[slot];
+      if (!item || item.occupied === false) return;
+      const chip = document.createElement('div');
+      chip.className = `ev-chip ${item.status === 'confermato' ? 'confermato' : 'preventivo'}`;
+      const slotShort = slot === 'MATTINA' ? 'Mat.' : slot === 'POMERIGGIO' ? 'Pom.' : 'Ser.';
+      chip.textContent = `${slotShort} ${item.eventType||item.customerName||'Evento'}`;
+      chip.title = `${SLOT_LABELS[slot]} · ${item.eventType||''} · ${item.customerName||''}`;
+      chip.onclick = (e) => { e.stopPropagation(); openPanel(dateStr, slot); };
+      eventsDiv.appendChild(chip);
+    });
+
+    div.appendChild(eventsDiv);
+    const hasEvents = Object.values(day).some(i => i && i.occupied !== false);
+    if (hasEvents) {
+      div.onclick = () => openPanel(dateStr, null);
+    } else {
+      // Data vuota: click apre gestione manuale con la data precompilata
+      div.onclick = () => openMgmtForDate(dateStr);
+    }
+  }
+
+  return div;
+}
+
+function prevMonth() { _calMonth--; if (_calMonth < 0) { _calMonth = 11; _calYear--; } renderCalendar(); }
+function nextMonth() { _calMonth++; if (_calMonth > 11) { _calMonth = 0; _calYear++; } renderCalendar(); }
+function goToday() { const n = new Date(); _calYear = n.getFullYear(); _calMonth = n.getMonth(); renderCalendar(); }
+
+// ══════════════════════════════════════════════════════
+// DETAIL PANEL
+// ══════════════════════════════════════════════════════
+let _panelDate = null;
+let _panelSlot = null;
+
+function openPanel(dateStr, initialSlot) {
+  _panelDate = dateStr;
+  const day = BOOKINGS[dateStr] || {};
+
+  // Trova primo slot con evento se non specificato
+  if (!initialSlot) {
+    initialSlot = ['MATTINA','POMERIGGIO','SERALE'].find(s => day[s] && day[s].occupied !== false) || 'SERALE';
+  }
+  _panelSlot = initialSlot;
+
+  document.getElementById('panelTitle').textContent = pretty(dateStr);
+  document.getElementById('panelSub').textContent = 'Dettagli evento';
+
+  renderPanelTabs(dateStr, initialSlot);
+  renderPanelContent(dateStr, initialSlot);
+
+  document.getElementById('panelOverlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderPanelTabs(dateStr, activeSlot) {
+  const day = BOOKINGS[dateStr] || {};
+  const tabsEl = document.getElementById('panelTabs');
+  tabsEl.innerHTML = ['MATTINA','POMERIGGIO','SERALE'].map(slot => {
+    const item = day[slot];
+    const hasEv = item && item.occupied !== false;
+    const cls = ['slot-tab',
+      hasEv ? 'has-event' : '',
+      hasEv ? (item.status === 'confermato' ? 'confermato-tab' : 'preventivo-tab') : '',
+      slot === activeSlot ? 'active' : ''
+    ].filter(Boolean).join(' ');
+    return `<button class="${cls}" onclick="switchPanelSlot('${slot}')">${SLOT_LABELS[slot]}</button>`;
+  }).join('');
+}
+
+function switchPanelSlot(slot) {
+  _panelSlot = slot;
+  renderPanelTabs(_panelDate, slot);
+  renderPanelContent(_panelDate, slot);
+}
+
+function renderPanelContent(dateStr, slot) {
+  const item = (BOOKINGS[dateStr] || {})[slot];
+  const contentEl = document.getElementById('panelContent');
+  const actionsEl = document.getElementById('panelActions');
+
+  if (!item || item.occupied === false) {
+    contentEl.innerHTML = `<div class="empty-slot">Nessun evento per questa fascia.</div>`;
+    actionsEl.innerHTML = `
+      <button class="btn btn-out" onclick="closePanel()">Chiudi</button>
+      <button class="btn btn-primary" onclick="openInMgmt('${dateStr}','${slot}')">Aggiungi manualmente</button>`;
+    return;
+  }
+
+  const d = item.details || {};
+  const fv = d.formValues || {};
+  const svcList = d.svcList || [];
+  const prezzi = d.prezzi || {};
+  const album = d.album || {};
+  const stato = item.status || 'preventivo';
+
+  // Costruisci righe dettaglio
+  let rows = '';
+  const row = (lbl, val) => val ? `<div class="detail-row"><div class="detail-lbl">${lbl}</div><div class="detail-val">${val}</div></div>` : '';
+
+  rows += row('Stato', `<span class="stato-badge ${stato}">${stato === 'confermato' ? 'Confermato' : 'Preventivo'}</span>`);
+  rows += row('Tipo evento', item.eventType || fv.tipoEvento || '—');
+  rows += row('Cliente', item.customerName || fv.nomeCliente || '—');
+  rows += row('Data', `${pretty(dateStr)} · ${SLOT_LABELS[slot]}`);
+  rows += row('Luogo', fv.luogoEvento || '—');
+
+  // Servizi
+  if (svcList.length) {
+    const svcHtml = `<div class="svc-list">${svcList.map(s =>
+      `<div class="svc-line"><span class="sn">${s.nome||'—'}</span><span class="sv">${f2(s.costo)}</span></div>`
+    ).join('')}</div>`;
+    rows += row('Servizi', svcHtml);
+  }
+
+  // Album
+  if (!album.noAlbum && album.formato) {
+    const albInfo = [album.formato, album.pagine ? album.pagine+' pag.' : '', album.copertina || ''].filter(Boolean).join(' · ');
+    rows += row('Album', albInfo);
+  } else if (album.noAlbum) {
+    rows += row('Album', 'Nessun album — file digitali');
+  }
+
+  // Pagamenti
+  if (prezzi.totaleNetto || prezzi.totale) {
+    const totale = prezzi.totaleNetto || prezzi.totale || 0;
+    const caparra = prezzi.caparra || 0;
+    const saldo = prezzi.saldoEntrEvento || 0;
+    const payHtml = `<div class="pay-mini">
+      <div class="pay-mini-row"><span>Totale</span><span>${f2(totale)}</span></div>
+      ${caparra ? `<div class="pay-mini-row"><span>① Salva Data</span><span>${f2(caparra)}</span></div>` : ''}
+      ${saldo ? `<div class="pay-mini-row"><span>② Saldo servizio</span><span>${f2(saldo)}</span></div>` : ''}
+      ${prezzi.accontoGrafica ? `<div class="pay-mini-row"><span>③ Acconto album</span><span>${f2(prezzi.accontoGrafica)}</span></div>` : ''}
+      ${prezzi.saldoConsegna ? `<div class="pay-mini-row"><span>④ Saldo consegna</span><span>${f2(prezzi.saldoConsegna)}</span></div>` : ''}
+    </div>`;
+    rows += row('Pagamenti', payHtml);
+  }
+
+  if (item.note || fv.noteExtra) {
+    rows += row('Note', item.note || fv.noteExtra);
+  }
+
+  contentEl.innerHTML = rows || '<div class="empty-slot">Nessun dettaglio disponibile.</div>';
+
+  // Azioni
+  const dataParam = encodeURIComponent(dateStr);
+  const slotParam = encodeURIComponent(slot);
+  const isManuale = item.source === 'manuale';
+  const isConfermato = stato === 'confermato';
+
+  let actionsHtml = '';
+
+  // Riapri in Preventivo (solo se ha details completi = salvato da preventivo)
+  if (!isManuale && item.details) {
+    actionsHtml += `<a class="btn btn-gold" href="./preventivo.html?date=${dataParam}&slot=${slotParam}" target="_blank">Riapri in Preventivo</a>`;
+  }
+
+  // Procedi al Contratto
+  actionsHtml += `<a class="btn btn-primary" href="./contratto.html?date=${dataParam}&slot=${slotParam}" target="_blank">Procedi al Contratto</a>`;
+
+  // Conferma Data (se non già confermato)
+  if (!isConfermato) {
+    actionsHtml += `<button class="btn btn-green" onclick="confirmFromPanel('${dateStr}','${slot}')">✓ Conferma Data</button>`;
+  }
+
+  // Modifica (per eventi manuali o per cambiare dati base)
+  actionsHtml += `<button class="btn btn-out" onclick="editFromPanel('${dateStr}','${slot}')">✎ Modifica</button>`;
+
+  // Elimina
+  actionsHtml += `<button class="btn btn-red" onclick="deleteFromPanel('${dateStr}','${slot}')">Elimina</button>`;
+
+  actionsEl.innerHTML = actionsHtml;
+}
+
+function closePanel(e) {
+  if (e && e.target !== document.getElementById('panelOverlay')) return;
+  document.getElementById('panelOverlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+async function confirmFromPanel(dateStr, slot) {
+  try {
+    const item = (BOOKINGS[dateStr] || {})[slot];
+    if (!item) return;
+    const payload = { ...item, date: dateStr, slot, status: 'confermato' };
+    const res = await fetch('/.netlify/functions/bookings-upsert', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'errore');
+    BOOKINGS[dateStr][slot].status = 'confermato';
+    renderCalendar();
+    // Riapri panel aggiornato
+    openPanel(dateStr, slot);
+    showToast('Data confermata ✓');
+  } catch(e) { showToast('Errore: ' + e.message); }
+}
+
+function editFromPanel(dateStr, slot) {
+  closePanel();
+  // Precompila il form gestione manuale con i dati dell'evento
+  document.getElementById('mgmtDate').value = dateStr;
+  const item = (BOOKINGS[dateStr] || {})[slot];
+  if (item) {
+    const fv = item.details?.formValues || {};
+    document.getElementById('mgmtType').value = item.eventType || fv.tipoEvento || '';
+    document.getElementById('mgmtName').value = item.customerName || fv.nomeCliente || '';
+    document.getElementById('mgmtStatus').value = item.status || 'preventivo';
+    document.getElementById('mgmtNote').value = item.note || fv.noteExtra || '';
+  }
+  onMgmtDateChange();
+  // Attiva solo la fascia dell'evento
+  _mgmtSlots = new Set([slot]);
+  updateMgmtSlotUI();
+  document.getElementById('manageCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function deleteFromPanel(dateStr, slot) {
+  if (!confirm(`Eliminare la fascia ${SLOT_LABELS[slot]} del ${pretty(dateStr)}?`)) return;
+  try {
+    const res = await fetch('/.netlify/functions/bookings-delete', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({date: dateStr, slot})
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || 'errore');
+    delete (BOOKINGS[dateStr] || {})[slot];
+    renderCalendar();
+    closePanel();
+    showToast(`Fascia eliminata`);
+  } catch(e) { showToast('Errore: ' + e.message); }
+}
+
+function openInMgmt(dateStr, slot) {
+  closePanel();
+  document.getElementById('mgmtDate').value = dateStr;
+  _mgmtSlots = new Set([slot]);
+  onMgmtDateChange();
+  updateMgmtSlotUI();
+  document.getElementById('manageCard').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// ══════════════════════════════════════════════════════
+// RICERCA
+// ══════════════════════════════════════════════════════
+function cercaEventi() {
+  const data = normDate(document.getElementById('srchData').value);
+  const tipo = document.getElementById('srchTipo').value.trim().toLowerCase();
+  const nome = document.getElementById('srchNome').value.trim().toLowerCase();
+
+  if (!data && !tipo && !nome) {
+    document.getElementById('searchResults').innerHTML = '<div style="font-size:.82rem;color:var(--ink3);padding:4px 0">Compila almeno un campo di ricerca.</div>';
+    return;
+  }
+
+  const risultati = [];
+  Object.entries(BOOKINGS).forEach(([dateStr, day]) => {
+    if (data && dateStr !== data) return;
+    Object.entries(day).forEach(([slot, item]) => {
+      if (!item || item.occupied === false) return;
+      const fv = item.details?.formValues || {};
+      const tipoEv = (item.eventType || fv.tipoEvento || '').toLowerCase();
+      const nomeRef = (item.customerName || fv.nomeCliente || '').toLowerCase();
+      if (tipo && !tipoEv.includes(tipo)) return;
+      if (nome && !nomeRef.includes(nome)) return;
+      risultati.push({dateStr, slot, item});
+    });
+  });
+
+  const el = document.getElementById('searchResults');
+  if (!risultati.length) {
+    el.innerHTML = '<div style="text-align:center;padding:16px;font-size:.85rem;color:var(--ink3)">Nessun evento trovato.</div>';
+    return;
+  }
+
+  risultati.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+  el.innerHTML = risultati.map(({dateStr, slot, item}) => {
+    const fv = item.details?.formValues || {};
+    const stato = item.status || 'preventivo';
+    const tipo2 = item.eventType || fv.tipoEvento || 'Evento';
+    const nome2 = item.customerName || fv.nomeCliente || '—';
+    return `<div class="res-item" onclick="openPanel('${dateStr}','${slot}')">
+      <div class="res-info">
+        <div class="res-date">${pretty(dateStr)} · ${SLOT_LABELS[slot]}</div>
+        <div class="res-meta">${tipo2} · ${nome2}</div>
+      </div>
+      <span class="stato-badge ${stato}">${stato === 'confermato' ? 'Confermato' : 'Preventivo'}</span>
+    </div>`;
+  }).join('');
+}
+
+['srchData','srchTipo','srchNome'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') cercaEventi(); });
+});
+
+// ══════════════════════════════════════════════════════
+// GESTIONE MANUALE — selezione multipla fasce
+// ══════════════════════════════════════════════════════
+let _mgmtSlots = new Set(['MATTINA']); // set di fasce selezionate
+
+function toggleMgmtSlot(slot) {
+  if (_mgmtSlots.has(slot) && _mgmtSlots.size > 1) {
+    _mgmtSlots.delete(slot);
+  } else {
+    _mgmtSlots.add(slot);
+  }
+  updateMgmtSlotUI();
+  // Carica dati della prima fascia selezionata
+  const firstSlot = ['MATTINA','POMERIGGIO','SERALE'].find(s => _mgmtSlots.has(s));
+  if (firstSlot) _loadSlotDataIntoForm(firstSlot);
+}
+
+function updateMgmtSlotUI() {
+  ['MATTINA','POMERIGGIO','SERALE'].forEach(slot => {
+    const btn = document.querySelector(`.slot-btn[data-slot="${slot}"]`);
+    const chk = document.getElementById('slotchk_' + slot);
+    const active = _mgmtSlots.has(slot);
+    if (btn) btn.classList.toggle('active', active);
+    if (chk) chk.style.opacity = active ? '1' : '0';
+  });
+}
+
+function _loadSlotDataIntoForm(slot) {
+  const date = normDate(document.getElementById('mgmtDate').value);
+  const item = date ? (BOOKINGS[date] || {})[slot] : null;
+  if (item && item.occupied !== false) {
+    document.getElementById('mgmtType').value = item.eventType || '';
+    document.getElementById('mgmtName').value = item.customerName || '';
+    document.getElementById('mgmtStatus').value = item.status || 'preventivo';
+    document.getElementById('mgmtNote').value = item.note || '';
+  }
+}
+
+function onMgmtDateChange() {
+  const date = normDate(document.getElementById('mgmtDate').value);
+  if (!date) return;
+  const day = BOOKINGS[date] || {};
+  ['MATTINA','POMERIGGIO','SERALE'].forEach(slot => {
+    const item = day[slot];
+    const el = document.getElementById('sbstate_' + slot);
+    if (!item || item.occupied === false) {
+      el.textContent = 'Libera';
+    } else {
+      el.textContent = item.status === 'confermato' ? 'Confermato' : 'Preventivo';
+    }
+  });
+  // Carica dati prima fascia selezionata
+  const firstSlot = ['MATTINA','POMERIGGIO','SERALE'].find(s => _mgmtSlots.has(s));
+  if (firstSlot) _loadSlotDataIntoForm(firstSlot);
+}
+
+function onMgmtStatusChange() {}
+
+function showMgmtStatus(msg, type) {
+  const el = document.getElementById('mgmtStatusMsg');
+  el.textContent = msg; el.className = `status-msg on ${type}`;
+  setTimeout(() => el.classList.remove('on'), 3000);
+}
+
+async function mgmtSave() {
+  const date = normDate(document.getElementById('mgmtDate').value);
+  if (!date) { showMgmtStatus('Seleziona una data', 'err'); return; }
+  if (_mgmtSlots.size === 0) { showMgmtStatus('Seleziona almeno una fascia', 'err'); return; }
+
+  const basePayload = {
+    occupied: true, source: 'manuale',
+    status: document.getElementById('mgmtStatus').value,
+    eventType: document.getElementById('mgmtType').value.trim(),
+    customerName: document.getElementById('mgmtName').value.trim(),
+    note: document.getElementById('mgmtNote').value.trim()
+  };
+
+  const slotsArr = [..._mgmtSlots];
+  let errors = 0;
+  for (const slot of slotsArr) {
+    try {
+      const res = await fetch('/.netlify/functions/bookings-upsert', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ...basePayload, date, slot })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'errore');
+      if (!BOOKINGS[date]) BOOKINGS[date] = {};
+      BOOKINGS[date][slot] = { ...basePayload, date, slot };
+    } catch(e) { errors++; }
+  }
+
+  renderCalendar();
+  onMgmtDateChange();
+  if (errors === 0) {
+    const label = slotsArr.map(s => SLOT_LABELS[s]).join(', ');
+    showMgmtStatus(`Salvato: ${label} del ${pretty(date)}`, 'ok');
+  } else {
+    showMgmtStatus(`Salvato con ${errors} errore/i`, 'warn');
+  }
+}
+
+async function mgmtConfirm() {
+  document.getElementById('mgmtStatus').value = 'confermato';
+  await mgmtSave();
+}
+
+async function mgmtDelete() {
+  const date = normDate(document.getElementById('mgmtDate').value);
+  if (!date) { showMgmtStatus('Seleziona una data', 'err'); return; }
+  const slotsArr = [..._mgmtSlots];
+  const label = slotsArr.map(s => SLOT_LABELS[s]).join(', ');
+  if (!confirm(`Eliminare ${label} del ${pretty(date)}?`)) return;
+  let errors = 0;
+  for (const slot of slotsArr) {
+    try {
+      const res = await fetch('/.netlify/functions/bookings-delete', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({date, slot})
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || 'errore');
+      if (BOOKINGS[date]) delete BOOKINGS[date][slot];
+    } catch(e) { errors++; }
+  }
+  renderCalendar();
+  onMgmtDateChange();
+  if (errors === 0) showMgmtStatus(`Eliminato: ${label} del ${pretty(date)}`, 'ok');
+  else showMgmtStatus(`Eliminato con ${errors} errore/i`, 'warn');
+}
+
+function openMgmtForDate(dateStr) {
+  document.getElementById('mgmtDate').value = dateStr;
+  _mgmtSlots = new Set(['MATTINA']);
+  updateMgmtSlotUI();
+  onMgmtDateChange();
+  document.getElementById('manageCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Pulisce i campi per un nuovo inserimento
+  document.getElementById('mgmtType').value = '';
+  document.getElementById('mgmtName').value = '';
+  document.getElementById('mgmtStatus').value = 'preventivo';
+  document.getElementById('mgmtNote').value = '';
+  setTimeout(() => document.getElementById('mgmtType').focus(), 400);
+}
+
+// ══════════════════════════════════════════════════════
+// INIT — una sola chiamata all'avvio
+// ══════════════════════════════════════════════════════
+(async function init() {
+  // Redirect automatico: se mobile, vai al calendario mobile
+  if(window.innerWidth < 768){
+    window.location.replace('./calendario-mobile.html');
+    return;
+  }
+  await fetchBookings();
+  renderCalendar();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massimo Inturrisi — Contratto</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;
+  --ink:#1c1917;--ink2:#44403c;--ink3:#78716c;
+  --gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;
+  --white:#fff;--red:#b91c1c;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);}
+
+/* ── HEADER ── */
+header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.brand{font-family:'Libre Baskerville',serif;font-size:1.05rem;color:#fff;font-weight:400;}
+.brand small{display:block;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);margin-top:1px;}
+.header-links{display:flex;gap:10px;}
+.header-link{color:rgba(255,255,255,.5);font-size:.72rem;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s;}
+.header-link:hover{color:#fff;background:rgba(255,255,255,.08);}
+
+/* ── LOAD BAR ── */
+.load-bar{background:var(--white);border-bottom:1px solid var(--bg3);padding:14px 40px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.load-bar input[type=date],.load-bar select{background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--ink);outline:none;}
+.load-bar input[type=date]:focus,.load-bar select:focus{border-color:var(--gold);}
+.load-bar .sep{color:var(--bg3);}
+#loadStatus{font-size:.78rem;color:var(--ink3);}
+#loadStatus.ok{color:#166534;font-weight:600;}
+#loadStatus.err{color:var(--red);font-weight:600;}
+
+/* ── LAYOUT ── */
+.layout{max-width:1200px;margin:0 auto;padding:28px 40px 60px;display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;}
+.col-main{display:flex;flex-direction:column;gap:18px;}
+.col-side{position:sticky;top:72px;display:flex;flex-direction:column;gap:14px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3);}
+.card-title{font-family:'Libre Baskerville',serif;font-size:.88rem;font-weight:400;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bg2);letter-spacing:.01em;}
+.card-title-sm{font-size:.75rem;font-weight:600;color:var(--ink3);margin-bottom:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bg2);letter-spacing:.05em;text-transform:uppercase;}
+
+/* ── FIELDS ── */
+.f{margin-bottom:13px;}
+.f:last-child{margin-bottom:0;}
+.f label{display:block;font-size:.63rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.f input,.f select,.f textarea{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(160,132,92,.12);}
+.f input[readonly]{background:var(--bg2);color:var(--ink3);cursor:default;}
+.f textarea{min-height:72px;resize:vertical;line-height:1.6;}
+.fg{display:grid;gap:12px;}
+.fg2{grid-template-columns:1fr 1fr;}
+.fg3{grid-template-columns:1fr 1fr 1fr;}
+
+/* ── COMUNI AUTOCOMPLETE ── */
+.comune-wrap{position:relative;}
+.comune-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--bg3);border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;z-index:300;box-shadow:0 8px 24px rgba(28,25,23,.1);}
+.comune-item{padding:9px 13px;font-size:.84rem;cursor:pointer;border-bottom:1px solid var(--bg2);}
+.comune-item:hover{background:var(--gold5);}
+.comune-item strong{color:var(--gold);}
+
+/* ── SCHEDA TECNICA SEZIONI ── */
+.scheda-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--bg2);}
+.scheda-section-lbl{font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+
+/* ── SERVIZI (sola lettura nel contratto) ── */
+.svc-list-ro{background:var(--bg);border-radius:8px;padding:10px 14px;}
+.svc-item-ro{display:flex;justify-content:space-between;padding:5px 0;font-size:.85rem;border-bottom:1px solid var(--bg2);}
+.svc-item-ro:last-child{border-bottom:none;}
+.svc-item-ro .sn{color:var(--ink2);}
+.svc-item-ro .sp{font-weight:600;color:var(--gold);}
+
+/* ── TOTALI / PAGAMENTI ── */
+.totals{background:var(--bg);border:1px solid var(--bg2);border-radius:9px;padding:13px 15px;}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.84rem;color:var(--ink2);border-bottom:1px solid var(--bg2);}
+.trow:last-child{border-bottom:none;}
+.trow.big{padding-top:11px;font-size:1.05rem;font-weight:700;color:var(--ink);font-family:'Libre Baskerville',serif;border-top:1px solid var(--bg3);border-bottom:none;}
+.trow.hi{color:var(--gold);font-weight:600;}
+.pay-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--bg3);font-size:.84rem;}
+.pay-row:last-child{border-bottom:none;}
+.pay-row .ps{color:var(--ink3);flex:1;padding-right:12px;}
+.pay-row .pa{font-weight:600;color:var(--ink);white-space:nowrap;}
+
+/* ── CONDIZIONI ── */
+#testoContratto{width:100%;min-height:180px;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;line-height:1.75;color:var(--ink2);outline:none;resize:vertical;}
+#testoContratto:focus{border-color:var(--gold);}
+
+/* ── BOTTONI ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.03em;cursor:pointer;transition:all .2s;width:100%;margin-bottom:8px;}
+.btn:last-child{margin-bottom:0;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:#333;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-gold:hover{background:#8a7050;}
+.btn-green{background:#166534;color:#fff;}
+.btn-green:hover{background:#14532d;}
+.btn-out{background:transparent;border:1px solid var(--bg3);color:var(--ink2);}
+.btn-out:hover{background:var(--bg2);}
+
+/* ── INFO NOTE ── */
+.info-note{background:var(--gold5);border:1px solid var(--gold3);border-radius:8px;padding:11px 14px;font-size:.77rem;color:var(--ink3);line-height:1.6;margin-bottom:12px;}
+.info-note strong{color:var(--gold);}
+.alert-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:8px;padding:10px 14px;font-size:.78rem;font-weight:600;margin-bottom:12px;display:none;}
+.alert-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:.78rem;font-weight:600;margin-bottom:12px;display:none;}
+.alert-ok.on,.alert-err.on{display:block;}
+
+/* ── CANVAS FIRMA ── */
+
+
+/* ── TOAST ── */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:all .25s ease;z-index:1200;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── STATO BADGE ── */
+.stato-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
+.stato-badge.preventivo{background:var(--gold4);color:var(--gold);border:1px solid var(--gold3);}
+.stato-badge.confermato{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand" id="brandEl">Massimo Inturrisi<small>Fotografo</small></div>
+  <div class="header-links">
+    <a class="header-link" href="./preventivo-desktop.html">Preventivo</a>
+    <a class="header-link" href="./calendario.html">Calendario</a>
+    <a class="header-link" href="./index.html">Home</a>
+  </div>
+</header>
+
+<!-- ── BARRA CARICAMENTO DATI ── -->
+<div class="load-bar">
+  <label style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)">Carica preventivo:</label>
+  <input type="date" id="loadData" title="Data evento">
+  <select id="loadFascia">
+    <option value="MATTINA">Mattina</option>
+    <option value="POMERIGGIO">Pomeriggio</option>
+    <option value="SERALE" selected>Serale</option>
+  </select>
+  <button onclick="caricaPreventivo()" style="padding:9px 18px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;">Carica preventivo</button>
+  <div class="load-bar sep">|</div>
+  <span id="loadStatus">Inserisci data e fascia per caricare</span>
+  <div id="statoBadgeWrap" style="margin-left:auto"></div>
+</div>
+
+<!-- ── LAYOUT PRINCIPALE ── -->
+<div class="layout">
+
+  <!-- ═══ COLONNA SINISTRA ═══ -->
+  <div class="col-main">
+
+    <!-- SCHEDA TECNICA EVENTO -->
+    <div class="card">
+      <div class="card-title">Scheda Tecnica — Evento</div>
+      <div class="fg fg3">
+        <div class="f">
+          <label>Tipo Evento</label>
+          <select id="tipoEvento" onchange="onTipoEvento()">
+            <option>Matrimonio</option><option>Battesimo</option><option>18° Compleanno</option>
+            <option>Comunione</option><option>Cresima</option><option>Fidanzamento</option>
+            <option>Laurea</option><option>Corporate</option><option>Altro</option>
+          </select>
+        </div>
+        <div class="f">
+          <label>Data Evento</label>
+          <input type="date" id="dataEvento">
+        </div>
+        <div class="f">
+          <label>Fascia Oraria</label>
+          <select id="orarioEvento">
+            <option value="MATTINA">Mattina</option>
+            <option value="POMERIGGIO">Pomeriggio</option>
+            <option value="SERALE" selected>Serale</option>
+          </select>
+        </div>
+        <div class="f">
+          <label>Luogo</label>
+          <input type="text" id="luogoEvento" placeholder="es. Siracusa">
+        </div>
+      </div>
+
+      <!-- Campi scheda tecnica dinamici per tipo evento -->
+      <div id="schedaEventoContainer"></div>
+    </div>
+
+    <!-- SERVIZI (lettura da preventivo) -->
+    <div class="card">
+      <div class="card-title">Servizi</div>
+      <div id="svcReadonly" class="svc-list-ro">
+        <div style="font-size:.8rem;color:var(--ink3);font-style:italic">Carica un preventivo per visualizzare i servizi.</div>
+      </div>
+    </div>
+
+    <!-- SCHEDA TECNICA ALBUM -->
+    <div class="card" id="cardAlbum">
+      <div class="card-title">Scheda Tecnica — Album</div>
+      <div class="fg fg3" id="albumRiepilogo">
+        <div class="f"><label>Formato</label><input type="text" id="alb_formato" readonly></div>
+        <div class="f"><label>Pagine</label><input type="text" id="alb_pagine" readonly></div>
+        <div class="f"><label>Copertina</label><input type="text" id="alb_copertina" readonly></div>
+        <div class="f"><label>Box</label><input type="text" id="alb_box" readonly></div>
+        <div class="f"><label>Album Genitori</label><input type="text" id="alb_genitori" readonly></div>
+      </div>
+
+      <!-- Dettagli tecnici da compilare -->
+      <div class="card-title-sm">Dettagli Album — da compilare</div>
+      <div class="fg fg2">
+        <div class="f"><label>Foto Copertina</label><input type="text" id="st_alb_foto" placeholder=""></div>
+        <div class="f"><label>Tessuto Album</label><input type="text" id="st_alb_tessuto" placeholder=""></div>
+        <div class="f"><label>Tessuto Box</label><input type="text" id="st_alb_tessuto_box" placeholder=""></div>
+        <div class="f"><label>Modello Box</label><input type="text" id="st_alb_modello_box" placeholder=""></div>
+        <div class="f"><label>Altro</label><input type="text" id="st_alb_altro" placeholder=""></div>
+      </div>
+    </div>
+
+    <!-- RIEPILOGO ECONOMICO -->
+    <div class="card">
+      <div class="card-title">Riepilogo Economico</div>
+      <div class="totals" id="economicoContainer">
+        <div style="font-size:.8rem;color:var(--ink3);font-style:italic">Carica un preventivo.</div>
+      </div>
+    </div>
+
+    <!-- PIANO PAGAMENTI -->
+    <div class="card">
+      <div class="card-title">Piano di Pagamento</div>
+      <div id="pagamentiContainer">
+        <div style="font-size:.8rem;color:var(--ink3);font-style:italic">Carica un preventivo.</div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /col-main -->
+
+  <!-- ═══ COLONNA DESTRA ═══ -->
+  <div class="col-side">
+
+    <!-- DATI CLIENTE -->
+    <div class="card">
+      <div class="card-title">Dati Cliente</div>
+
+      <div class="fg fg2">
+        <div class="f">
+          <label>Cognome</label>
+          <input type="text" id="clienteCognome" placeholder="Rossi" oninput="schedCF()">
+        </div>
+        <div class="f">
+          <label>Nome</label>
+          <input type="text" id="clienteNome" placeholder="Mario" oninput="schedCF()">
+        </div>
+      </div>
+
+      <div class="fg fg2">
+        <div class="f">
+          <label>Data di Nascita</label>
+          <input type="date" id="clienteDOB" oninput="schedCF()">
+        </div>
+        <div class="f">
+          <label>Sesso</label>
+          <select id="clienteSesso" onchange="schedCF()">
+            <option value="M">M — Maschio</option>
+            <option value="F">F — Femmina</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Comune nascita con autocomplete -->
+      <div class="f">
+        <label>Comune di Nascita</label>
+        <div class="comune-wrap">
+          <input type="text" id="clienteLOB" placeholder="Cerca comune..." autocomplete="off"
+            oninput="cercaComune(this.value)" onblur="setTimeout(()=>chiudiComune(),200)">
+          <div class="comune-list" id="comuneList" style="display:none"></div>
+        </div>
+        <input type="hidden" id="clienteLOB_code" value="">
+      </div>
+
+      <!-- Codice Fiscale automatico -->
+      <div class="f">
+        <label>Codice Fiscale</label>
+        <div style="display:flex;gap:7px;align-items:stretch">
+          <input type="text" id="clienteCF" placeholder="Auto-calcolato..." style="font-family:monospace;letter-spacing:.06em;font-size:.84rem;flex:1">
+          <button onclick="calcCF()" style="padding:0 13px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">⟳ Genera</button>
+        </div>
+      </div>
+
+      <div class="f">
+        <label>Indirizzo di Residenza</label>
+        <input type="text" id="clienteRes" placeholder="Via Roma 1">
+      </div>
+      <div class="fg fg2">
+        <div class="f">
+          <label>Città</label>
+          <input type="text" id="clienteCitta" placeholder="Solarino">
+        </div>
+        <div class="f">
+          <label>CAP</label>
+          <input type="text" id="clienteCAP" placeholder="96010" maxlength="5">
+        </div>
+      </div>
+      <div class="f">
+        <label>Telefono</label>
+        <input type="tel" id="clienteTel" placeholder="339 0000000">
+      </div>
+      <div class="f">
+        <label>Email</label>
+        <input type="email" id="clienteEmail" placeholder="mario@email.it">
+      </div>
+    </div>
+
+    <!-- CONDIZIONI GENERALI -->
+    <div class="card">
+      <div class="card-title">Condizioni Generali</div>
+      <div class="f">
+        <textarea id="testoContratto"></textarea>
+      </div>
+    </div>
+
+    <!-- NOTE -->
+    <div class="card">
+      <div class="card-title">Note</div>
+      <div class="f">
+        <textarea id="noteExtra" placeholder="Note, accordi particolari..."></textarea>
+      </div>
+    </div>
+
+    <!-- AZIONI -->
+    <div class="card">
+      <div class="card-title">Azioni</div>
+      <div id="alertOk" class="alert-ok"></div>
+      <div id="alertErr" class="alert-err"></div>
+      <button class="btn btn-gold" onclick="generaContratto()">Genera PDF Contratto</button>
+      <button class="btn btn-green" onclick="confermaEvento()">Segna come Confermato</button>
+      <button class="btn btn-out" onclick="window.location.href='./preventivo-desktop.html'">Torna al Preventivo</button>
+    </div>
+
+  </div>
+  <!-- /col-side -->
+
+</div>
+
+<div class="toast" id="toastMsg"></div>
+
+<script src="config.js" onerror="console.warn('config.js non trovato')"></script>
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG / STUDIO
+// ══════════════════════════════════════════════════════
+let CFG_STUDIO={nome:'Massimo Inturrisi',qualifica:'Fotografo',indirizzo:'Via A. Carrubba 8/9',citta:'96010 Solarino (SR)',piva:'01726290891',tel:'339 159 4106'};
+function applyConfig(){const cfg=window.RAYMAX_CONFIG||{};if(cfg.studio)CFG_STUDIO=Object.assign(CFG_STUDIO,cfg.studio);}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function f2(v){return '€ '+v.toFixed(2).replace('.',',');}
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+function showToast(msg,dur=2800){const el=document.getElementById('toastMsg');if(!el)return;el.textContent=msg;el.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>el.classList.remove('on'),dur);}
+function showAlert(type,msg){
+  const ok=document.getElementById('alertOk'),err=document.getElementById('alertErr');
+  ok.classList.remove('on');err.classList.remove('on');
+  if(type==='ok'){ok.textContent=msg;ok.classList.add('on');}
+  else if(type==='err'){err.textContent=msg;err.classList.add('on');}
+}
+
+// Cache bookings per evitare GET ripetute
+let _BKCACHE={}, _BKTIME=0;
+const _BKTTL=5*60*1000;
+async function fetchBookingsContratto(force=false){
+  const now=Date.now();
+  if(!force&&Object.keys(_BKCACHE).length>0&&(now-_BKTIME)<_BKTTL) return _BKCACHE;
+  try{
+    const res=await fetch('/.netlify/functions/bookings-get');
+    if(!res.ok) throw new Error('fetch failed');
+    const data=await res.json();
+    _BKCACHE=data.bookings||{};_BKTIME=now;
+  }catch(e){console.warn('fetch failed',e);}
+  return _BKCACHE;
+}
+
+let S={noAlbum:false,albGen:{qty:2,upgradeSize:'small'},loadedRecord:null,totale:0,totaleNetto:0};
+
+// ══════════════════════════════════════════════════════
+// COMUNI AUTOCOMPLETE (da offline originale)
+// ══════════════════════════════════════════════════════
+const COMUNI=[["Agrigento","G273"],["Alessandria","A182"],["Ancona","A271"],["Andria","A285"],["Aosta","A326"],["Arezzo","A390"],["Ascoli Piceno","A462"],["Asti","A479"],["Avellino","A509"],["Bari","A662"],["Barletta","A734"],["Belluno","A757"],["Benevento","A783"],["Bergamo","A794"],["Biella","A859"],["Bologna","A944"],["Bolzano","A952"],["Brescia","B157"],["Brindisi","B180"],["Cagliari","B354"],["Caltanissetta","B429"],["Campobasso","B519"],["Carbonia","B356"],["Caserta","B963"],["Catania","C351"],["Catanzaro","C352"],["Chieti","C632"],["Como","C933"],["Cosenza","D086"],["Cremona","D150"],["Crotone","D122"],["Cuneo","D205"],["Enna","C342"],["Fermo","D542"],["Ferrara","D548"],["Firenze","D612"],["Foggia","D643"],["Forlì","D704"],["Frosinone","D810"],["Genova","D969"],["Gorizia","E098"],["Grosseto","E202"],["Iglesias","E281"],["Imperia","E290"],["Isernia","E335"],["L'Aquila","A345"],["La Spezia","E463"],["Latina","E472"],["Lecce","E506"],["Lecco","E507"],["Livorno","E625"],["Lodi","E648"],["Lucca","E715"],["Macerata","E783"],["Mantova","E897"],["Massa","F023"],["Matera","F052"],["Messina","F158"],["Milano","F205"],["Modena","F257"],["Monza","F704"],["Napoli","F839"],["Novara","F952"],["Nuoro","F979"],["Oristano","G113"],["Padova","G224"],["Palermo","G273"],["Parma","G337"],["Pavia","G388"],["Perugia","G478"],["Pesaro","G453"],["Pescara","G482"],["Piacenza","G535"],["Pisa","G702"],["Pistoia","G713"],["Pordenone","G888"],["Potenza","G942"],["Prato","G999"],["Ragusa","H163"],["Ravenna","H199"],["Reggio Calabria","H224"],["Reggio Emilia","H223"],["Rieti","H282"],["Rimini","H294"],["Roma","H501"],["Rovigo","H620"],["Salerno","H703"],["Sassari","I452"],["Savona","I480"],["Siena","I726"],["Siracusa","I754"],["Solarino","I786"],["Sondrio","I829"],["Sud Sardegna","M255"],["Taranto","L049"],["Teramo","L103"],["Terni","L117"],["Torino","L219"],["Trapani","L331"],["Trento","L378"],["Treviso","L407"],["Trieste","L424"],["Udine","L483"],["Varese","L682"],["Venezia","L736"],["Verbania","L746"],["Vercelli","L750"],["Verona","L781"],["Vibo Valentia","F537"],["Vicenza","L840"],["Viterbo","M082"],["Floridia","D636"],["Avola","A522"],["Noto","F943"],["Augusta","A494"],["Lentini","E532"],["Pachino","G211"],["Priolo Gargallo","H073"],["Melilli","F107"],["Sortino","I864"],["Palazzolo Acreide","G263"],["Ferla","D540"],["Buscemi","B287"],["Canicattini Bagni","B600"],["Cassaro","C002"],["Portopalo di Capo Passero","G922"],["Rosolini","H574"],["Ispica","E358"],["Modica","F258"],["Scicli","I535"],["Pozzallo","G954"],["Vittoria","M100"],["Comiso","C927"],["Acate","A014"],["Chiaramonte Gulfi","C612"],["Monterosso Almo","F610"],["Giarratana","E015"],["Licodia Eubea","E578"],["Caltagirone","B428"],["Grammichele","E133"],["Mirabella Imbaccari","M231"],["San Michele di Ganzaria","I045"],["Piazza Armerina","G580"],["Leonforte","E536"],["Agira","A072"],["Assoro","A477"],["Barrafranca","A676"],["Pietraperzia","G624"],["Nicosia","F890"],["Troina","L448"],["Cerami","C480"],["Gagliano Castelferrato","D848"],["Catenanuova","C352"],["Centuripe","C471"],["Nissoria","F900"],["Sperlinga","I891"],["Villarosa","M009"],["Aidone","A025"],["Valguarnera Caropepe","L581"],["Regalbuto","H220"],["Acireale","A028"],["Adrano","A056"],["Belpasso","A766"],["Biancavilla","A841"],["Bronte","B202"],["Castel di Iudica","C091"],["Fiumefreddo di Sicilia","D628"],["Giarre","E017"],["Gravina di Catania","E156"],["Linguaglossa","E602"],["Mascalucia","F004"],["Misterbianco","F250"],["Motta Sant'Anastasia","F780"],["Nicolosi","F894"],["Palagonia","G253"],["Paternò","G371"],["Pedara","G402"],["Piedimonte Etneo","G600"],["Ramacca","H168"],["Randazzo","H175"],["Riposto","H325"],["San Giovanni La Punta","H922"],["San Pietro Clarenza","I098"],["Santa Maria di Licodia","I238"],["Santa Venerina","I308"],["Scordia","I549"],["Trecastagni","L355"],["Tremestieri Etneo","L369"],["Valverde","L652"],["Viagrande","L828"],["Zafferana Etnea","M256"]];
+
+function cercaComune(q){
+  const list=document.getElementById('comuneList');
+  if(q.length<2){list.style.display='none';return;}
+  const r=COMUNI.filter(([n])=>n.toLowerCase().includes(q.toLowerCase())).slice(0,12);
+  if(!r.length){list.style.display='none';return;}
+  list.innerHTML=r.map(([n,c])=>`<div class="comune-item" onclick="selComune('${n}','${c}')"><strong>${n}</strong> <span style="font-size:.78rem;color:var(--ink3)">(${c})</span></div>`).join('');
+  list.style.display='block';
+}
+function selComune(nome,codice){
+  document.getElementById('clienteLOB').value=nome;
+  document.getElementById('clienteLOB_code').value=codice;
+  document.getElementById('comuneList').style.display='none';
+  calcCF();
+}
+function chiudiComune(){document.getElementById('comuneList').style.display='none';}
+
+// ══════════════════════════════════════════════════════
+// CODICE FISCALE — copiato intatto dall'offline originale
+// ══════════════════════════════════════════════════════
+const CF_MESI=['A','B','C','D','E','H','L','M','P','R','S','T'];
+const CF_DISPARI={'0':1,'1':0,'2':5,'3':7,'4':9,'5':13,'6':15,'7':17,'8':19,'9':21,'A':1,'B':0,'C':5,'D':7,'E':9,'F':13,'G':15,'H':17,'I':19,'J':21,'K':2,'L':4,'M':18,'N':20,'O':11,'P':3,'Q':6,'R':8,'S':12,'T':14,'U':16,'V':10,'W':22,'X':25,'Y':24,'Z':23};
+const CF_PARI={'0':0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7,'I':8,'J':9,'K':10,'L':11,'M':12,'N':13,'O':14,'P':15,'Q':16,'R':17,'S':18,'T':19,'U':20,'V':21,'W':22,'X':23,'Y':24,'Z':25};
+const CF_CTRL='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function codLet(s,isCognome){
+  const cons=s.split('').filter(c=>'BCDFGHJKLMNPQRSTVWXYZ'.includes(c));
+  const voc=s.split('').filter(c=>'AEIOU'.includes(c));
+  if(!isCognome&&cons.length>=4)return cons[0]+cons[2]+cons[3];
+  return([...cons,...voc].join('')+'XXX').slice(0,3);
+}
+function calcCarattereControllo(raw15){
+  let somma=0;
+  for(let i=0;i<15;i++){const c=raw15[i];somma+=i%2===0?(CF_DISPARI[c]??0):(CF_PARI[c]??0);}
+  return CF_CTRL[somma%26];
+}
+
+// calcCF: auto-calcola il codice fiscale
+function calcCF(){
+  const cogn=(document.getElementById('clienteCognome')?.value||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+  const nome=(document.getElementById('clienteNome')?.value||'').trim().toUpperCase().replace(/[^A-Z]/g,'');
+  const dob=document.getElementById('clienteDOB')?.value;
+  const sesso=document.getElementById('clienteSesso')?.value||'M';
+  const codComune=document.getElementById('clienteLOB_code')?.value||'';
+  const cfEl=document.getElementById('clienteCF');
+  if(!cogn||!nome||!dob){if(cfEl)cfEl.value='';return;}
+  const[yy,mm,dd]=dob.split('-');
+  const anno=yy.slice(-2);
+  const mese=CF_MESI[parseInt(mm,10)-1]||'A';
+  const giorno=parseInt(dd,10)+(sesso==='F'?40:0);
+  const ggStr=giorno.toString().padStart(2,'0');
+  const partial=codLet(cogn,true)+codLet(nome,false)+anno+mese+ggStr;
+  if(!codComune){cfEl.value=partial+'????  ← seleziona comune';return;}
+  const raw15=partial+codComune;
+  cfEl.value=raw15+calcCarattereControllo(raw15);
+}
+// Trigger auto-calcolo con debounce
+let _cfTimer;function schedCF(){clearTimeout(_cfTimer);_cfTimer=setTimeout(calcCF,400);}
+
+// ══════════════════════════════════════════════════════
+// SCHEDA TECNICA EVENTO — struttura da offline originale
+// ══════════════════════════════════════════════════════
+const SCHEDA_FIELDS={
+  'Matrimonio':[
+    {id:'st_sposo',label:'Nome Sposo',tipo:'text',placeholder:'es. Marco Rossi'},
+    {id:'st_sposa',label:'Nome Sposa',tipo:'text',placeholder:'es. Laura Bianchi'},
+    {section:'Preparativi Sposa'},
+    {id:'st_prep_sp_luogo',label:'Luogo preparativi sposa',tipo:'text',placeholder:'es. Hotel Villa Elena, Siracusa'},
+    {id:'st_prep_sp_ora',label:'Orario mio arrivo',tipo:'time',placeholder:'09:00'},
+    {section:'Preparativi Sposo'},
+    {id:'st_prep_sm_luogo',label:'Luogo preparativi sposo',tipo:'text',placeholder:'es. Via Roma 12, Solarino'},
+    {id:'st_prep_sm_ora',label:'Orario mio arrivo',tipo:'time',placeholder:'10:30'},
+    {section:'Chiesa'},
+    {id:'st_chiesa_nome',label:'Nome chiesa',tipo:'text',placeholder:'es. Cattedrale di Siracusa'},
+    {id:'st_chiesa_luogo',label:'Indirizzo',tipo:'text',placeholder:'es. Piazza Duomo, Siracusa'},
+    {id:'st_chiesa_ora',label:'Orario cerimonia',tipo:'time',placeholder:'11:00'},
+    {section:'Esterne'},
+    {id:'st_esterne_luogo',label:'Luogo esterne',tipo:'text',placeholder:'es. Ortigia, Piazza Archimede'},
+    {section:'Ricevimento'},
+    {id:'st_locale_nome',label:'Nome locale',tipo:'text',placeholder:'es. Villa dei Sogni'},
+    {id:'st_locale_luogo',label:'Indirizzo',tipo:'text',placeholder:'es. Contrada Buffalora, Siracusa'},
+    {id:'st_locale_ora',label:'Orario ricevimento',tipo:'time',placeholder:'20:00'},
+  ],
+  'Battesimo':[
+    {id:'st_bambino',label:'Nome del/della bambino/a',tipo:'text',placeholder:'es. Sofia'},
+    {section:'Chiesa'},
+    {id:'st_chiesa_nome',label:'Nome chiesa',tipo:'text',placeholder:'es. San Giovanni Evangelista'},
+    {id:'st_chiesa_luogo',label:'Luogo',tipo:'text',placeholder:'es. Solarino (SR)'},
+    {id:'st_chiesa_ora',label:'Orario cerimonia',tipo:'time',placeholder:'11:00'},
+    {section:'Locale / Festa'},
+    {id:'st_locale_nome',label:'Nome locale',tipo:'text',placeholder:'es. Ristorante La Pergola'},
+    {id:'st_locale_luogo',label:'Luogo',tipo:'text',placeholder:'es. Via Etnea 5, Siracusa'},
+    {id:'st_locale_ora',label:'Orario inizio',tipo:'time',placeholder:'13:00'},
+  ],
+  'Comunione':'__same_battesimo__',
+  'Cresima':'__same_battesimo__',
+  '18° Compleanno':[
+    {id:'st_festeggiato',label:'Nome del/della festeggiato/a',tipo:'text',placeholder:'es. Giulia'},
+    {section:'Pre-servizio (se previsto)'},
+    {id:'st_pre_luogo',label:'Luogo pre-servizio',tipo:'text',placeholder:'es. Villa Bellini, Catania'},
+    {id:'st_pre_ora',label:'Orario',tipo:'time',placeholder:'17:00'},
+    {section:'Locale / Festa'},
+    {id:'st_locale_nome',label:'Nome locale',tipo:'text',placeholder:'es. Roof Garden Palace'},
+    {id:'st_locale_luogo',label:'Indirizzo',tipo:'text',placeholder:'es. Viale Kennedy 10, Siracusa'},
+    {id:'st_locale_ora',label:'Orario inizio',tipo:'time',placeholder:'20:30'},
+  ],
+};
+const SCHEDA_DEFAULT=[{id:'st_note_gen',label:'Note operative',tipo:'textarea',placeholder:'Inserisci dettagli operativi...'}];
+
+function getSchedaFields(){
+  const tipo=document.getElementById('tipoEvento')?.value||'';
+  let f=SCHEDA_FIELDS[tipo];
+  if(f==='__same_battesimo__')f=SCHEDA_FIELDS['Battesimo'];
+  return f||SCHEDA_DEFAULT;
+}
+
+function buildSchedaEvento(){
+  const fields=getSchedaFields();
+  let html='';
+  fields.forEach(f=>{
+    if(f.section){
+      html+=`<div class="scheda-section"><div class="scheda-section-lbl">${f.section}</div><div class="fg fg2">`;
+      // chiude al prossimo section o fine — gestiamo con struttura flat + close esplicito
+      html+='__CLOSE__';
+    } else {
+      const val=document.getElementById(f.id)?.value||'';
+      if(f.tipo==='textarea'){
+        html+=`<div class="f" style="grid-column:span 2"><label>${f.label}</label><textarea id="${f.id}" placeholder="${f.placeholder}">${val}</textarea></div>`;
+      } else {
+        html+=`<div class="f"><label>${f.label}</label><input type="${f.tipo}" id="${f.id}" placeholder="${f.placeholder||''}" value="${val}"></div>`;
+      }
+    }
+  });
+  // Post-process: chiudi i div aperti
+  let result='<div class="fg fg2">';
+  let inSection=false;
+  fields.forEach(f=>{
+    if(f.section){
+      if(inSection)result+='</div></div>';
+      result+=`<div class="scheda-section" style="grid-column:span 2"><div class="scheda-section-lbl">${f.section}</div><div class="fg fg2">`;
+      inSection=true;
+    } else {
+      const val=document.getElementById(f.id)?.value||'';
+      if(f.tipo==='textarea'){
+        result+=`<div class="f" style="grid-column:span 2"><label>${f.label}</label><textarea id="${f.id}" placeholder="${f.placeholder||''}">${val}</textarea></div>`;
+      } else {
+        result+=`<div class="f"><label>${f.label}</label><input type="${f.tipo}" id="${f.id}" placeholder="${f.placeholder||''}" value="${val}"></div>`;
+      }
+    }
+  });
+  if(inSection)result+='</div></div>';
+  result+='</div>';
+  document.getElementById('schedaEventoContainer').innerHTML=result;
+}
+
+function onTipoEvento(){buildSchedaEvento();}
+
+// ══════════════════════════════════════════════════════
+// CARICAMENTO DATI DA NETLIFY
+// ══════════════════════════════════════════════════════
+function normalizeDate(v){
+  if(!v)return'';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;
+  const d=new Date(v);if(isNaN(d))return'';
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function prettyDate(v){const n=normalizeDate(v);if(!n)return'—';const[y,m,d]=n.split('-');return`${d}/${m}/${y}`;}
+
+// caricaPreventivo: chiama bookings-get e precompila il contratto
+async function caricaPreventivo(){
+  const date=normalizeDate(document.getElementById('loadData')?.value);
+  const slot=(document.getElementById('loadFascia')?.value||'SERALE').toUpperCase();
+  const statusEl=document.getElementById('loadStatus');
+
+  if(!date){statusEl.textContent='Inserisci una data valida.';statusEl.className='err';return;}
+  statusEl.textContent='Caricamento...';statusEl.className='';
+
+  try{
+    // Carica dati con cache (max 1 GET ogni 5 minuti)
+    const bookings=await fetchBookingsContratto();
+    const day=bookings[date]||{};
+    const record=day[slot];
+    // Aggiorna cache locale
+    _BKCACHE=bookings;
+
+    if(!record||record.occupied===false){
+      statusEl.textContent=`Nessun preventivo trovato per ${prettyDate(date)} — ${slot}.`;
+      statusEl.className='err';return;
+    }
+
+    // Record trovato: precompila il contratto
+    statusEl.textContent=`Preventivo caricato: ${prettyDate(date)} — ${slot}`;
+    statusEl.className='ok';
+    S.loadedRecord={date,slot,record};
+
+    // Mostra stato badge
+    const stato=record.status||'preventivo';
+    document.getElementById('statoBadgeWrap').innerHTML=
+      `<span class="stato-badge ${stato}">${stato==='confermato'?'Confermato':'Preventivo'}</span>`;
+
+    precompila(date,slot,record);
+
+  }catch(e){
+    statusEl.textContent='Errore: '+e.message;statusEl.className='err';
+  }
+}
+
+// precompila: popola i campi del contratto con i dati del record
+function precompila(date,slot,record){
+  const d=record.details||{};
+  const fv=d.formValues||{};
+
+  // Evento
+  const tipo=record.eventType||fv.tipoEvento||'Matrimonio';
+  document.getElementById('tipoEvento').value=tipo;
+  document.getElementById('dataEvento').value=date;
+  document.getElementById('orarioEvento').value=slot;
+  document.getElementById('luogoEvento').value=fv.luogoEvento||'';
+
+  // Nome cliente (se presente nel record)
+  if(record.customerName){
+    const parts=record.customerName.trim().split(' ');
+    if(parts.length>=2){
+      document.getElementById('clienteCognome').value=parts[0]||'';
+      document.getElementById('clienteNome').value=parts.slice(1).join(' ')||'';
+    }
+  }
+
+  // Scheda evento
+  buildSchedaEvento();
+
+  // Servizi (readonly)
+  const svcList=d.svcList||[];
+  const svcEl=document.getElementById('svcReadonly');
+  if(svcList.length){
+    svcEl.innerHTML=svcList.map(s=>`<div class="svc-item-ro"><span class="sn">${s.nome||'—'}</span><span class="sp">${f2(s.costo||0)}</span></div>`).join('');
+  } else {
+    svcEl.innerHTML='<div style="font-size:.8rem;color:var(--ink3)">Nessun servizio registrato nel preventivo.</div>';
+  }
+
+  // Album
+  const alb=d.album||{};
+  S.noAlbum=alb.noAlbum||false;
+  document.getElementById('alb_formato').value=alb.formato||alb.fmtId||'—';
+  document.getElementById('alb_pagine').value=alb.pagine?alb.pagine+' pag.':'—';
+  document.getElementById('alb_copertina').value=alb.copertina||alb.copCod||'—';
+  document.getElementById('alb_box').value=alb.box||alb.boxCod||'—';
+  document.getElementById('alb_genitori').value=alb.genitori||'—';
+  document.getElementById('cardAlbum').style.display=S.noAlbum?'none':'';
+
+  // Economico
+  const prezzi=d.prezzi||{};
+  const totale=prezzi.totale||record.totale||d.totale||0;
+  const sconto=prezzi.sconto||d.sconto||0;
+  const totaleNetto=Math.max(0,totale-sconto);
+  const svcTot=prezzi.svcTot||0;
+  const albSub=prezzi.albSub||0;
+  const caparra=prezzi.caparra||50;
+  S.totale=totale;S.totaleNetto=totaleNetto;
+  S.caparra=caparra;S.sconto=sconto;S.svcTot=svcTot;S.albSub=albSub;
+
+  renderEconomico({totale,totaleNetto,sconto,svcTot,albSub});
+  renderPagamenti({totale:totaleNetto,caparra,sconto,svcTot,albSub,svcVideoTot:prezzi.svcVideoTot||0,tipo});
+
+  // Note
+  if(fv.noteExtra)document.getElementById('noteExtra').value=fv.noteExtra;
+
+  showToast('Preventivo caricato correttamente');
+}
+
+// Riepilogo economico
+function renderEconomico({totale,totaleNetto,sconto,svcTot,albSub}){
+  let html='';
+  if(albSub>0)html+=`<div class="trow"><span>Album + Copertina + Box</span><span>${f2(albSub)}</span></div>`;
+  if(svcTot>0)html+=`<div class="trow"><span>Servizi</span><span>${f2(svcTot)}</span></div>`;
+  if(sconto>0)html+=`<div class="trow hi"><span>Sconto applicato</span><span>− ${f2(sconto)}</span></div>`;
+  html+=`<div class="trow big"><span>Totale</span><span>${f2(totaleNetto)}</span></div>`;
+  document.getElementById('economicoContainer').innerHTML=html;
+}
+
+// Piano pagamenti — stessa logica del preventivo desktop
+function renderPagamenti({totale,caparra,sconto,svcTot,albSub,svcVideoTot,tipo}){
+  const hasAlbum=!S.noAlbum&&albSub>0;
+  const saldo50video=hasAlbum?Math.round(svcVideoTot*0.5*100)/100:0;
+  const saldoEntrEvento=Math.max(0,svcTot-caparra-saldo50video);
+  const A2=hasAlbum?albSub+saldo50video:0;
+  const saldoConsegna=tipo==='Matrimonio'?200:(hasAlbum?50:0);
+  const accontoGrafica=A2>0?Math.max(0,A2-saldoConsegna):0;
+
+  const dataEv=gv('dataEvento');
+  const dataEvFmt=dataEv?new Date(dataEv).toLocaleDateString('it-IT'):'—';
+  const saldoLabel=tipo==='Matrimonio'
+    ?"② Saldo Servizio — 15 gg prima dell'evento"
+    :"② Saldo Servizio — 7 giorni prima dell'evento";
+
+  // Salva per PDF
+  S.pagamenti={caparra,saldoEntrEvento,accontoGrafica,saldoConsegna,A2,dataEvFmt,saldoLabel};
+
+  let html=`
+    <div class="pay-row"><span class="ps">① Quota "Salva Data" — alla firma</span><span class="pa">${f2(caparra)}</span></div>
+    <div class="pay-row"><span class="ps">${saldoLabel} (${dataEvFmt})</span><span class="pa">${f2(saldoEntrEvento)}</span></div>`;
+  if(A2>0){
+    html+=`<div class="pay-row"><span class="ps">③ Acconto stampa album</span><span class="pa">${f2(accontoGrafica)}</span></div>`;
+    html+=`<div class="pay-row"><span class="ps">④ Saldo alla consegna</span><span class="pa">${f2(saldoConsegna)}</span></div>`;
+  }
+  document.getElementById('pagamentiContainer').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════
+// FIRMA
+// ══════════════════════════════════════════════════════
+
+
+// ══════════════════════════════════════════════════════
+// CONFERMA EVENTO — aggiorna stato su Netlify
+// ══════════════════════════════════════════════════════
+async function confermaEvento(){
+  if(!S.loadedRecord){showAlert('err','Nessun preventivo caricato.');return;}
+  const{date,slot,record}=S.loadedRecord;
+  const payload={
+    date,slot,status:'confermato',occupied:true,
+    source:'contratto-desktop',
+    eventType:record.eventType||'',
+    customerName:record.customerName||(gv('clienteCognome')+' '+gv('clienteNome')).trim(),
+    note:record.note||'',
+    quoteCreatedAt:record.quoteCreatedAt||new Date().toISOString(),
+    contractConfirmedAt:new Date().toISOString(),
+    details:{...(record.details||{}), contractDetails:{
+      clienteCognome:gv('clienteCognome'),
+      clienteNome:gv('clienteNome'),
+      clienteDOB:gv('clienteDOB'),
+      clienteSesso:gv('clienteSesso'),
+      clienteLOB:gv('clienteLOB'),
+      clienteLOB_code:gv('clienteLOB_code'),
+      clienteCF:gv('clienteCF'),
+      clienteRes:gv('clienteRes'),
+      clienteCitta:gv('clienteCitta'),
+      clienteCAP:gv('clienteCAP'),
+      clienteTel:gv('clienteTel'),
+      clienteEmail:gv('clienteEmail'),
+      confermato:true,
+      contractDate:new Date().toISOString()
+    }}
+  };
+  try{
+    const res=await fetch('/.netlify/functions/bookings-upsert',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.error||'upsert failed');
+    // Aggiorna badge
+    document.getElementById('statoBadgeWrap').innerHTML=`<span class="stato-badge confermato">Confermato</span>`;
+    S.loadedRecord.record.status='confermato';
+    showAlert('ok','Evento confermato e aggiornato nel calendario.');
+    showToast('Evento confermato');
+  }catch(e){
+    showAlert('err','Errore conferma: '+e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// PDF CONTRATTO — struttura dall'offline originale
+// ══════════════════════════════════════════════════════
+function generaContratto(){
+  const cn=(gv('clienteCognome')+' '+gv('clienteNome')).trim()||'Cliente';
+  const dataEv=gv('dataEvento')?new Date(gv('dataEvento')).toLocaleDateString('it-IT'):'—';
+  const dataDoc=new Date().toLocaleDateString('it-IT');
+  const tipo=gv('tipoEvento')||'—';
+  const luogo=gv('luogoEvento')||'—';
+  const condizioni=gv('testoContratto').split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('');
+  const noteExtra=gv('noteExtra');
+
+  // Firma dal file img/firma.png — sostituisce il canvas firma
+  const sigHtml=`<img src="img/firma.png" alt="Firma" style="max-height:48px;max-width:160px;display:block;margin-bottom:6px" onerror="this.style.display='none'">`;
+
+  // Servizi dal record
+  const svcList=(S.loadedRecord?.record?.details?.svcList)||[];
+  const svcRows=svcList.map(s=>`<tr><td style="padding:6px 9px;border-bottom:1px solid #eee">${s.nome||'—'}</td><td style="text-align:right;padding:6px 9px;border-bottom:1px solid #eee;font-weight:600">€ ${(s.costo||0).toFixed(2)}</td></tr>`).join('');
+
+  // Pagamenti
+  const pag=S.pagamenti||{caparra:50,saldoEntrEvento:0,accontoGrafica:0,saldoConsegna:0,A2:0,dataEvFmt:dataEv,saldoLabel:"② Saldo Servizio"};
+  const totNetto=S.totaleNetto||0;
+  const sconto=S.sconto||0;
+
+  // Scheda tecnica campi
+  const schedaHtml=buildSchedaPDFContratto(tipo,cn,dataEv,luogo);
+
+  // Album dettagli
+  const albFormatoVal=gv('alb_formato');
+  const albPagineVal=gv('alb_pagine');
+  const albCopVal=gv('alb_copertina');
+  const albBoxVal=gv('alb_box');
+
+  const sigs=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:28px">
+      <div>${sigHtml}<div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-top:4px">Il Fotografo — ${CFG_STUDIO.nome}</div></div>
+      <div><div style="height:42px;border-bottom:1px solid #333;margin-bottom:8px;"></div><div style="font-size:.67rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-top:4px">Il Cliente — ${cn}</div></div>
+    </div>`;
+
+  const footer=`<div style="text-align:center;font-size:.6rem;color:#aaa;margin-top:20px;padding-top:10px;border-top:1px solid #eee;letter-spacing:.06em;text-transform:uppercase">${CFG_STUDIO.nome} — ${CFG_STUDIO.qualifica} · ${CFG_STUDIO.indirizzo}, ${CFG_STUDIO.citta} · P.IVA ${CFG_STUDIO.piva} · Tel ${CFG_STUDIO.tel}</div>`;
+  const pb=`<div style="page-break-before:always"></div>`;
+  const copyBadge=(txt)=>`<div style="text-align:right;margin-bottom:6px;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#999">${txt}</div>`;
+
+  // Pg 1: parti contratto + evento + servizi + album + riepilogo + firme
+  const pg1Content=(badge)=>`
+    ${copyBadge(badge)}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid #1c1917">
+      <div style="font-family:'Libre Baskerville',serif;font-size:1.1rem;color:#1c1917">${CFG_STUDIO.nome}<div style="font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:#78716c;margin-top:2px">${CFG_STUDIO.qualifica}</div></div>
+      <div style="text-align:right;font-size:.75rem;color:#78716c"><div style="font-size:.85rem;font-weight:600;color:#1c1917;margin-bottom:2px">Contratto di Servizio</div>${dataDoc}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:#f5f3ef;border-radius:8px;padding:12px 14px;border-left:3px solid #1c1917">
+        <div style="font-size:.88rem;font-weight:600;color:#1c1917">${CFG_STUDIO.nome}</div>
+        <div style="font-size:.78rem;color:#78716c;margin-top:3px">${CFG_STUDIO.indirizzo}, ${CFG_STUDIO.citta}<br>P.IVA ${CFG_STUDIO.piva} · Tel ${CFG_STUDIO.tel}</div>
+        <div style="font-size:.6rem;color:#999;margin-top:4px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Il Fotografo</div>
+      </div>
+      <div style="background:#f5f3ef;border-radius:8px;padding:12px 14px;border-left:3px solid #1c1917">
+        <div style="font-size:.88rem;font-weight:600;color:#1c1917">${cn}</div>
+        <div style="font-size:.78rem;color:#78716c;margin-top:3px">${gv('clienteRes')||'—'}, ${gv('clienteCitta')||'—'}<br>${gv('clienteTel')||''} · ${gv('clienteEmail')||''}</div>
+        <div style="font-size:.6rem;color:#999;margin-top:4px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Il Cliente</div>
+      </div>
+    </div>
+    <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px">Evento</div>
+    <div style="background:#f5f3ef;border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:.82rem;margin-bottom:14px">
+      <div><strong>Tipo:</strong> ${tipo}</div><div><strong>Data:</strong> ${dataEv}</div><div><strong>Orario:</strong> ${gv('orarioEvento')||'—'}</div>
+      <div style="grid-column:span 3"><strong>Luogo:</strong> ${luogo}</div>
+    </div>
+    ${svcRows?`<div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px">Servizi</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:14px"><tbody>${svcRows}</tbody></table>`:''}
+    ${!S.noAlbum?`<div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px">Album</div><div style="background:#f5f3ef;border-radius:8px;padding:10px 14px;font-size:.82rem;margin-bottom:14px">${albFormatoVal} · ${albPagineVal} · Copertina: ${albCopVal} · Box: ${albBoxVal}</div>`:'<div style="font-size:.82rem;color:#78716c;margin-bottom:14px;font-style:italic">Nessun album — consegna file digitali</div>'}
+    <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px">Riepilogo Economico</div>
+    <div style="background:#1c1917;border-radius:8px;padding:14px 18px;color:#fff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;opacity:.6">Totale Contratto</span>
+      <span style="font-family:'Libre Baskerville',serif;font-size:1.4rem">${f2(totNetto)}</span>
+    </div>
+    ${sconto>0?`<div style="font-size:.78rem;color:#a0845c;text-align:right;margin-bottom:6px">Sconto applicato: − ${f2(sconto)}</div>`:''}
+    ${sigs}${footer}`;
+
+  // Pg 2: condizioni + pagamenti + firme
+  const pg2Content=(badge)=>`
+    ${copyBadge(badge)}
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #ddd">
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#555">Condizioni Generali</div>
+      <div style="font-size:.72rem;color:#888">${dataDoc}</div>
+    </div>
+    <div style="font-size:.68rem;line-height:1.75;color:#444;column-count:2;column-gap:24px;margin-bottom:18px">${condizioni||'<p>Vedi condizioni allegate.</p>'}</div>
+    <div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:8px">Piano di Pagamento</div>
+    <div style="background:#f5f3ef;border-radius:8px;padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e2dcd3;font-size:.82rem"><span style="color:#78716c">① Quota "Salva Data" — alla firma</span><span style="font-weight:600">€ ${pag.caparra.toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e2dcd3;font-size:.82rem"><span style="color:#78716c">${pag.saldoLabel} (${pag.dataEvFmt})</span><span style="font-weight:600">€ ${pag.saldoEntrEvento.toFixed(2)}</span></div>
+      ${pag.A2>0?`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e2dcd3;font-size:.82rem"><span style="color:#78716c">③ Acconto stampa album</span><span style="font-weight:600">€ ${pag.accontoGrafica.toFixed(2)}</span></div><div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem"><span style="color:#78716c">④ Saldo alla consegna</span><span style="font-weight:600">€ ${pag.saldoConsegna.toFixed(2)}</span></div>`:''}
+    </div>
+    ${noteExtra?`<div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin-bottom:6px">Note</div><div style="font-size:.8rem;color:#555;margin-bottom:14px">${noteExtra}</div>`:''}
+    ${sigs}${footer}`;
+
+  // Pg 3: scheda tecnica
+  const pg3=`<div>${schedaHtml}</div>`;
+
+  // Pg 4: dettagli album tecnici
+  const pg4Alb=!S.noAlbum?`
+    <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #1c1917">Dettagli Album</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+      <tbody>
+        <tr><td style="font-weight:700;padding:8px 10px;border:1px solid #e2dcd3;width:35%">Foto Copertina</td><td style="padding:8px 10px;border:1px solid #e2dcd3">${gv('st_alb_foto')}</td></tr>
+        <tr><td style="font-weight:700;padding:8px 10px;border:1px solid #e2dcd3">Tessuto Album</td><td style="padding:8px 10px;border:1px solid #e2dcd3">${gv('st_alb_tessuto')}</td></tr>
+        <tr><td style="font-weight:700;padding:8px 10px;border:1px solid #e2dcd3">Tessuto Box</td><td style="padding:8px 10px;border:1px solid #e2dcd3">${gv('st_alb_tessuto_box')}</td></tr>
+        <tr><td style="font-weight:700;padding:8px 10px;border:1px solid #e2dcd3">Modello Box</td><td style="padding:8px 10px;border:1px solid #e2dcd3">${gv('st_alb_modello_box')}</td></tr>
+        <tr><td style="font-weight:700;padding:8px 10px;border:1px solid #e2dcd3">Altro</td><td style="padding:8px 10px;border:1px solid #e2dcd3">${gv('st_alb_altro')}</td></tr>
+      </tbody>
+    </table>
+    ${footer}`:'';
+
+  const html=`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+<title>Contratto — ${cn}</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;color:#1c1917;background:#fff;padding:32px 40px;font-size:10pt;}
+.pdf-page{min-height:100%;}
+@media print{
+  body{padding:20px 24px;}
+  .pdf-page{page-break-after:always;}
+  .pdf-page:last-child{page-break-after:auto;}
+}
+</style>
+</head><body onload="window.print()">
+  <div class="pdf-page">${pg1Content('Copia Cliente')}</div>
+  <div class="pdf-page">${pg2Content('Copia Cliente')}</div>
+  <div class="pdf-page">${pg1Content('Copia Fotografo')}</div>
+  <div class="pdf-page">${pg2Content('Copia Fotografo')}</div>
+  <div class="pdf-page">${pg3}</div>
+  ${!S.noAlbum?`<div class="pdf-page">${pg4Alb}</div>`:''}
+</body></html>`;
+
+  const win=window.open('','_blank','width=820,height=960');
+  if(win){win.document.write(html);win.document.close();}
+  else{alert('Pop-up bloccato. Abilita i pop-up per questo sito.');}
+}
+
+// buildSchedaPDFContratto: scheda tecnica per il PDF
+function buildSchedaPDFContratto(tipo,cn,dataEv,luogo){
+  const fields=getSchedaFields();
+  let rows='';
+  fields.forEach(f=>{
+    if(f.section){
+      rows+=`<tr><td colspan="2" style="background:#333;color:#fff;padding:6px 10px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border:1px solid #333">${f.section}</td></tr>`;
+    } else {
+      const val=document.getElementById(f.id)?.value||'';
+      rows+=`<tr><td style="font-weight:700;padding:7px 10px;border:1px solid #e2dcd3;width:40%;font-size:.82rem">${f.label}</td><td style="padding:7px 10px;border:1px solid #e2dcd3;font-size:.82rem">${val}</td></tr>`;
+    }
+  });
+
+  // Protagonisti per hero
+  let protagonista='';
+  if(tipo==='Matrimonio'){
+    const s1=document.getElementById('st_sposo')?.value||'—';
+    const s2=document.getElementById('st_sposa')?.value||'—';
+    protagonista=`${s1} & ${s2}`;
+  } else if(tipo==='18° Compleanno'){
+    protagonista=document.getElementById('st_festeggiato')?.value||'';
+  } else if(['Battesimo','Comunione','Cresima'].includes(tipo)){
+    protagonista=document.getElementById('st_bambino')?.value||'';
+  }
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #1c1917">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555">Scheda Tecnica</div>
+      <div style="font-size:.75rem;color:#888">${dataEv} · ${new Date().toLocaleDateString('it-IT')}</div>
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:.72rem;color:#78716c;margin-bottom:8px">Cliente: <strong style="color:#1c1917">${cn}</strong> · ${tipo} · ${luogo}</div>
+      ${protagonista?`<div style="font-size:1.4rem;font-weight:700;color:#1c1917;font-family:'Libre Baskerville',serif;border-left:4px solid #1c1917;padding-left:14px;line-height:1.3">${protagonista}<div style="font-size:1rem;font-weight:600;margin-top:3px">${tipo}</div></div>`:''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:20px">
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-top:16px;text-align:center">${CFG_STUDIO.nome} — ${CFG_STUDIO.qualifica} · P.IVA ${CFG_STUDIO.piva}</div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// DEFAULT CONTRATTO — copiato dall'offline originale
+// ══════════════════════════════════════════════════════
+const DEFAULT_CONTRATTO=`• Oggetto del Contratto: Il cliente affida a ${CFG_STUDIO && CFG_STUDIO.nome ? CFG_STUDIO.nome : 'Massimo Inturrisi'} la realizzazione del servizio fotografico e/o video dell'evento.
+
+• Consegna del Servizio: Il servizio completo sarà consegnato entro 6 mesi dalla data del pagamento del secondo acconto (se previsto). Eventuali ritardi causati da forza maggiore saranno comunicati tempestivamente.
+
+• Caparra Confirmatoria: La quota salva data viene versata a titolo di caparra confirmatoria ai sensi dell'art. 1385 c.c. In caso di annullamento dell'evento per cause imputabili al cliente, la caparra non sarà restituita. Se l'annullamento è causato dal fotografo, l'importo verrà integralmente restituito.
+
+• Spostamento della Data: Qualora la richiesta di slittamento della data sia avanzata entro un termine di tre mesi antecedenti la data fissata, lo studio si impegna a fornire la massima disponibilità per individuare una nuova data compatibile. Nel caso in cui non fosse possibile, la quota "salva data" non sarà rimborsata.
+
+• Esecuzione del Servizio: Le riprese fotografiche e/o video saranno effettuate a discrezione artistica dello studio, salvo indicazioni specifiche comunicate per iscritto dal cliente prima dell'evento.
+
+• Correzioni e Costi Aggiuntivi: Eventuali modifiche richieste dopo la consegna potranno comportare costi aggiuntivi.
+
+• Conservazione dei File: Lo studio garantisce la conservazione dei file originali per un anno dalla data dell'evento. Successivamente, non sarà responsabile della loro perdita.
+
+• Esclusione di Responsabilità: Lo studio non è responsabile per la perdita dei file causata da danni accidentali alle attrezzature, furti, incendi o guasti tecnici. Eventuali risarcimenti saranno limitati al rimborso del prezzo pagato.
+
+• Utilizzo delle Immagini: Con il consenso scritto del cliente, lo studio potrà utilizzare le immagini per finalità promozionali (social media, sito web, concorsi fotografici).
+
+• Privacy: Il cliente dichiara di aver preso visione dell'informativa sulla privacy in conformità al GDPR e di accettarne i termini.`;
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+(function init(){
+  applyConfig();
+  const br=document.getElementById('brandEl');
+  if(br){br.childNodes[0].textContent=CFG_STUDIO.nome;const sm=br.querySelector('small');if(sm)sm.textContent=CFG_STUDIO.qualifica;}
+  document.getElementById('testoContratto').value=DEFAULT_CONTRATTO;
+  buildSchedaEvento();
+
+  // Pre-popola data e fascia dalla URL se presenti (?date=2025-06-15&slot=SERALE)
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('date')){document.getElementById('loadData').value=params.get('date');}
+  if(params.get('slot')){document.getElementById('loadFascia').value=params.get('slot');}
+  if(params.get('date')&&params.get('slot'))caricaPreventivo();
+})();
+</script>
+</body>
+</html>

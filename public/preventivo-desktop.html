@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raymax — Preventivo Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══ VARIABILI — identiche al mobile ══ */
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--bg3:#e2dcd3;
+  --ink:#1c1917;--ink2:#44403c;--ink3:#78716c;
+  --gold:#a0845c;--gold2:#c9a87a;--gold3:#e8d5b7;--gold4:#f5ede0;--gold5:#faf7f2;
+  --white:#fff;--red:#b91c1c;--r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);}
+
+/* ══ HEADER ══ */
+header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2);}
+.brand{font-family:'Libre Baskerville',serif;font-size:1.05rem;color:#fff;font-weight:400;}
+.brand small{display:block;font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold2);margin-top:1px;}
+.header-links{display:flex;gap:10px;align-items:center;}
+.header-link{color:rgba(255,255,255,.5);font-size:.72rem;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s;}
+.header-link:hover{color:#fff;background:rgba(255,255,255,.08);}
+
+/* ══ LAYOUT DESKTOP: sidebar sinistra + colonna destra sticky ══ */
+.layout{max-width:1180px;margin:0 auto;padding:32px 40px 60px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start;}
+.col-main{display:flex;flex-direction:column;gap:20px;}
+.col-side{position:sticky;top:74px;display:flex;flex-direction:column;gap:16px;}
+
+/* ══ CARD ══ */
+.card{background:var(--white);border-radius:var(--r);padding:22px;box-shadow:0 2px 14px rgba(28,25,23,.07);border:1px solid var(--bg3);}
+.card-title{font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bg2);}
+.card-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bg2);}
+.card-header-row .card-title{margin:0;padding:0;border:none;}
+
+/* ══ FIELDS ══ */
+.f{margin-bottom:13px;}
+.f:last-child{margin-bottom:0;}
+.f label{display:block;font-size:.63rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.f input,.f select,.f textarea{width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:10px 12px;color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(160,132,92,.12);}
+.f textarea{min-height:68px;resize:vertical;line-height:1.6;}
+.fg{display:grid;gap:12px;}
+.fg2{grid-template-columns:1fr 1fr;}
+.fg3{grid-template-columns:1fr 1fr 1fr;}
+.fg4{grid-template-columns:2fr 1fr 1fr 1fr;}
+
+/* ══ SERVIZI — logica identica al mobile, solo hover in più ══ */
+.svc-group{margin-bottom:18px;}
+.svc-group:last-child{margin-bottom:0;}
+.svc-group-lbl{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bg2);}
+.svc-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:9px;background:var(--bg);border:1px solid var(--bg2);margin-bottom:5px;cursor:pointer;transition:all .15s;user-select:none;}
+.svc-row:hover{background:var(--gold5);border-color:var(--gold3);}
+.svc-row.on{background:var(--gold4);border-color:var(--gold2);}
+.svc-check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;transition:all .15s;}
+.svc-row.on .svc-check{background:var(--gold);border-color:var(--gold);color:#fff;}
+.svc-name{flex:1;font-size:.87rem;color:var(--ink2);line-height:1.3;}
+.svc-edit-row{display:flex;gap:8px;align-items:center;flex:1;}
+.svc-price-input{width:86px;background:var(--bg2);border:1px solid var(--bg3);border-radius:7px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:600;color:var(--gold);outline:none;text-align:right;}
+.svc-name-input{flex:1;background:var(--bg2);border:1px solid var(--bg3);border-radius:7px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.83rem;outline:none;}
+.svc-sel-btn{padding:4px 8px;cursor:pointer;color:var(--ink3);font-size:.72rem;flex-shrink:0;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.svc-add-btn{width:100%;margin-top:5px;padding:8px;background:transparent;border:1.5px dashed var(--bg3);border-radius:8px;color:var(--ink3);font-family:'DM Sans',sans-serif;font-size:.77rem;cursor:pointer;transition:all .2s;}
+.svc-add-btn:hover{background:var(--gold5);border-color:var(--gold2);color:var(--gold);}
+
+/* ══ FORMATO ══ */
+.fmt-section-lbl{font-size:.59rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;margin-top:10px;}
+.fmt-section-lbl:first-child{margin-top:0;}
+.fmt-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:2px;}
+.fmt-btn{padding:9px 4px;border-radius:8px;border:1px solid var(--bg3);background:var(--bg);font-size:.76rem;font-weight:500;color:var(--ink2);font-family:'DM Sans',sans-serif;text-align:center;cursor:pointer;transition:all .15s;}
+.fmt-btn:hover{border-color:var(--gold2);background:var(--gold5);}
+.fmt-btn.on{border-color:var(--gold);background:var(--gold4);color:var(--gold);font-weight:700;box-shadow:0 0 0 2px var(--gold3);}
+
+/* ══ COPERTINE — solo standard/eco come nel mobile ══ */
+.cop-special-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cop-btn-special{padding:10px 12px;border-radius:9px;border:1px solid var(--bg3);font-size:.78rem;font-family:'DM Sans',sans-serif;text-align:left;background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .15s;}
+.cop-btn-special:hover{border-color:var(--gold2);background:var(--gold5);}
+.cop-btn-special.on{border:2px solid rgba(255,255,255,.4);box-shadow:0 0 0 2px rgba(255,255,255,.5);color:#fff;}
+.cop-lbl{display:block;font-weight:600;font-size:.8rem;}
+.cop-sub{display:block;font-size:.65rem;opacity:.8;margin-top:2px;}
+
+/* ══ BOX ══ */
+.box-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.box-btn{padding:10px 9px;border-radius:9px;border:1px solid var(--bg3);background:var(--bg);font-size:.78rem;color:var(--ink2);font-family:'DM Sans',sans-serif;text-align:center;cursor:pointer;transition:all .15s;}
+.box-btn:hover{border-color:var(--gold2);background:var(--gold5);}
+.box-btn.on{border-color:var(--gold);background:var(--gold4);color:var(--gold);font-weight:700;box-shadow:0 0 0 2px var(--gold3);}
+.box-btn small{display:block;font-size:.69rem;color:var(--ink3);margin-top:3px;}
+.box-btn.on small{color:var(--gold);}
+
+/* ══ SPINNER ══ */
+.spin{display:flex;align-items:center;gap:9px;margin-top:6px;}
+.spin-btn{width:32px;height:32px;border-radius:7px;background:var(--bg2);border:1px solid var(--bg3);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:var(--ink2);transition:all .15s;}
+.spin-btn:hover{background:var(--gold4);border-color:var(--gold2);color:var(--gold);}
+.spin-val{font-size:1rem;font-weight:700;min-width:32px;text-align:center;}
+
+/* ══ NO ALBUM ══ */
+.no-album-btn{border:1.5px dashed var(--bg3);border-radius:7px;background:transparent;color:var(--ink3);font-family:'DM Sans',sans-serif;cursor:pointer;padding:7px 14px;font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;transition:all .2s;}
+.no-album-btn:hover{border-color:var(--red);color:var(--red);}
+.no-album-btn.on{border-style:solid;border-color:var(--red);color:var(--red);background:rgba(185,28,28,.05);}
+
+/* ══ ALBUM PREVIEW ══ */
+.alb-preview{background:linear-gradient(160deg,#f0ece4,#e8e0d4);border-radius:12px;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;border:1px solid var(--bg3);margin-bottom:14px;}
+
+/* ══ ALBUM GENITORI ══ */
+.alb-gen-fmts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:7px;}
+
+/* ══ INFO NOTE ══ */
+.info-note{background:var(--gold5);border:1px solid var(--gold3);border-radius:8px;padding:11px 14px;font-size:.77rem;color:var(--ink3);line-height:1.6;}
+.info-note strong{color:var(--gold);}
+.booking-alert{display:none;margin-top:8px;padding:9px 12px;border-radius:8px;font-size:.77rem;line-height:1.5;border:1px solid var(--bg3);background:var(--bg);}
+.booking-alert.on{display:block;}
+.booking-alert.free{border-color:#bbf7d0;background:#f0fdf4;color:#166534;}
+.booking-alert.busy{border-color:#fecaca;background:#fef2f2;color:#991b1b;}
+.booking-alert.warn{border-color:#fde68a;background:#fffbeb;color:#92400e;}
+
+/* ══ TOTALI (sidebar) ══ */
+.totals{background:var(--bg);border:1px solid var(--bg2);border-radius:9px;padding:13px 15px;}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.84rem;color:var(--ink2);border-bottom:1px solid var(--bg2);}
+.trow:last-child{border-bottom:none;}
+.trow.big{padding-top:11px;margin-top:2px;font-size:1.05rem;font-weight:700;color:var(--ink);font-family:'Libre Baskerville',serif;border-top:1px solid var(--bg3);border-bottom:none;}
+
+/* ══ RIEPILOGO PREVENTIVO ══ */
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg2);font-size:.86rem;}
+.price-row:last-child{border-bottom:none;}
+.price-row.total{font-size:1.1rem;font-weight:700;font-family:'Libre Baskerville',serif;padding-top:11px;border-top:2px solid var(--ink);margin-top:3px;border-bottom:none;}
+.price-row .label{color:var(--ink2);}
+.price-row .val{font-weight:600;color:var(--gold);}
+.price-row.total .val{color:var(--ink);}
+.payment-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--bg3);font-size:.83rem;}
+.payment-row:last-child{border-bottom:none;}
+.payment-row .step{color:var(--ink3);}
+.payment-row .amount{font-weight:600;color:var(--ink);}
+
+/* ══ INPUT INLINE (sconto/caparra) ══ */
+.inline-row{display:flex;align-items:center;gap:9px;margin-top:11px;padding-top:11px;border-top:1px solid var(--bg2);}
+.inline-row label{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;min-width:72px;}
+.inline-row input{width:86px;background:var(--bg);border:1px solid var(--bg3);border-radius:7px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;outline:none;}
+.inline-row input:focus{border-color:var(--gold);}
+.inline-row span{font-size:.72rem;color:var(--ink3);}
+
+/* ══ BOTTONI ══ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.03em;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:#333;}
+.btn-gold{background:var(--gold);color:#fff;}
+.btn-green{background:#166534;color:#fff;}
+.btn-green:hover{background:#14532d;}
+.btn-gold:hover{background:#8a7050;}
+.btn-outline{background:transparent;border:1px solid var(--bg3);color:var(--ink2);}
+.btn-outline:hover{background:var(--bg2);}
+.btn-full{width:100%;justify-content:center;}
+.btn-sm{padding:8px 14px;font-size:.77rem;}
+.btn-danger{background:#fef2f2;border:1px solid #fecaca;color:var(--red);}
+.btn-danger:hover{background:#fee2e2;}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:all .25s ease;z-index:1200;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ PRINT / PDF ══ */
+@media print{
+  header,#actions-bar,.no-print{display:none!important;}
+  body{background:#fff;}
+  .layout{display:block;padding:0;}
+  .col-side{position:static;}
+  .card{break-inside:avoid;border:none;box-shadow:none;margin-bottom:18px;}
+  .col-main,.col-side{display:block;width:100%;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand" id="brandEl">
+    Massimo Inturrisi
+    <small>Fotografo</small>
+  </div>
+  <div class="header-links">
+    <a class="header-link" href="./calendario.html">Calendario</a>
+    <a class="header-link" href="./index.html">Home</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ══ COLONNA PRINCIPALE ══ -->
+  <div class="col-main">
+
+    <!-- EVENTO -->
+    <div class="card">
+      <div class="card-title">Evento</div>
+      <div class="fg fg4">
+        <div class="f">
+          <label>Tipo Evento</label>
+          <select id="tipoEvento" onchange="onEvento()">
+            <option>Matrimonio</option>
+            <option>Battesimo</option>
+            <option>18° Compleanno</option>
+            <option>Comunione</option>
+            <option>Cresima</option>
+            <option>Fidanzamento</option>
+            <option>Laurea</option>
+            <option>Corporate</option>
+            <option>Altro</option>
+          </select>
+          <div id="altroServizioContainer" style="display:none;margin-top:8px;">
+            <input type="text" id="altroServizio" placeholder="Specifica il tipo di servizio" oninput="renderFinalTotals()">
+          </div>
+        </div>
+        <div class="f">
+          <label>Data</label>
+          <input type="date" id="dataEvento" onchange="checkSelectedDate()">
+        </div>
+        <div class="f">
+          <label>Fascia oraria</label>
+          <select id="orarioEvento" onchange="checkSelectedDate()">
+            <option value="MATTINA">Mattina</option>
+            <option value="POMERIGGIO">Pomeriggio</option>
+            <option value="SERALE" selected>Serale</option>
+          </select>
+        </div>
+        <div class="f">
+          <label>Luogo</label>
+          <input type="text" id="luogoEvento" placeholder="es. Siracusa">
+        </div>
+      </div>
+      <div class="f" style="margin-top:4px">
+        <label>Nome Cliente</label>
+        <input type="text" id="nomeCliente" placeholder="Nome e Cognome">
+      </div>
+      <div class="booking-alert" id="bookingAlert"></div>
+    </div>
+
+    <!-- SERVIZI -->
+    <div class="card">
+      <div class="card-title">Servizi</div>
+      <div id="svcContainer"></div>
+    </div>
+
+    <!-- ALBUM -->
+    <div class="card">
+      <div class="card-header-row">
+        <div class="card-title">Album</div>
+        <button class="no-album-btn" id="noAlbumBtn" onclick="toggleNoAlbum()">Nessun Album</button>
+      </div>
+
+      <div id="albumContent">
+        <div class="fg fg2" style="gap:20px">
+          <!-- Formato e pagine -->
+          <div>
+            <div class="card-title" style="margin-bottom:12px">Formato & Pagine</div>
+            <div id="fmtGrid"></div>
+            <div class="f" style="margin-top:12px">
+              <label>Pagine</label>
+              <div class="spin">
+                <button class="spin-btn" onclick="chgPag(-10)">−</button>
+                <span class="spin-val" id="pagVal">30</span>
+                <button class="spin-btn" onclick="chgPag(10)">+</button>
+                <button class="spin-btn" onclick="chgPag(-2)" style="font-size:.75rem">-2</button>
+                <button class="spin-btn" onclick="chgPag(2)" style="font-size:.75rem">+2</button>
+              </div>
+            </div>
+          </div>
+          <!-- Copertina e Box -->
+          <div>
+            <div class="card-title" style="margin-bottom:12px">Copertina</div>
+            <input type="text" id="copSearch" placeholder="Cerca modello... (es. F17, L120, ECO)" autocomplete="off" oninput="buildCopGrid(this.value)" style="width:100%;background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--ink);outline:none;margin-bottom:8px;transition:border-color .2s">
+            <div id="copGrid"></div>
+            <div id="copNote" class="info-note" style="display:none;margin-top:8px;font-size:.75rem"></div>
+            <div style="margin-top:16px">
+              <div class="card-title" style="margin-bottom:10px">Box</div>
+              <div class="box-grid" id="boxGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview album -->
+        <div id="albPreviewCard" style="display:none;margin-top:14px">
+          <div class="alb-preview" id="albScene"></div>
+          <div style="text-align:center">
+            <div id="albInfoTitle" style="font-family:'Libre Baskerville',serif;font-size:.9rem;color:var(--ink);margin-bottom:2px"></div>
+            <div id="albInfoSub" style="font-size:.73rem;color:var(--ink3)"></div>
+          </div>
+        </div>
+
+        <!-- Album Genitori (solo Matrimonio) -->
+        <div id="cardAlbGen" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--bg2)">
+          <div class="card-header-row" style="margin-bottom:10px;padding-bottom:8px">
+            <div class="card-title" style="margin:0;padding:0;border:none">Album Genitori</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:20px">
+            <div>
+              <label style="font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px">Quantità</label>
+              <div class="spin">
+                <button class="spin-btn" onclick="chgAlbGen(-1)">−</button>
+                <span class="spin-val" id="albGenQty">2</span>
+                <button class="spin-btn" onclick="chgAlbGen(1)">+</button>
+              </div>
+            </div>
+            <div style="flex:1">
+              <label style="font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px">Formato</label>
+              <div class="alb-gen-fmts">
+                <button class="fmt-btn" id="agBtn_small" onclick="selAlbGenFmt('small')">Piccolo<small style="display:block;font-size:.58rem;color:var(--ink3);margin-top:1px">15×20/20×15/20×20</small></button>
+                <button class="fmt-btn" id="agBtn_big" onclick="selAlbGenFmt('big')">Grande<small style="display:block;font-size:.58rem;color:var(--ink3);margin-top:1px">20×30/30×20/25×25</small></button>
+                <button class="fmt-btn" id="agBtn_none" onclick="selAlbGenFmt('none')">Nessuno<small style="display:block;font-size:.58rem;color:var(--ink3);margin-top:1px">nessuna copia</small></button>
+              </div>
+            </div>
+          </div>
+          <div class="info-note" id="albGenNote" style="margin-top:10px">—</div>
+        </div>
+
+        <!-- Riepilogo album -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--bg2)">
+          <div class="card-title" style="margin-bottom:10px">Riepilogo Album</div>
+          <div class="totals">
+            <div class="trow"><span>Formato</span><span id="t_fmt" style="font-weight:600">—</span></div>
+            <div class="trow"><span>Pagine <span id="t_npag" style="font-weight:600">0</span></span><span id="t_albcost">€ 0,00</span></div>
+            <div class="trow"><span>Copertina base</span><span id="t_cop_base">€ 0,00</span></div>
+            <div class="trow"><span>Suppl. modello</span><span id="t_cop_extra">€ 0,00</span></div>
+            <div class="trow"><span>Box</span><span id="t_box">€ 0,00</span></div>
+            <div class="trow" id="t_alb_gen_row" style="display:none"><span id="t_alb_gen_lbl">Album genitori</span><span id="t_alb_gen">€ 0,00</span></div>
+            <div class="trow big"><span>Totale Album</span><span id="t_alb_sub">€ 0,00</span></div>
+          </div>
+          <input type="hidden" id="accontoAlbum" value="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTE -->
+    <div class="card">
+      <div class="card-title">Note</div>
+      <div class="f">
+        <textarea id="noteExtra" placeholder="Note, accordi particolari..."></textarea>
+      </div>
+    </div>
+
+  </div>
+  <!-- /col-main -->
+
+  <!-- ══ COLONNA LATERALE STICKY ══ -->
+  <div class="col-side">
+
+    <!-- RIEPILOGO ECONOMICO -->
+    <div class="card">
+      <div class="card-title">Preventivo</div>
+      <div id="finalTotals"></div>
+      <div class="inline-row">
+        <label>Sconto €</label>
+        <input type="number" id="scontoVal" min="0" step="10" value="0" oninput="renderFinalTotals()">
+        <span>sull'album</span>
+      </div>
+      <div class="inline-row">
+        <label>Salva Data €</label>
+        <input type="number" id="caparra" min="0" step="10" value="50" oninput="calcTot();renderFinalTotals()">
+        <span>caparra</span>
+      </div>
+    </div>
+
+    <!-- AZIONI -->
+    <div class="card" id="actions-bar">
+      <div class="card-title">Genera</div>
+      <button class="btn btn-gold btn-full" onclick="generaPDF()" style="margin-bottom:10px">
+        Scarica PDF
+      </button>
+      <button class="btn btn-primary btn-full" onclick="salvaPreventivo()" style="margin-bottom:10px">
+        Salva nel Calendario
+      </button>
+      <button class="btn btn-green btn-full" onclick="caricaSuContratto()">
+        Carica su Contratto
+      </button>
+      <div id="saveStatus" style="margin-top:10px;font-size:.75rem;color:var(--ink3);text-align:center;display:none"></div>
+    </div>
+
+  </div>
+  <!-- /col-side -->
+
+</div>
+<!-- /layout -->
+
+<div class="toast" id="toastMsg"></div>
+
+<!-- ══ TEMPLATE PDF (nascosto, usato per la stampa) ══ -->
+<div id="pdfTemplate" style="display:none"></div>
+
+<script src="config.js" onerror="console.warn('config.js non trovato')"></script>
+<script>
+// ══════════════════════════════════════════════════════
+// DATI — identici al mobile, caricati da config.js
+// ══════════════════════════════════════════════════════
+let FORMATI=[], BOX_PER_FAMIGLIA={}, COPERTINE=[], SERVIZI_PER_EVENTO={}, SERVIZI_GENERICO=[], PRESET_EVENTO={};
+let CFG_STUDIO={nome:'Massimo Inturrisi',qualifica:'Fotografo',indirizzo:'Via A. Carrubba 8/9',citta:'96010 Solarino (SR)',piva:'01726290891',tel:'339 159 4106'};
+const SVC_CUSTOM={};
+const SVC_PRICE_OVERRIDES={};
+
+const S={page:0,fmtId:null,pagine:30,copCod:null,boxCod:null,boxCosto:0,svc:{},noAlbum:false,
+         albGen:{qty:2,upgradeSize:'small',disabled:false}};
+
+// ── applyConfig: identica al mobile ──
+function applyConfig(){
+  const cfg=window.RAYMAX_CONFIG||{};
+  if(cfg.studio) CFG_STUDIO=Object.assign(CFG_STUDIO,cfg.studio);
+  if(cfg.formati) FORMATI=cfg.formati;
+  if(cfg.box) BOX_PER_FAMIGLIA=cfg.box;
+  if(cfg.copertine) COPERTINE=cfg.copertine;
+  if(cfg.servizi) SERVIZI_PER_EVENTO=cfg.servizi;
+  if(cfg.preset_evento) PRESET_EVENTO=cfg.preset_evento;
+  if(cfg.servizi_generico) SERVIZI_GENERICO=cfg.servizi_generico;
+  else if(cfg.servizi?.Matrimonio){
+    const extra=cfg.servizi.Matrimonio.find(g=>g.icona==='extra');
+    SERVIZI_GENERICO=[
+      {gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'g_f1',nome:'Servizio fotografico',costo:0,editabile:true},{id:'g_f2',nome:'Servizio fotografico aggiuntivo',costo:0,editabile:true}]},
+      {gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'g_v1',nome:'Servizio video',costo:0,editabile:true},{id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}]},
+      ...(extra?[extra]:[])
+    ];
+  }
+  if(!window.RAYMAX_CONFIG){
+    FORMATI=[{id:'20x30',label:'20x30',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'30x20',label:'30x20',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'25x25',label:'25x25',pagina:4.5,copertina:55,famiglia:'20x30'},{id:'25x35',label:'25x35',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'35x25',label:'35x25',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'30x30',label:'30x30',pagina:5.5,copertina:65,famiglia:'25x35'},{id:'30x40',label:'30x40',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'40x30',label:'40x30',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'35x35',label:'35x35',pagina:7.0,copertina:85,famiglia:'30x40'},{id:'35x45',label:'35x45',pagina:7.5,copertina:100,famiglia:'35x45'},{id:'45x35',label:'45x35',pagina:7.5,copertina:100,famiglia:'35x45'},{id:'40x40',label:'40x40',pagina:7.5,copertina:100,famiglia:'35x45'}];
+    BOX_PER_FAMIGLIA={'20x30':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:70},{cod:'C-CL-E-FL-P-N-Z',costo:100},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:150}],'25x35':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:75},{cod:'C-CL-E-FL-P-N-Z',costo:105},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:155}],'30x40':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:90},{cod:'C-CL-E-FL-P-N-Z',costo:120},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:170}],'35x45':[{cod:'NO BOX',costo:0},{cod:'G-SE-F',costo:110},{cod:'C-CL-E-FL-P-N-Z',costo:135},{cod:'CP-RG-LG-PL-PLR-LA-LC-LN-LR-OL-RF',costo:185}]};
+    COPERTINE=[{cod:'STANDARD',extra:0},{cod:'ECO',extra:0,eco:true},{cod:'F04',extra:10},{cod:'F09',extra:10},{cod:'F10',extra:10},{cod:'F13',extra:10},{cod:'F24',extra:10},{cod:'F11',extra:20},{cod:'F12',extra:20},{cod:'F27',extra:20},{cod:'F02',extra:25},{cod:'F05',extra:25},{cod:'F06',extra:25},{cod:'F14',extra:25},{cod:'F16',extra:25},{cod:'L130',extra:25},{cod:'F15',extra:30},{cod:'F25',extra:30},{cod:'L135',extra:30},{cod:'P378',extra:30},{cod:'F17',extra:35},{cod:'F18',extra:35},{cod:'F19',extra:35},{cod:'F21',extra:35},{cod:'F22',extra:35},{cod:'F23',extra:35},{cod:'L120',extra:35},{cod:'L120V',extra:35},{cod:'L122',extra:35},{cod:'L129',extra:35},{cod:'L136',extra:35},{cod:'L143',extra:35},{cod:'P373',extra:35},{cod:'V440',extra:35},{cod:'F20',extra:45},{cod:'L131',extra:45},{cod:'L133',extra:45},{cod:'L138',extra:45},{cod:'L141',extra:45},{cod:'L142',extra:45},{cod:'P370',extra:45},{cod:'P375',extra:45},{cod:'P377',extra:45},{cod:'L121',extra:55},{cod:'L126',extra:55},{cod:'L127',extra:55},{cod:'L128',extra:55},{cod:'L137',extra:55},{cod:'L139N',extra:55},{cod:'L139R',extra:55},{cod:'P371',extra:55},{cod:'P374',extra:55},{cod:'P376',extra:55}];
+    SERVIZI_PER_EVENTO={'Battesimo':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'b_f1',nome:'Preparazione a Casa · Rito in chiesa · Foto torta al locale',costo:150},{id:'b_f2',nome:'Permanenza al locale',costo:50},{id:'b_f3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'b_v1',nome:'Riprese e montaggio: Prep. Casa · Rito · Torta al locale',costo:250},{id:'b_v2',nome:'',costo:0,editabile:true},{id:'b_v0',nome:'Nessun video',costo:0,noVideo:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}],'18° Compleanno':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'d_f1',nome:'Foto intera festa (no foto regali)',costo:150},{id:'d_f2',nome:'Pre servizio base',costo:100},{id:'d_f3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:false,items:[{id:'d_v1',nome:'Riprese e montaggio: intera festa',costo:250},{id:'d_v2',nome:'Riprese e montaggio: preservizio',costo:100},{id:'d_v3',nome:'',costo:0,editabile:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}],'Matrimonio':[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'m_f1',nome:'Pre matrimonio',costo:100},{id:'m_f2',nome:'Intero servizio',costo:700},{id:'m_f3',nome:'Preparativi casa sposi',costo:150},{id:'m_f4',nome:'Cerimonia',costo:200},{id:'m_f5',nome:'Esterne',costo:200},{id:'m_f6',nome:'Ricevimento',costo:150}]},{gruppo:'Servizio Video',icona:'video',radio:false,items:[{id:'m_v1',nome:'Riprese pre matrimonio',costo:100},{id:'m_v2',nome:'Riprese e montaggio intera giornata wedding',costo:500},{id:'m_v3',nome:'Trailer della giornata da proiettare (proiettore escluso)',costo:100}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}]};
+    SERVIZI_GENERICO=[{gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'g_f1',nome:'Servizio fotografico',costo:0,editabile:true},{id:'g_f2',nome:'Servizio fotografico aggiuntivo',costo:0,editabile:true}]},{gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'g_v1',nome:'Servizio video',costo:0,editabile:true},{id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}]},{gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}];
+    PRESET_EVENTO={'Matrimonio':{fmtId:'35x25',pagine:60,boxCod:'C-CL-E-FL-P-N-Z',caparra:200},'Battesimo':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50},'18° Compleanno':{fmtId:'25x25',pagine:40,boxCod:'G-SE-F',caparra:50},'Comunione':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50},'Cresima':{fmtId:'25x25',pagine:30,boxCod:'G-SE-F',caparra:50}};
+  }
+  ensureStandaloneServices();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS — copiate intatte dal mobile
+// ══════════════════════════════════════════════════════
+function f2(v){return '€ '+v.toFixed(2).replace('.',',');}
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+function cloneData(v){return JSON.parse(JSON.stringify(v));}
+function getDefaultGenericServices(){
+  return[
+    {gruppo:'Servizio Fotografico',icona:'foto',radio:false,items:[{id:'g_f1',nome:'Servizio fotografico',costo:0,editabile:true},{id:'g_f2',nome:'Servizio fotografico aggiuntivo',costo:0,editabile:true}]},
+    {gruppo:'Servizio Video',icona:'video',radio:true,items:[{id:'g_v1',nome:'Servizio video',costo:0,editabile:true},{id:'g_v0',nome:'Nessun video',costo:0,noVideo:true}]},
+    {gruppo:'Servizi Extra',icona:'extra',radio:false,items:[{id:'x_drone',nome:'Drone',costo:200},{id:'x_pol',nome:'Polaroid (50 Stampe)',costo:100},{id:'x_trasf',nome:'Trasferta',costo:50}]}
+  ];
+}
+function ensureStandaloneServices(){
+  if(!Array.isArray(SERVIZI_GENERICO)||!SERVIZI_GENERICO.length||!SERVIZI_GENERICO.some(g=>g?.items?.some(i=>(i.nome||'').trim()))){
+    SERVIZI_GENERICO=getDefaultGenericServices();
+  }
+  const tipi=['Matrimonio','Battesimo','18° Compleanno','Comunione','Cresima','Fidanzamento','Laurea','Corporate','Altro'];
+  tipi.forEach(t=>{if(!SERVIZI_PER_EVENTO[t])SERVIZI_PER_EVENTO[t]=cloneData(SERVIZI_GENERICO);});
+}
+function getGruppi(){const t=document.getElementById('tipoEvento')?.value||'';return SERVIZI_PER_EVENTO[t]||SERVIZI_GENERICO;}
+function getTipoEventoFinale(){
+  const raw=document.getElementById('tipoEvento')?.value||'';
+  if(raw!=='Altro') return raw||'';
+  const custom=(document.getElementById('altroServizio')?.value||'').trim();
+  return custom||'Altro';
+}
+function updateAltroServizioUI(){
+  const raw=document.getElementById('tipoEvento')?.value||'';
+  const box=document.getElementById('altroServizioContainer');
+  const inp=document.getElementById('altroServizio');
+  if(!box||!inp) return;
+  const show=raw==='Altro';
+  box.style.display=show?'block':'none';
+  if(!show) inp.value='';
+}
+function showToast(msg,dur=2400){
+  const el=document.getElementById('toastMsg');if(!el)return;
+  el.textContent=msg;el.classList.add('on');
+  clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>el.classList.remove('on'),dur);
+}
+
+// ══════════════════════════════════════════════════════
+// SERVIZI — logica identica al mobile
+// ══════════════════════════════════════════════════════
+function buildSvcUI(){
+  const gruppi=getGruppi();
+  document.getElementById('svcContainer').innerHTML=gruppi.map(g=>`
+    <div class="svc-group">
+      <div class="svc-group-lbl">${g.gruppo}${g.radio?' <span style="font-weight:400;font-size:.6rem;color:var(--ink3)">(scegli uno)</span>':''}</div>
+      ${g.items.map(s=>buildSvcRow(g,s)).join('')}
+      ${(g.icona==='foto'||g.icona==='video')&&!g.radio?`<button class="svc-add-btn" onclick="addSvc('${g.icona}')">+ Aggiungi voce</button>`:''}
+    </div>`).join('');
+}
+
+function buildSvcRow(g,s){
+  const currentPrice=s.editabile
+    ?((SVC_CUSTOM[s.id]&&typeof SVC_CUSTOM[s.id].costo!=='undefined')?SVC_CUSTOM[s.id].costo:(s.costo||0))
+    :((typeof SVC_PRICE_OVERRIDES[s.id]!=='undefined')?SVC_PRICE_OVERRIDES[s.id]:(s.costo||0));
+  if(s.editabile){
+    const c=SVC_CUSTOM[s.id]||{nome:'',costo:0};
+    const on=S.svc[s.id]?'on':'';
+    return `<div class="svc-row ${on}" id="row_${s.id}" onclick="toggleSvc('${g.icona}','${s.id}',${g.radio})">
+      <div class="svc-check" id="chk_${s.id}">${S.svc[s.id]?'✓':''}</div>
+      <div class="svc-edit-row">
+        <input class="svc-name-input" type="text" placeholder="Descrizione servizio" value="${c.nome||''}"
+          onclick="event.stopPropagation()"
+          oninput="SVC_CUSTOM['${s.id}']={...(SVC_CUSTOM['${s.id}']||{}),nome:this.value}; if(S.svc['${s.id}']){calcTot(); renderFinalTotals();}" onblur="activateCustomSvc('${s.id}')">
+        <input class="svc-price-input" type="number" placeholder="€" value="${currentPrice||''}"
+          onclick="event.stopPropagation()"
+          oninput="SVC_CUSTOM['${s.id}']={...(SVC_CUSTOM['${s.id}']||{}),costo:parseFloat(this.value)||0}; if(S.svc['${s.id}']){calcTot(); renderFinalTotals();}" onblur="activateCustomSvc('${s.id}')">
+      </div>
+      <button type="button" class="svc-sel-btn" onclick="event.stopPropagation();toggleSvc('${g.icona}','${s.id}',${g.radio})">sel.</button>
+    </div>`;
+  }
+  const on=S.svc[s.id]?'on':'';
+  return `<div class="svc-row ${on}" id="row_${s.id}" onclick="toggleSvc('${g.icona}','${s.id}',${g.radio})">
+    <div class="svc-check" id="chk_${s.id}">${S.svc[s.id]?'✓':''}</div>
+    <div class="svc-name">${s.nome||'—'}</div>
+    ${!s.noVideo?`<input class="svc-price-input" type="number" value="${currentPrice||0}" onclick="event.stopPropagation()" oninput="SVC_PRICE_OVERRIDES['${s.id}']=parseFloat(this.value)||0;calcTot();renderFinalTotals();">`:''}
+  </div>`;
+}
+
+
+function activateCustomSvc(id){
+  const c=SVC_CUSTOM[id]||{};
+  const hasName=(c.nome||'').trim()!=='';
+  const hasPrice=typeof c.costo!=='undefined' && c.costo!==null && c.costo!==0 && c.costo!=='';
+  if((hasName||hasPrice) && !S.svc[id]){
+    S.svc[id]=true;
+    buildSvcUI();calcTot();renderFinalTotals();
+  }else if(S.svc[id]){
+    calcTot();renderFinalTotals();
+  }
+}
+
+function toggleSvc(icona,id,radio){
+  if(radio){getGruppi().forEach(g=>{if(g.icona===icona)g.items.forEach(s=>{S.svc[s.id]=false;});});}
+  S.svc[id]=!S.svc[id];
+  buildSvcUI();calcTot();renderFinalTotals();
+}
+
+let _svcCounter=100;
+function addSvc(icona){
+  const id='custom_'+(_svcCounter++);
+  const gruppi=getGruppi();const g=gruppi.find(g=>g.icona===icona);
+  if(g){g.items.push({id,nome:'',costo:0,editabile:true});SVC_CUSTOM[id]={nome:'',costo:0};}
+  buildSvcUI();
+}
+
+// ══════════════════════════════════════════════════════
+// EVENTO — identico al mobile
+// ══════════════════════════════════════════════════════
+function onEvento(){
+  updateAltroServizioUI();
+  window._caparraManuale=false; // reset flag al cambio tipo evento
+  const tipo=document.getElementById('tipoEvento')?.value||'Matrimonio';
+  const preset=PRESET_EVENTO[tipo];
+  if(preset){
+    S.fmtId=preset.fmtId;S.pagine=preset.pagine;
+    document.getElementById('caparra').value=preset.caparra;
+    const fmt=FORMATI.find(f=>f.id===preset.fmtId);
+    const boxes=fmt?(BOX_PER_FAMIGLIA[fmt.famiglia]||[]):[];
+    const box=boxes.find(b=>b.cod===preset.boxCod)||boxes[1]||boxes[0];
+    if(box){S.boxCod=box.cod;S.boxCosto=box.costo;}
+  }
+  if(!['STANDARD','ECO'].includes(S.copCod)) S.copCod='STANDARD';
+  buildSvcUI();buildFmtGrid();buildCopGrid();buildBoxGrid();
+  document.getElementById('pagVal').textContent=S.pagine;
+  updateAlbGenUI();updateAlbPreview();calcTot();renderFinalTotals();
+}
+
+// ══════════════════════════════════════════════════════
+// FORMATO — identico al mobile
+// ══════════════════════════════════════════════════════
+function buildFmtGrid(){
+  const quadrati=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return a===b;});
+  const orizz=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return a>b;});
+  const vert=FORMATI.filter(f=>{const[a,b]=f.id.split('x').map(Number);return b>a;});
+  const row=arr=>arr.map(f=>`<button class="fmt-btn${S.fmtId===f.id?' on':''}" onclick="selFmt('${f.id}')">${f.label}</button>`).join('');
+  document.getElementById('fmtGrid').innerHTML=`
+    <div class="fmt-section-lbl">Quadrato</div><div class="fmt-grid">${row(quadrati)}</div>
+    <div class="fmt-section-lbl">Orizzontale</div><div class="fmt-grid">${row(orizz)}</div>
+    <div class="fmt-section-lbl">Verticale</div><div class="fmt-grid">${row(vert)}</div>`;
+}
+function selFmt(id){S.fmtId=id;buildFmtGrid();buildBoxGrid();updateAlbPreview();calcTot();renderFinalTotals();}
+function chgPag(d){
+  S.pagine=Math.max(10,S.pagine+d);
+  if(S.pagine%2!==0)S.pagine+=(d>=0?1:-1);
+  document.getElementById('pagVal').textContent=S.pagine;
+  calcTot();updateAlbPreview();updateAlbGenUI();renderFinalTotals();
+}
+
+// ══════════════════════════════════════════════════════
+// COPERTINE — identico al mobile
+// ══════════════════════════════════════════════════════
+const BOOK_COLORS_BY_EXTRA={'STANDARD':'linear-gradient(135deg,#1a6b2e,#2d9e4a)','ECO':'linear-gradient(135deg,#7a8a7a,#9aaa9a)',10:'linear-gradient(135deg,#1565a0,#2980c0)',20:'linear-gradient(135deg,#0e7490,#0ea5c9)',25:'linear-gradient(135deg,#0f766e,#14b8a6)',30:'linear-gradient(135deg,#92610a,#c98b1a)',35:'linear-gradient(135deg,#9a3d12,#d4621e)',45:'linear-gradient(135deg,#7c3a1a,#b5622e)',55:'linear-gradient(135deg,#6b1a2d,#9e2d4a)'};
+function getAlbumColor(cod){if(!cod)return'linear-gradient(135deg,#2c3e50,#34495e)';if(cod==='STANDARD')return BOOK_COLORS_BY_EXTRA['STANDARD'];if(cod==='ECO')return BOOK_COLORS_BY_EXTRA['ECO'];const cop=COPERTINE.find(c=>c.cod===cod);if(!cop)return'linear-gradient(135deg,#2c3e50,#34495e)';return BOOK_COLORS_BY_EXTRA[cop.extra]||'linear-gradient(135deg,#2c3e50,#34495e)';}
+
+function buildCopGrid(q){
+  // Mostra sempre STANDARD e ECO; mostra i modelli normali SOLO se c'è una ricerca
+  const searchStr=(q===undefined?document.getElementById('copSearch')?.value||'':q).trim();
+  const searchLow=searchStr.toLowerCase();
+  const special=COPERTINE.filter(c=>c.extra===0);
+  // Modelli normali: mostra solo se searchStr non vuoto
+  const normal=searchStr?COPERTINE.filter(c=>c.extra>0&&c.cod.toLowerCase().includes(searchLow)):[];
+  // Se c'è già una selezione non-standard, mostrarla sempre
+  const selMod=S.copCod&&!['STANDARD','ECO'].includes(S.copCod)?COPERTINE.find(c=>c.cod===S.copCod):null;
+  const normalFinal=selMod&&!normal.find(c=>c.cod===selMod.cod)?[...normal,selMod]:normal;
+
+  const rS=special.map(cop=>{const isOn=S.copCod===cop.cod;const sw=isOn?`background:${getAlbumColor(cop.cod)};`:'';const lbl=cop.eco?'Cartoncino fotografico':'Foto copertina o tessuto';return`<button class="cop-btn-special${isOn?' on':''}" onclick="selCop('${cop.cod}')" style="${sw}"><span class="cop-lbl">${cop.cod}</span><span class="cop-sub">${lbl}</span></button>`;}).join('');
+  const rN=normalFinal.map(cop=>{const isOn=S.copCod===cop.cod;const sw=isOn?`background:${getAlbumColor(cop.cod)};`:'';return`<button class="cop-btn-small${isOn?' on':''}" onclick="selCop('${cop.cod}')" title="${cop.cod} +€${cop.extra}" style="${sw}"><span class="cop-sm-lbl">${cop.cod}</span><span class="cop-sm-extra">+€${cop.extra}</span></button>`;}).join('');
+  const hint=searchStr&&!normalFinal.length?'<p style="font-size:.76rem;color:var(--ink3);padding:4px 0">Nessun modello trovato.</p>':'';
+  document.getElementById('copGrid').innerHTML=(rS?`<div class="cop-special-row">${rS}</div>`:'')+(rN?`<div class="cop-normal-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px">${rN}</div>`:hint);
+  updateCopNote();
+}
+function selCop(cod){S.copCod=cod;buildCopGrid();updateAlbPreview();calcTot();renderFinalTotals();}
+function updateCopNote(){
+  const note=document.getElementById('copNote');if(!note)return;
+  if(!S.copCod||S.noAlbum){note.style.display='none';return;}
+  const cop=COPERTINE.find(c=>c.cod===S.copCod);if(!cop){note.style.display='none';return;}
+  note.style.display='';
+  note.innerHTML=cop.eco?`<strong>Copertina ECO</strong> — Cartoncino fotografico. Costo: 2×pag + €10.`:`<strong>${cop.cod}</strong>${cop.extra>0?` — Supplemento <strong>€${cop.extra}</strong>`:'  — Nessun supplemento'}`;
+}
+
+// ══════════════════════════════════════════════════════
+// BOX — identico al mobile
+// ══════════════════════════════════════════════════════
+const BOX_COLORS=['linear-gradient(135deg,#8d6e63,#a1887f)','linear-gradient(135deg,#6b7c59,#8a9b7a)','linear-gradient(135deg,#4a5568,#718096)','linear-gradient(135deg,#5d4037,#8d6e63)'];
+function buildBoxGrid(){
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);
+  const boxes=fmt?(BOX_PER_FAMIGLIA[fmt.famiglia]||[]):[];
+  document.getElementById('boxGrid').innerHTML=boxes.map((b,i)=>{const on=S.boxCod===b.cod;return`<button class="box-btn${on?' on':''}" onclick="selBox('${b.cod}',${b.costo})">${b.cod}<small>${b.costo>0?f2(b.costo):'Incluso'}</small></button>`;}).join('');
+}
+function selBox(cod,costo){S.boxCod=cod;S.boxCosto=costo;buildBoxGrid();updateAlbPreview();calcTot();renderFinalTotals();}
+
+// ══════════════════════════════════════════════════════
+// ALBUM PREVIEW — identico al mobile
+// ══════════════════════════════════════════════════════
+function updateAlbPreview(){
+  const card=document.getElementById('albPreviewCard');if(!card)return;
+  if(S.noAlbum||!S.fmtId){card.style.display='none';return;}
+  card.style.display='';
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);if(!fmt)return;
+  const albBg=getAlbumColor(S.copCod);
+  const[w,h]=fmt.id.split('x').map(Number);
+  const ratio=h/w;const aW=110,aH=Math.round(aW*ratio);
+  const bW=Math.round(aW*1.22),bH=Math.round(aH*1.22);
+  const hasBox=S.boxCod&&S.boxCod!=='NO BOX';
+  const boxBg=hasBox?BOX_COLORS[Math.min(2,Math.floor((S.boxCosto||0)/80))]:'transparent';
+  const scene=document.getElementById('albScene');
+  if(hasBox){scene.innerHTML=`<div style="position:relative;width:${bW}px;height:${bH}px"><div style="position:absolute;inset:0;background:${boxBg};border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.25)"></div><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${aW}px;height:${aH}px;background:${albBg};border-radius:4px;box-shadow:inset -3px 0 8px rgba(0,0,0,.3)"></div></div>`;}
+  else{scene.innerHTML=`<div style="width:${aW}px;height:${aH}px;background:${albBg};border-radius:4px;box-shadow:0 6px 20px rgba(0,0,0,.25),inset -3px 0 8px rgba(0,0,0,.3)"></div>`;}
+  document.getElementById('albInfoTitle').textContent=fmt.label+(S.copCod?` · ${S.copCod}`:'');
+  document.getElementById('albInfoSub').textContent=S.pagine+' pagine'+(hasBox?` · Box ${S.boxCod}`:'');
+}
+
+// ══════════════════════════════════════════════════════
+// NESSUN ALBUM — identico al mobile
+// ══════════════════════════════════════════════════════
+function toggleNoAlbum(){
+  S.noAlbum=!S.noAlbum;
+  const btn=document.getElementById('noAlbumBtn');
+  btn.classList.toggle('on',S.noAlbum);
+  btn.textContent=S.noAlbum?'Ripristina Album':'Nessun Album';
+  const content=document.getElementById('albumContent');
+  if(content){content.style.opacity=S.noAlbum?'.35':'1';content.style.pointerEvents=S.noAlbum?'none':'';}
+  updateAlbGenUI();calcTot();renderFinalTotals();updateAlbPreview();
+}
+
+// ══════════════════════════════════════════════════════
+// ALBUM GENITORI — identico al mobile
+// ══════════════════════════════════════════════════════
+function getAlbGenFmtId(){
+  const sposiFmt=S.fmtId||'25x25';const[a,b]=sposiFmt.split('x').map(Number);
+  const isQuad=a===b;const isOrizz=a>b;
+  if(S.albGen.upgradeSize==='big'){if(isQuad)return'25x25';return isOrizz?'30x20':'20x30';}
+  if(isQuad)return'20x20';return isOrizz?'20x15':'15x20';
+}
+function getAlbGenPagCosto(){return S.albGen.upgradeSize==='big'?3:2;}
+function calcAlbGen(){
+  const tipo=document.getElementById('tipoEvento')?.value||'';
+  if(tipo!=='Matrimonio'||S.noAlbum||S.albGen.disabled||S.albGen.qty===0)return{cost:0,fmtId:null,ppag:0};
+  const fmtId=getAlbGenFmtId();const ppag=getAlbGenPagCosto();
+  const costOne=(S.pagine*ppag)+30;
+  return{cost:costOne*S.albGen.qty,fmtId,ppag,costOne};
+}
+function updateAlbGenUI(){
+  const tipo=document.getElementById('tipoEvento')?.value||'';
+  const card=document.getElementById('cardAlbGen');const row=document.getElementById('t_alb_gen_row');
+  if(!card)return;
+  if(tipo!=='Matrimonio'||S.noAlbum){card.style.display='none';if(row)row.style.display='none';return;}
+  card.style.display='';if(row)row.style.display='';
+  const ag=calcAlbGen();
+  document.getElementById('albGenQty').textContent=S.albGen.qty;
+  ['agBtn_small','agBtn_big','agBtn_none'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
+  const selId=S.albGen.disabled?'agBtn_none':(S.albGen.upgradeSize==='big'?'agBtn_big':'agBtn_small');
+  const selEl=document.getElementById(selId);if(selEl)selEl.classList.add('on');
+  const note=document.getElementById('albGenNote');
+  if(note){
+    if(S.albGen.disabled)note.textContent='Nessun album genitori selezionato.';
+    else if(ag.cost>0)note.textContent=`Formato: ${ag.fmtId} · ${S.pagine} pag. · ${S.albGen.qty} album · Totale: ${f2(ag.cost)}`;
+    else note.textContent='Quantità: 0';
+  }
+  const lbl=document.getElementById('t_alb_gen_lbl');if(lbl)lbl.textContent='Album genitori (×'+S.albGen.qty+')';
+  const tot=document.getElementById('t_alb_gen');if(tot)tot.textContent=f2(ag.cost);
+}
+function chgAlbGen(d){S.albGen.qty=Math.max(0,S.albGen.qty+d);updateAlbGenUI();calcTot();renderFinalTotals();}
+function selAlbGenFmt(v){
+  if(v==='none'){S.albGen.disabled=true;}
+  else{S.albGen.disabled=false;S.albGen.upgradeSize=v||'small';}
+  updateAlbGenUI();updateAlbPreview();calcTot();renderFinalTotals();
+}
+
+// ══════════════════════════════════════════════════════
+// CALCOLO COSTI — identico al mobile (calcCosts completo)
+// ══════════════════════════════════════════════════════
+function calcCosts(){
+  const fmt=FORMATI.find(f=>f.id===S.fmtId);
+  const cop=COPERTINE.find(c=>c.cod===S.copCod);
+  const albCost=(!S.noAlbum&&fmt)?S.pagine*fmt.pagina:0;
+  let copBase=(!S.noAlbum&&fmt)?fmt.copertina:0;
+  let copExtra=(!S.noAlbum&&cop)?cop.extra:0;
+  let isEco=false;
+  if(!S.noAlbum&&cop&&cop.eco&&fmt){copBase=0;copExtra=(2*fmt.pagina)+10;isEco=true;}
+  const boxCost=(!S.noAlbum)?(S.boxCosto||0):0;
+  const albSub=albCost+copBase+copExtra+boxCost;
+  const albGenData=calcAlbGen();const albGenCost=albGenData.cost||0;
+  let svcTot=0,svcVideoTot=0;const svcList=[];
+  getGruppi().forEach(g=>g.items.forEach(s=>{
+    if(S.svc[s.id]&&!s.noVideo){
+      const cust=SVC_CUSTOM[s.id]||{};
+      const priceOvr=SVC_PRICE_OVERRIDES[s.id];
+      const costo=s.editabile?(cust.costo||0):(typeof priceOvr!=='undefined'?priceOvr:s.costo);
+      const nome=s.editabile?(cust.nome||'Servizio personalizzato'):s.nome;
+      svcTot+=costo;svcList.push({nome,costo,isVideo:g.icona==='video'});
+      if(g.icona==='video')svcVideoTot+=costo;
+    }
+  }));
+  const totale=albSub+albGenCost+svcTot;
+  const tipoEvento=document.getElementById('tipoEvento')?.value||'';
+  if(tipoEvento!=='Matrimonio'&&!window._caparraManuale){
+    const hasFoto=getGruppi().some(g=>g.icona==='foto'&&g.items.some(s=>S.svc[s.id]&&!s.noVideo));
+    const hasVideo=getGruppi().some(g=>g.icona==='video'&&g.items.some(s=>S.svc[s.id]&&!s.noVideo));
+    const caparraEl=document.getElementById('caparra');
+    if(caparraEl){
+      const presetCaparra=(PRESET_EVENTO[tipoEvento]?.caparra)||50;
+      const autoCaparra=(hasFoto&&hasVideo)?100:presetCaparra;
+      if(parseFloat(caparraEl.value)===presetCaparra||parseFloat(caparraEl.value)===100)caparraEl.value=autoCaparra;
+    }
+  }
+  const caparra=parseFloat(document.getElementById('caparra')?.value)||0;
+  const sconto=Math.max(0,parseFloat(document.getElementById('scontoVal')?.value)||0);
+  const hasAlbum=!S.noAlbum&&albSub>0;
+  // Sconto: applica prima su album genitori, poi su album sposi, residuo su saldo servizio
+  const scontoSuAlbumGen=(tipoEvento==='Matrimonio'&&albGenCost>0)?Math.min(sconto,albGenCost):0;
+  const scontoSuAlbum=(hasAlbum&&scontoSuAlbumGen===0)?Math.min(sconto,albSub):0;
+  const scontoSuAlbumTot=scontoSuAlbum+scontoSuAlbumGen;
+  const scontoResiduo=Math.max(0,sconto-scontoSuAlbumTot);
+  const albSubNetto=Math.max(0,albSub-scontoSuAlbum);
+  const albGenCostNetto=Math.max(0,albGenCost-scontoSuAlbumGen);
+  const totaleNetto=Math.max(0,totale-sconto);
+  const saldo50video=hasAlbum?Math.round(svcVideoTot*0.5*100)/100:0;
+  const saldoEntrEvento=Math.max(0,svcTot-caparra-saldo50video-scontoResiduo);
+  const A2=hasAlbum?(albSubNetto+albGenCostNetto+saldo50video):0;
+  // Saldo consegna: €200 matrimonio, €50 altri con album
+  const saldoConsegna=tipoEvento==='Matrimonio'?200:(hasAlbum?50:0);
+  const accontoGrafica=A2>0?Math.max(0,A2-saldoConsegna):0;
+  const accontoGraficaScontato=accontoGrafica; // sconto già applicato sull'album
+  const saldoEntrEventoScontato=saldoEntrEvento;
+  const albumDetails=(function(){
+    if(S.noAlbum)return'Nessun album';
+    const parts=[];
+    if(fmt)parts.push('Album '+fmt.label);
+    if(S.pagine)parts.push(S.pagine+' pag.');
+    parts.push('Copertina '+(S.copCod||'non definita'));
+    parts.push((S.boxCod&&S.boxCod!=='NO BOX')?('Box '+S.boxCod):'No box');
+    return parts.join(' · ');
+  })();
+  const albumGenDetails=(albGenCost>0)?('Album genitori ×'+S.albGen.qty+' · '+(albGenData.fmtId||'')+' · '+S.pagine+' pag.'):'';
+  return{fmt,cop,albCost,copBase,copExtra,isEco,boxCost,albSub,albSubNetto,albGenCost,albGenCostNetto,svcTot,svcVideoTot,saldo50video,svcList,totale,totaleNetto,caparra,saldoEntrEvento,saldoEntrEventoScontato,A2,accontoGrafica,accontoGraficaScontato,sconto,scontoSuAlbum,scontoSuAlbumGen,scontoResiduo,saldoConsegna,tipoEvento,albumDetails,albumGenDetails};
+}
+
+function calcTot(){
+  const c=calcCosts();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const accontoAlbEl=document.getElementById('accontoAlbum');if(accontoAlbEl)accontoAlbEl.value=c.accontoGrafica.toFixed(2);
+  set('t_fmt',c.fmt&&!S.noAlbum?c.fmt.label:S.noAlbum?'Nessun album':'—');
+  set('t_npag',S.pagine);
+  set('t_albcost',c.fmt&&!S.noAlbum?f2(c.albCost):'€ 0,00');
+  set('t_cop_base',c.isEco?'€ 0,00 (ECO)':f2(c.copBase));
+  set('t_cop_extra',c.isEco?`+${f2(c.copExtra)} (2pag+€10)`:f2(c.copExtra));
+  set('t_box',f2(c.boxCost));
+  set('t_alb_sub',f2(c.albSub+c.albGenCost));
+  updateAlbGenUI();
+}
+
+// ══════════════════════════════════════════════════════
+// RIEPILOGO — identico al mobile
+// ══════════════════════════════════════════════════════
+function fmtRowPrice(originale,netto){
+  if(originale>0&&netto>=0&&netto<originale){
+    return `<span class="val" style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.1"><span style="text-decoration:line-through;color:var(--ink3)">${f2(originale)}</span><span style="font-size:.82em;margin-top:2px">${f2(netto)}</span></span>`;
+  }
+  return `<span class="val">${f2(originale)}</span>`;
+}
+
+// Etichetta saldo servizio (matrimonio 15gg, altri 7gg)
+function getSaldoServizioLabel(tipoEvento){
+  return tipoEvento==='Matrimonio'?"② Saldo Servizio — 15 gg prima dell'evento":"② Saldo Servizio — 7 giorni prima dell'evento";
+}
+
+function renderFinalTotals(){
+  const c=calcCosts();
+  const tipo=getTipoEventoFinale()||'—';
+  const dataEv=document.getElementById('dataEvento')?.value?new Date(document.getElementById('dataEvento').value).toLocaleDateString('it-IT'):'—';
+  let html=`
+    <div class="price-row"><span class="label">Tipo evento</span><span class="val" style="color:var(--ink)">${tipo}</span></div>
+    <div class="price-row"><span class="label">Data</span><span class="val" style="color:var(--ink)">${dataEv}</span></div>`;
+  if(c.svcList.length){html+=c.svcList.map(s=>`<div class="price-row"><span class="label">${s.nome||'—'}</span><span class="val">${f2(s.costo)}</span></div>`).join('');}
+  if(!S.noAlbum&&c.albSub>0){
+    html+=`<div class="price-row"><span class="label">${c.albumDetails}</span>${fmtRowPrice(c.albSub,c.albSubNetto)}</div>`;
+    if(c.albGenCost>0)html+=`<div class="price-row"><span class="label">${c.albumGenDetails}</span>${fmtRowPrice(c.albGenCost,c.albGenCostNetto)}</div>`;
+  } else if(S.noAlbum){
+    html+=`<div class="price-row"><span class="label" style="font-style:italic">Nessun album</span><span class="val" style="color:var(--ink3)">file digitali</span></div>`;
+  }
+  html+=`${(!S.noAlbum&&c.scontoResiduo>0)?`<div class="price-row"><span class="label">Adeguamento</span><span class="val">− ${f2(c.scontoResiduo)}</span></div>`:(c.sconto>0&&!S.noAlbum?'':(c.sconto>0?`<div class="price-row"><span class="label">Sconto</span><span class="val">− ${f2(c.sconto)}</span></div>`:''))}<div class="price-row total"><span>Totale</span><span>${f2(c.totaleNetto)}</span></div>`;
+  html+=`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bg2)">
+    <div style="font-size:.63rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Piano di Pagamento</div>
+    <div class="payment-row"><span class="step">① Salva Data — alla firma</span><span class="amount">${f2(c.caparra)}</span></div>
+    <div class="payment-row"><span class="step">${getSaldoServizioLabel(c.tipoEvento)}</span><span class="amount">${f2(c.saldoEntrEventoScontato)}</span></div>
+    ${c.A2>0?`<div class="payment-row"><span class="step">③ Acconto stampa album</span><span class="amount">${f2(c.accontoGraficaScontato)}</span></div><div class="payment-row"><span class="step">④ Saldo alla consegna</span><span class="amount">${f2(c.saldoConsegna)}</span></div>`:''}
+  </div>`;
+  document.getElementById('finalTotals').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════
+// CALENDARIO ONLINE — identico al mobile, origin=desktop
+// ══════════════════════════════════════════════════════
+let BOOKINGS_CACHE={};
+function normalizeDate(v){
+  if(!v)return'';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;
+  const d=new Date(v);if(Number.isNaN(d.getTime()))return'';
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function prettyDate(v){const n=normalizeDate(v);if(!n)return'—';const[y,m,d]=n.split('-');return`${d}/${m}/${y}`;}
+function renderBookingAlert(type,msg){
+  const el=document.getElementById('bookingAlert');if(!el)return;
+  if(!msg){el.className='booking-alert';el.textContent='';return;}
+  el.className=`booking-alert on ${type||''}`;el.innerHTML=msg;
+}
+const SLOT_LABELS={MATTINA:'Mattina',POMERIGGIO:'Pomeriggio',SERALE:'Serale'};
+function selectedSlot(){return(gv('orarioEvento')||'SERALE').toUpperCase();}
+
+// Cache TTL: richiesta al server max 1 volta ogni 5 minuti
+let _bookingsCacheTime=0;
+const CACHE_TTL=5*60*1000;
+async function fetchBookings(force=false){
+  const now=Date.now();
+  if(!force && Object.keys(BOOKINGS_CACHE).length>0 && (now-_bookingsCacheTime)<CACHE_TTL){
+    return BOOKINGS_CACHE; // usa cache locale, nessuna chiamata
+  }
+  try{
+    const res=await fetch('/.netlify/functions/bookings-get');
+    if(!res.ok)throw new Error('get failed');
+    const data=await res.json();
+    BOOKINGS_CACHE=data.bookings||{};
+    _bookingsCacheTime=now;
+    return BOOKINGS_CACHE;
+  }catch(e){console.warn('Calendario non disponibile',e);return BOOKINGS_CACHE;}
+}
+
+async function checkSelectedDate(){
+  const date=normalizeDate(gv('dataEvento'));if(!date){renderBookingAlert('','');return;}
+  await fetchBookings();
+  const day=BOOKINGS_CACHE[date]||{};const slot=selectedSlot();const item=day[slot];
+  if(item&&item.occupied!==false){
+    const note=(item.note||'Fascia già impegnata').replace(/</g,'&lt;');
+    const stato=item.status==='confermato'?'Confermato':'Preventivo';
+    // Mostra avviso con pulsante per caricare il preventivo esistente
+    renderBookingAlert('busy',`${SLOT_LABELS[slot]} impegnata: <strong>${prettyDate(date)}</strong><br>${stato} · ${note}<br><button onclick="caricaPreventivoEsistente()" style="margin-top:7px;padding:5px 12px;background:#fff;border:1px solid #fecaca;border-radius:6px;font-size:.75rem;font-weight:600;color:#991b1b;cursor:pointer;font-family:'DM Sans',sans-serif">Carica preventivo salvato</button>`);
+  }else{
+    renderBookingAlert('free',`${SLOT_LABELS[slot]} libera: <strong>${prettyDate(date)}</strong>`);
+  }
+}
+
+// Carica i dati del preventivo salvato e precompila il form
+function caricaPreventivoEsistente(){
+  const date=normalizeDate(gv('dataEvento'));
+  const slot=selectedSlot();
+  const day=BOOKINGS_CACHE[date]||{};
+  const item=day[slot];
+  if(!item||!item.details)return;
+  const d=item.details;
+  const fv=d.formValues||{};
+
+  // Precompila campi base
+  if(fv.tipoEvento)document.getElementById('tipoEvento').value=fv.tipoEvento;
+  if(fv.luogoEvento)document.getElementById('luogoEvento').value=fv.luogoEvento;
+  if(fv.nomeCliente)document.getElementById('nomeCliente').value=fv.nomeCliente;
+  if(fv.noteExtra)document.getElementById('noteExtra').value=fv.noteExtra;
+  if(fv.scontoVal){document.getElementById('scontoVal').value=fv.scontoVal;}
+
+  // Ripristina album
+  if(d.album){
+    const alb=d.album;
+    S.noAlbum=!!alb.noAlbum;
+    if(alb.fmtId){S.fmtId=alb.fmtId;}
+    if(alb.pagine){S.pagine=parseInt(alb.pagine)||30;document.getElementById('pagVal').textContent=S.pagine;}
+    if(alb.copCod){S.copCod=alb.copCod;}
+    if(alb.boxCod){S.boxCod=alb.boxCod;S.boxCosto=alb.boxCosto||0;}
+    const noAlbBtn=document.getElementById('noAlbumBtn');
+    if(noAlbBtn){noAlbBtn.classList.toggle('on',S.noAlbum);noAlbBtn.textContent=S.noAlbum?'Ripristina Album':'Nessun Album';}
+    const albumContent=document.getElementById('albumContent');
+    if(albumContent){albumContent.style.opacity=S.noAlbum?'.35':'1';albumContent.style.pointerEvents=S.noAlbum?'none':'';}
+  }
+
+  // Ripristina caparra dal preventivo
+  if(d.prezzi?.caparra)document.getElementById('caparra').value=d.prezzi.caparra;
+
+  // Ripristina servizi selezionati
+  if(d.svcList&&d.svcList.length){
+    // Reset selezioni
+    Object.keys(S.svc).forEach(k=>S.svc[k]=false);
+    d.svcList.forEach(sv=>{
+      // Cerca l'id corrispondente nel nome
+      const gruppi=getGruppi();
+      gruppi.forEach(g=>g.items.forEach(s=>{
+        if(!s.noVideo&&(s.nome===sv.nome||(s.editabile&&SVC_CUSTOM[s.id]?.nome===sv.nome))){
+          S.svc[s.id]=true;
+          if(typeof sv.costo==='number')SVC_PRICE_OVERRIDES[s.id]=sv.costo;
+        }
+      }));
+    });
+  }
+
+  onEvento();
+  showToast('Preventivo caricato');
+}
+
+function buildPreventivoNote(){
+  const tipo=getTipoEventoFinale()||'Evento';const nome=gv('nomeCliente')||'Cliente';
+  const luogo=gv('luogoEvento')||'luogo da definire';
+  return`Preventivo del ${new Date().toLocaleDateString('it-IT')} — ${tipo} — ${nome} — ${luogo}`;
+}
+
+// Salva nel calendario via Netlify (origin: desktop)
+async function saveBooking(){
+  const date=normalizeDate(gv('dataEvento'));
+  if(!date)return{ok:false,skipped:true,message:'Nessuna data selezionata'};
+  const c=calcCosts();
+  const payload={
+    date,slot:selectedSlot(),status:'preventivo',occupied:true,
+    source:'preventivo-desktop',
+    eventType:getTipoEventoFinale()||'',customerName:gv('nomeCliente')||'',
+    note:buildPreventivoNote(),
+    quoteCreatedAt:new Date().toISOString(),
+    details:{
+      origin:'desktop',generatedAs:'pdf',
+      svcList:c.svcList,
+      prezzi:{
+        totale:c.totale,totaleNetto:c.totaleNetto,caparra:c.caparra,
+        sconto:c.sconto,svcTot:c.svcTot,svcVideoTot:c.svcVideoTot,
+        albSub:c.albSub,albGenCost:c.albGenCost,
+        saldoEntrEvento:c.saldoEntrEventoScontato,
+        accontoGrafica:c.accontoGraficaScontato,
+        saldoConsegna:c.saldoConsegna,A2:c.A2
+      },
+      album:(()=>{
+        const albGenFmt=(()=>{const[a,b]=(S.fmtId||'25x25').split('x').map(Number);const isQ=a===b,isO=a>b;if(S.albGen.upgradeSize==='big'){if(isQ)return'25x25';return isO?'30x20':'20x30';}if(isQ)return'20x20';return isO?'20x15':'15x20';})();
+        return{noAlbum:S.noAlbum,fmtId:S.fmtId,formato:c.fmt?c.fmt.label:'—',pagine:S.pagine,copCod:S.copCod,copertina:S.copCod||'—',boxCod:S.boxCod,box:S.boxCod||'—',boxCosto:S.boxCosto,albSub:c.albSub,albGenCost:c.albGenCost,genitori:c.albGenCost>0?('×'+S.albGen.qty+' '+albGenFmt):'Nessuno'};
+      })(),
+      formValues:{
+        tipoEvento:getTipoEventoFinale()||'',dataEvento:date,orarioEvento:selectedSlot(),
+        luogoEvento:gv('luogoEvento')||'',nomeCliente:gv('nomeCliente')||'',
+        scontoVal:gv('scontoVal')||'',noteExtra:gv('noteExtra')||''
+      }
+    }
+  };
+  try{
+    const res=await fetch('/.netlify/functions/bookings-upsert',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const data=await res.json();
+    if(!res.ok||!data.ok)throw new Error(data.error||'save failed');
+    BOOKINGS_CACHE[date]=data.day;return{ok:true};
+  }catch(e){console.warn('Salvataggio fallito',e);return{ok:false,error:e.message};}
+}
+
+async function salvaPreventivo(){
+  if((document.getElementById('tipoEvento')?.value||'')==='Altro' && !(document.getElementById('altroServizio')?.value||'').trim()){
+    showToast('Specifica il tipo di servizio');
+    document.getElementById('altroServizio')?.focus();
+    return;
+  }
+  // Controlla cache locale (no chiamata server extra)
+  const date=normalizeDate(gv('dataEvento'));
+  if(date){
+    const slot=selectedSlot();
+    const item=(BOOKINGS_CACHE[date]||{})[slot];
+    if(item&&item.occupied!==false){
+      const ok=window.confirm('Questa data e fascia hanno già un preventivo salvato.\nVuoi sovrascriverlo?');
+      if(!ok)return;
+    }
+  }
+  const btn=document.querySelector('[onclick="salvaPreventivo()"]');
+  if(btn){btn.disabled=true;btn.textContent='Salvataggio...';}
+  const result=await saveBooking();
+  if(btn){btn.disabled=false;btn.textContent='Salva nel Calendario';}
+  if(result.skipped)showToast('Inserisci la data evento prima di salvare');
+  else if(result.ok){showToast('Salvato nel calendario');}
+  else showToast('Salvataggio fallito: '+( result.error||'errore sconosciuto'));
+}
+
+// ══════════════════════════════════════════════════════
+// GENERA PDF — stampa la finestra con layout ottimizzato
+// ══════════════════════════════════════════════════════
+function generaPDF(){
+  if((document.getElementById('tipoEvento')?.value||'')==='Altro' && !(document.getElementById('altroServizio')?.value||'').trim()){
+    alert('Specifica il tipo di servizio');
+    document.getElementById('altroServizio')?.focus();
+    return;
+  }
+  // Costruisce un documento HTML da stampare con window.print()
+  const c=calcCosts();
+  const tipo=gv('tipoEvento')||'—';
+  const cliente=gv('nomeCliente')||'—';
+  const dataEv=document.getElementById('dataEvento')?.value?new Date(document.getElementById('dataEvento').value).toLocaleDateString('it-IT'):'—';
+  const luogo=gv('luogoEvento')||'—';
+  const dataDoc=new Date().toLocaleDateString('it-IT');
+  const scadenza=(()=>{const d=new Date();d.setDate(d.getDate()+10);return d.toLocaleDateString('it-IT');})();
+
+  const svcRows=c.svcList.map(s=>`<tr><td>${s.nome||'—'}</td><td style="text-align:right;font-weight:600">${f2(s.costo)}</td></tr>`).join('');
+
+  const albRows=(()=>{
+    if(S.noAlbum)return`<tr><td colspan="2" style="font-style:italic">Nessun album — consegna file digitali</td></tr>`;
+    if(!c.albSub>0)return'';
+    let r=`<tr><td>${c.albumDetails}</td><td style="text-align:right;font-weight:600">`;
+    if(c.albSubNetto<c.albSub){r+=`<span style="text-decoration:line-through;color:#999">${f2(c.albSub)}</span><br>${f2(c.albSubNetto)}`;}
+    else{r+=f2(c.albSub);}
+    r+='</td></tr>';
+    if(c.albGenCost>0){
+      r+=`<tr><td>${c.albumGenDetails}</td><td style="text-align:right;font-weight:600">`;
+      if(c.albGenCostNetto<c.albGenCost){r+=`<span style="text-decoration:line-through;color:#999">${f2(c.albGenCost)}</span><br>${f2(c.albGenCostNetto)}`;}
+      else{r+=f2(c.albGenCost);}
+      r+='</td></tr>';
+    }
+    return r;
+  })();
+
+  const note=gv('noteExtra');
+
+  const html=`<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8">
+<title>Preventivo — ${cliente}</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;color:#1c1917;background:#fff;padding:32px 40px;font-size:10pt;}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #1c1917;}
+.brand{font-family:'Libre Baskerville',serif;font-size:1.2rem;color:#1c1917;font-weight:400;}
+.brand small{display:block;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:#78716c;margin-top:2px;}
+.meta{text-align:right;font-size:.75rem;color:#78716c;}
+.meta .ddate{font-size:.85rem;font-weight:600;color:#1c1917;margin-bottom:2px;}
+.header-box{background:#1c1917;color:#fff;border-radius:8px;padding:16px 20px;margin-bottom:20px;}
+.header-box .ev-tipo{font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px;}
+.header-box .ev-nome{font-family:'Libre Baskerville',serif;font-size:1.3rem;color:#fff;font-weight:400;}
+.header-box .ev-meta{font-size:.75rem;color:rgba(255,255,255,.6);margin-top:4px;}
+h2{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a0845c;margin:18px 0 8px;}
+table{width:100%;border-collapse:collapse;}
+td{padding:6px 0;border-bottom:1px solid #ede9e2;font-size:.88rem;vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.total-row td{font-size:1rem;font-weight:700;font-family:'Libre Baskerville',serif;padding-top:12px;border-top:2px solid #1c1917;border-bottom:none;}
+.pay-box{background:#f5f3ef;border-radius:8px;padding:14px 16px;margin-top:6px;}
+.pay-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #e2dcd3;font-size:.84rem;}
+.pay-row:last-child{border-bottom:none;}
+.pay-step{color:#78716c;}
+.pay-amt{font-weight:600;color:#1c1917;}
+.validity{text-align:center;font-size:.72rem;color:#78716c;margin-top:16px;padding-top:12px;border-top:1px solid #e2dcd3;}
+.footer{text-align:center;font-size:.6rem;color:#aaa;margin-top:24px;padding-top:10px;border-top:1px solid #ede9e2;letter-spacing:.06em;text-transform:uppercase;}
+.note-box{background:#faf7f2;border:1px solid #e8d5b7;border-radius:6px;padding:10px 14px;margin-top:16px;font-size:.8rem;color:#44403c;line-height:1.6;}
+</style>
+</head><body onload="window.print()">
+  <div class="hdr">
+    <div class="brand">${CFG_STUDIO.nome}<small>${CFG_STUDIO.qualifica}</small></div>
+    <div class="meta"><div class="ddate">${dataDoc}</div><div>Preventivo Fotografico</div></div>
+  </div>
+  <div class="header-box">
+    <div class="ev-tipo">${tipo} · ${luogo}</div>
+    <div class="ev-nome">${cliente}</div>
+    <div class="ev-meta">${dataEv}</div>
+  </div>
+  ${svcRows?`<h2>Servizi</h2><table><tbody>${svcRows}</tbody></table>`:''}
+  ${!S.noAlbum&&c.albSub>0?`<h2>Album</h2><table><tbody>${albRows}</tbody></table>`:''}
+  ${S.noAlbum?`<h2>Album</h2><table><tbody>${albRows}</tbody></table>`:''}
+  ${(!S.noAlbum&&c.scontoResiduo>0)?`<table style="margin-top:6px"><tbody><tr><td>Adeguamento</td><td style="text-align:right;font-weight:600">− ${f2(c.scontoResiduo)}</td></tr></tbody></table>`:(c.sconto>0&&!S.noAlbum?'':(c.sconto>0?`<table style="margin-top:6px"><tbody><tr><td>Sconto</td><td style="text-align:right;font-weight:600">− ${f2(c.sconto)}</td></tr></tbody></table>`:''))}
+  <table style="margin-top:8px"><tbody>
+    <tr class="total-row"><td>Totale Preventivo</td><td style="text-align:right">${f2(c.totaleNetto)}</td></tr>
+  </tbody></table>
+  <h2>Piano di Pagamento</h2>
+  <div class="pay-box">
+    <div class="pay-row"><span class="pay-step">① Salva Data — alla firma</span><span class="pay-amt">${f2(c.caparra)}</span></div>
+    <div class="pay-row"><span class="pay-step">${getSaldoServizioLabel(c.tipoEvento)}</span><span class="pay-amt">${f2(c.saldoEntrEventoScontato)}</span></div>
+    ${c.A2>0?`<div class="pay-row"><span class="pay-step">③ Acconto stampa album</span><span class="pay-amt">${f2(c.accontoGraficaScontato)}</span></div><div class="pay-row"><span class="pay-step">④ Saldo alla consegna</span><span class="pay-amt">${f2(c.saldoConsegna)}</span></div>`:''}
+  </div>
+  ${note?`<div class="note-box"><strong style="font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:#a0845c">Note</strong><br>${note}</div>`:''}
+  <div class="validity">Preventivo valido 10 giorni · scade il ${scadenza}</div>
+  <div class="footer">${CFG_STUDIO.nome} · ${CFG_STUDIO.indirizzo}, ${CFG_STUDIO.citta} · P.IVA ${CFG_STUDIO.piva} · Tel ${CFG_STUDIO.tel}</div>
+</body></html>`;
+
+  const win=window.open('','_blank','width=800,height=900');
+  if(win){win.document.write(html);win.document.close();}
+  else{alert('Pop-up bloccato. Consenti i pop-up per questo sito.');}
+  // Salva automaticamente nel calendario dopo la generazione
+  saveBooking().then(r=>{if(r.ok){showToast('Salvato nel calendario');}});
+}
+
+// ══════════════════════════════════════════════════════
+// CARICA SU CONTRATTO — salva e apre contratto con data/fascia in URL
+// ══════════════════════════════════════════════════════
+async function caricaSuContratto(){
+  const date=normalizeDate(gv('dataEvento'));
+  if(!date){showToast('Inserisci prima la data evento');return;}
+  // Usa cache locale (no chiamata server extra)
+  const slot=selectedSlot();
+  const item=(BOOKINGS_CACHE[date]||{})[slot];
+  if(item&&item.occupied!==false){
+    const ok=window.confirm('Questa data e fascia hanno già un preventivo.\nVuoi sovrascriverlo e aprire il contratto?');
+    if(!ok)return;
+  }
+  const btn=document.querySelector('[onclick="caricaSuContratto()"]');
+  if(btn){btn.disabled=true;btn.textContent='Salvataggio...';}
+  const result=await saveBooking();
+  if(btn){btn.disabled=false;btn.textContent='Carica su Contratto';}
+  if(result.ok||result.skipped){
+    // Apri contratto con parametri data e fascia
+    const url=`./contratto.html?date=${encodeURIComponent(date)}&slot=${encodeURIComponent(slot)}`;
+    window.open(url,'_blank');
+  } else {
+    showToast('Errore salvataggio: '+(result.error||'riprova'));
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+(function init(){
+  applyConfig();
+  const brandEl=document.getElementById('brandEl');
+  if(brandEl){
+    brandEl.childNodes[0].textContent=CFG_STUDIO.nome;
+    const small=brandEl.querySelector('small');if(small)small.textContent=CFG_STUDIO.qualifica;
+  }
+  // Debounce: aspetta 600ms dopo l'ultimo cambio prima di chiamare il server
+  let _checkTimer;
+  function debouncedCheck(){clearTimeout(_checkTimer);_checkTimer=setTimeout(checkSelectedDate,600);}
+  document.getElementById('dataEvento')?.addEventListener('change',debouncedCheck);
+  document.getElementById('orarioEvento')?.addEventListener('change',debouncedCheck);
+  document.getElementById('altroServizio')?.addEventListener('input',()=>{renderFinalTotals();});
+  // Redirect automatico: se mobile, vai al preventivo mobile
+  if(window.innerWidth<768 && !window.location.search.includes('nodesktop')){
+    const params=window.location.search;
+    window.location.replace('./preventivo.html'+params);
+    return;
+  }
+  // Traccia modifiche manuali alla caparra
+  document.getElementById('caparra')?.addEventListener('input',()=>{window._caparraManuale=true;calcTot();renderFinalTotals();});
+  fetchBookings(); // carica cache una sola volta all'avvio
+  onEvento();
+  updateAlbPreview();
+  renderFinalTotals();
+  // Carica preventivo da URL params se presenti (?date=...&slot=...)
+  const _urlParams=new URLSearchParams(window.location.search);
+  if(_urlParams.get('date')&&_urlParams.get('slot')){
+    const _pDate=_urlParams.get('date');
+    const _pSlot=_urlParams.get('slot');
+    document.getElementById('dataEvento').value=_pDate;
+    if(document.getElementById('orarioEvento')){
+      document.getElementById('orarioEvento').value=_pSlot;
+    }
+    // Carica il preventivo salvato dopo aver recuperato i dati dal server
+    fetchBookings(true).then(()=>{
+      const _item=(BOOKINGS_CACHE[_pDate]||{})[_pSlot];
+      if(_item&&_item.details){
+        caricaPreventivoEsistente();
+        showToast('Preventivo caricato dal calendario');
+      }
+      checkSelectedDate();
+    });
+  }
+})();
+</script>
+</body>
+</html>
