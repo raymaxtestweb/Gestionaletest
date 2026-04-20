@@ -84,6 +84,8 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
 .loading{text-align:center;padding:40px;color:var(--ink3);}
+.quick-btn{padding:8px 16px;border:1px solid var(--bg3);border-radius:8px;background:var(--white);color:var(--ink);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.quick-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -118,29 +120,37 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
     </div>
   </div>
 
+  <!-- QUICK FILTER BUTTONS -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="quick-btn active" onclick="setQuickFilter('all')" id="quickAll">Tutti</button>
+    <button class="quick-btn" onclick="setQuickFilter('in_lavorazione')" id="quickLav">In lavorazione</button>
+    <button class="quick-btn" onclick="setQuickFilter('pronto')" id="quickPronto">Pronto</button>
+    <button class="quick-btn" onclick="setQuickFilter('consegnato')" id="quickCons">Consegnato</button>
+  </div>
+
   <!-- FILTRI -->
   <div class="filters">
-    <div class="ff"><label>Mese</label>
-      <select id="filtMese">
-        <option value="">Tutti</option>
-        <option value="01">Gennaio</option><option value="02">Febbraio</option>
-        <option value="03">Marzo</option><option value="04">Aprile</option>
-        <option value="05">Maggio</option><option value="06">Giugno</option>
-        <option value="07">Luglio</option><option value="08">Agosto</option>
-        <option value="09">Settembre</option><option value="10">Ottobre</option>
-        <option value="11">Novembre</option><option value="12">Dicembre</option>
-      </select>
+    <div class="ff"><label>Data da</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <select id="filtMeseDa"><option value="">Mese</option>
+          <option value="01">Gen</option><option value="02">Feb</option><option value="03">Mar</option>
+          <option value="04">Apr</option><option value="05">Mag</option><option value="06">Giu</option>
+          <option value="07">Lug</option><option value="08">Ago</option><option value="09">Set</option>
+          <option value="10">Ott</option><option value="11">Nov</option><option value="12">Dic</option>
+        </select>
+        <select id="filtAnnoDa"><option value="">Anno</option></select>
+      </div>
     </div>
-    <div class="ff"><label>Anno</label>
-      <select id="filtAnno"><option value="">Tutti</option></select>
-    </div>
-    <div class="ff"><label>Stato</label>
-      <select id="filtStato">
-        <option value="">Tutti</option>
-        <option value="in_lavorazione">In lavorazione</option>
-        <option value="pronto">Pronto</option>
-        <option value="consegnato">Consegnato</option>
-      </select>
+    <div class="ff"><label>Data a</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <select id="filtMeseA"><option value="">Mese</option>
+          <option value="01">Gen</option><option value="02">Feb</option><option value="03">Mar</option>
+          <option value="04">Apr</option><option value="05">Mag</option><option value="06">Giu</option>
+          <option value="07">Lug</option><option value="08">Ago</option><option value="09">Set</option>
+          <option value="10">Ott</option><option value="11">Nov</option><option value="12">Dic</option>
+        </select>
+        <select id="filtAnnoA"><option value="">Anno</option></select>
+      </div>
     </div>
     <div class="ff"><label>Cliente</label>
       <input type="text" id="filtCliente" placeholder="Nome...">
@@ -215,18 +225,31 @@ async function fetchOrders(){
 // ══════════════════════════════════════════════════════
 // FILTRI
 // ══════════════════════════════════════════════════════
+let _quickFilter = 'all'; // 'all' | 'in_lavorazione' | 'pronto' | 'consegnato'
+
+function setQuickFilter(stato){
+  _quickFilter = stato;
+  document.querySelectorAll('.quick-btn').forEach(b=>b.classList.remove('active'));
+  const idMap = {all:'quickAll',in_lavorazione:'quickLav',pronto:'quickPronto',consegnato:'quickCons'};
+  document.getElementById(idMap[stato])?.classList.add('active');
+  applyFilters();
+}
+
 function getFiltered(){
-  const mese = document.getElementById('filtMese').value;
-  const anno = document.getElementById('filtAnno').value;
-  const stato = document.getElementById('filtStato').value;
+  const meseDa = document.getElementById('filtMeseDa').value;
+  const annoDa = document.getElementById('filtAnnoDa').value;
+  const meseA = document.getElementById('filtMeseA').value;
+  const annoA = document.getElementById('filtAnnoA').value;
   const cliente = document.getElementById('filtCliente').value.trim().toLowerCase();
 
+  const dataDa = meseDa && annoDa ? annoDa+'-'+meseDa+'-01' : null;
+  const dataA = meseA && annoA ? annoA+'-'+meseA+'-31' : null;
+
   return ALL_ORDERS.filter(o => {
-    const d = o.createdAt ? o.createdAt.slice(0,7) : ''; // YYYY-MM
-    const [y, m] = d.split('-');
-    if(mese && m !== mese) return false;
-    if(anno && y !== anno) return false;
-    if(stato && o.stato !== stato) return false;
+    const created = o.createdAt ? o.createdAt.slice(0,10) : '';
+    if(dataDa && created < dataDa) return false;
+    if(dataA && created > dataA) return false;
+    if(_quickFilter !== 'all' && o.stato !== _quickFilter) return false;
     if(cliente && !(o.clientName||'').toLowerCase().includes(cliente)) return false;
     return true;
   });
@@ -234,11 +257,13 @@ function getFiltered(){
 
 function applyFilters(){ renderTable(getFiltered()); }
 function resetFilters(){
-  document.getElementById('filtMese').value='';
-  document.getElementById('filtAnno').value='';
-  document.getElementById('filtStato').value='';
+  document.getElementById('filtMeseDa').value='';
+  document.getElementById('filtAnnoDa').value='';
+  document.getElementById('filtMeseA').value='';
+  document.getElementById('filtAnnoA').value='';
   document.getElementById('filtCliente').value='';
-  renderTable(ALL_ORDERS);
+  _quickFilter='all';
+  setQuickFilter('all');
 }
 
 // ══════════════════════════════════════════════════════
@@ -444,15 +469,25 @@ async function deleteOrder(orderId){
 // ══════════════════════════════════════════════════════
 function populateYears(){
   const years = new Set(ALL_ORDERS.map(o=>(o.createdAt||'').slice(0,4)).filter(Boolean));
-  const sel = document.getElementById('filtAnno');
   const cur = new Date().getFullYear().toString();
+  const curMonth = (new Date().getMonth()+1).toString().padStart(2,'0');
   if(!years.has(cur)) years.add(cur);
-  [...years].sort((a,b)=>b-a).forEach(y=>{
-    const opt = document.createElement('option');
-    opt.value=y; opt.textContent=y;
-    if(y===cur) opt.selected=true;
-    sel.appendChild(opt);
+  const sortedYears = [...years].sort((a,b)=>b-a);
+  
+  // Popola Da
+  [document.getElementById('filtAnnoDa'), document.getElementById('filtAnnoA')].forEach(sel=>{
+    sortedYears.forEach(y=>{
+      const opt = document.createElement('option');
+      opt.value=y; opt.textContent=y;
+      sel.appendChild(opt);
+    });
   });
+  
+  // Set default: mese corrente
+  document.getElementById('filtMeseDa').value = curMonth;
+  document.getElementById('filtAnnoDa').value = cur;
+  document.getElementById('filtMeseA').value = curMonth;
+  document.getElementById('filtAnnoA').value = cur;
 }
 
 // ══════════════════════════════════════════════════════
