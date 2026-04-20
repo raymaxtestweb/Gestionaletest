@@ -334,8 +334,18 @@ function openPanel(orderId){
   const row = (lbl,val) => `<div class="detail-row"><span class="detail-lbl">${lbl}</span><span class="detail-val">${val}</span></div>`;
 
   let itemsHtml = '';
+  const hasLibero = o.items && o.items.some(it => it.unitCost === 0 && it.code !== 'FT');
   if(o.items&&o.items.length){
-    itemsHtml = '<div class="items-mini">'+(o.items.map(it=>`<div class="item-line"><span>${esc(it.code)} · ${esc(it.desc)} ×${it.qty}</span><span style="font-weight:600">€ ${fp(it.total)}</span></div>`).join(''))+'</div>';
+    itemsHtml = '<div class="items-mini">'+(o.items.map((it,idx)=>{
+      const isLibero = it.unitCost === 0 && it.code !== 'FT';
+      const costoField = isLibero
+        ? `<input type="number" step="0.01" min="0" placeholder="Costo" value="${it.unitCost||''}"
+            style="width:80px;border:1px solid var(--bg3);border-radius:6px;padding:3px 6px;font-size:.75rem;background:var(--bg);font-family:inherit;outline:none;text-align:right"
+            onchange="updateItemCost('${o.orderId}',${idx},parseFloat(this.value)||0)">`
+        : `<span style="font-weight:600">€ ${fp(it.total)}</span>`;
+      return `<div class="item-line"><span>${esc(it.code)} · ${esc(it.desc)} ×${it.qty}</span>${costoField}</div>`;
+    }).join(''))+'</div>';
+    if(hasLibero) itemsHtml += '<div style="font-size:.65rem;color:var(--ink3);margin-top:6px;padding:0 2px">Inserisci il costo per gli articoli manuali per aggiornare il netto.</div>';
   }
 
   const payInfo = o.payType==='anticipato'
@@ -365,6 +375,33 @@ function openPanel(orderId){
 
   document.getElementById('panelOverlay').classList.add('on');
   document.body.style.overflow='hidden';
+}
+
+async function updateItemCost(orderId, itemIdx, newCost){
+  const o = ALL_ORDERS.find(x=>x.orderId===orderId);
+  if(!o || !o.items[itemIdx]) return;
+  o.items[itemIdx].unitCost = newCost;
+  o.items[itemIdx].total = o.items[itemIdx].unitPrice * o.items[itemIdx].qty; // totale rimane invariato
+  // Ricalcola costo totale e netto
+  const totalCosto = o.items.reduce((s,it) => s + (it.unitCost||0)*it.qty, 0);
+  o.costo = totalCosto;
+  // Ricalcola netto in base a payFlag salvato
+  const payFlag = o.payFlag || 'pos';
+  if(payFlag === 'pos'){
+    o.netto = o.incasso - (o.incasso * 0.15) - totalCosto;
+  } else {
+    o.netto = o.incasso - totalCosto;
+  }
+  try{
+    const res = await fetch('/.netlify/functions/orders-upsert',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(o)
+    });
+    const data = await res.json();
+    if(!res.ok||!data.ok) throw new Error(data.error||'errore');
+    renderTable(getFiltered());
+    openPanel(orderId); // riapre panel aggiornato
+    showToast('Costo aggiornato ✓');
+  } catch(e){ showToast('Errore: '+e.message); }
 }
 
 function closePanel(){

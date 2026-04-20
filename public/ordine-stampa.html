@@ -112,6 +112,8 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
   .pcopy .psign-box{border-top:.5pt solid #78716c;width:45%;text-align:center;padding-top:1.5mm;font-size:6.5pt;color:#78716c}
   @page{size:A4 landscape;margin:0}
 }
+.pay-flag{padding:8px 22px;border-radius:8px;border:1.5px solid var(--bg3);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;color:var(--ink3);transition:all .2s;}
+.pay-flag.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 .print-page{display:none}
 @media(max-width:700px){.layout{padding:16px}.manual-row{grid-template-columns:1fr}header{padding:0 16px}}
 </style>
@@ -131,10 +133,25 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
   <!-- CLIENTE -->
   <div class="card">
     <div class="card-title">Dati cliente</div>
-    <div class="fg fg3">
-      <div class="f"><label>Nome e Cognome</label><input type="text" id="clientName" placeholder="Nome cliente"></div>
+    <div class="fg fg2" style="margin-bottom:12px">
+      <div class="f"><label>Cognome e Nome</label><input type="text" id="clientName" placeholder="Cognome Nome"></div>
       <div class="f"><label>Telefono</label><input type="text" id="clientPhone" placeholder="+39 ..."></div>
-      <div class="f"><label>Note ordine</label><input type="text" id="orderNote" placeholder="es. Album matrimonio, data consegna..."></div>
+    </div>
+    <div class="fg fg3" style="margin-bottom:12px">
+      <div class="f"><label>Indirizzo</label><input type="text" id="clientIndirizzo" placeholder="Via/Piazza..."></div>
+      <div class="f"><label>Comune</label><input type="text" id="clientComune" placeholder="Comune"></div>
+      <div class="fg" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="f"><label>PR</label><input type="text" id="clientPr" placeholder="SR" maxlength="2" style="text-transform:uppercase"></div>
+        <div class="f"><label>CAP</label><input type="text" id="clientCap" placeholder="96100" maxlength="5"></div>
+      </div>
+    </div>
+    <div class="fg fg2" style="margin-bottom:16px">
+      <div class="f"><label>Codice Fiscale</label><input type="text" id="clientCf" placeholder="XXXXXXXXXXXXX" style="text-transform:uppercase"></div>
+      <div class="f"><label>Note ordine</label><input type="text" id="orderNote" placeholder="es. data consegna..."></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button class="pay-flag active" id="flagPos" onclick="setPayFlag('pos')">POS</button>
+      <button class="pay-flag" id="flagCash" onclick="setPayFlag('cash')">Cash</button>
     </div>
   </div>
 
@@ -271,6 +288,21 @@ prodottiFissi.forEach(s=>allP.push({...s,type:'fisso',search:(s.code+' '+s.desc+
 // STATO
 // ══════════════════════════════════════════════════════
 let items=[],idSeq=0,payType='anticipato',lastF=[],totalOverride=null,accontoOverride=null;
+let payFlag='pos'; // 'pos' = prezzo pieno (+20%), 'cash' = sconto 15%
+
+function setPayFlag(flag){
+  payFlag=flag;
+  document.getElementById('flagPos').classList.toggle('active',flag==='pos');
+  document.getElementById('flagCash').classList.toggle('active',flag==='cash');
+  totalOverride=null;accontoOverride=null;render();
+}
+
+// Applica markup POS/Cash al prezzo base
+function applyFlag(basePrice){
+  const pos=basePrice*1.2;
+  if(payFlag==='cash') return pos*0.85;
+  return pos;
+}
 
 // ══════════════════════════════════════════════════════
 // RICERCA
@@ -339,16 +371,14 @@ function ingrandimentoSurcharge(dim){
 // Prezzo di vendita unitario
 function up(it){
   if(it.manual)return it.manualPrice;
-  if(it.type==='foto')return getAmaPPU(it.code,it.qty);
-  if(it.type==='pannello')return it.cost*(it.flagX2?2:2.2);
-  if(it.type==='fisso')return it.sellPrice;
-  // Lab/digitali: ingrandimenti hanno surcharge fisso, altrimenti sono foto amatoriali
-  // Gli ingrandimenti (25x+) hanno surcharge
+  if(it.type==='foto')return applyFlag(getAmaPPU(it.code,it.qty));
+  if(it.type==='pannello')return applyFlag(it.cost*(it.flagX2?2:2.2));
+  if(it.type==='fisso')return applyFlag(it.sellPrice);
   if(it.type==='lab'){
     const sur=ingrandimentoSurcharge(it.dim);
-    return sur>0?it.cost+sur:it.cost; // se surcharge, applica; altrimenti solo costo (non è amatoriale)
+    return applyFlag(sur>0?it.cost+sur:it.cost);
   }
-  return it.cost; // fallback
+  return applyFlag(it.cost);
 }
 // Costo produzione unitario
 function cp(it){
@@ -367,6 +397,12 @@ function lc(it){return cp(it)*it.qty;}
 function gtCalc(){let t=0;items.forEach(i=>t+=lt(i));return t;}
 function gcCalc(){let t=0;items.forEach(i=>t+=lc(i));return t;}
 function gt(){return totalOverride!==null?totalOverride:gtCalc();}
+function calcNetto(incasso, costo){
+  // POS: incasso - 15% commissione - costo produzione
+  // Cash: incasso - costo produzione
+  if(payFlag==='pos') return incasso - (incasso*0.15) - costo;
+  return incasso - costo;
+}
 
 function render(){
   const tb=document.getElementById('orderBody'),es=document.getElementById('emptyState');
@@ -394,7 +430,7 @@ function render(){
     </tr>`;
   }).join('');
   const displayTotal=totalOverride!==null?totalOverride:grand;
-  const netto=displayTotal-cost;
+  const netto=calcNetto(displayTotal,cost);
   document.getElementById('totalItems').textContent=tq;
   document.getElementById('totalPrice').textContent='€ '+fp(displayTotal);
   document.getElementById('totalCost').textContent=fp(cost);
@@ -431,7 +467,7 @@ function editTotal(el){
     const span=document.createElement('span');span.id='totalPrice';span.className='editable-val';
     span.onclick=function(){editTotal(this);};span.title='Clicca per modificare';span.textContent='€ '+fp(v);
     inp.replaceWith(span);
-    const netto=v-gcCalc();document.getElementById('totalNetto').textContent=fp(netto);
+    const netto=calcNetto(v,gcCalc());document.getElementById('totalNetto').textContent=fp(netto);
     updatePay(v);
   }
   inp.addEventListener('blur',commit);
@@ -463,9 +499,14 @@ async function saveOrder(){
   const clientName=document.getElementById('clientName').value.trim()||'Cliente sconosciuto';
   const clientPhone=document.getElementById('clientPhone').value.trim()||'';
   const orderNote=document.getElementById('orderNote').value.trim()||'';
+  const clientIndirizzo=document.getElementById('clientIndirizzo').value.trim()||'';
+  const clientComune=document.getElementById('clientComune').value.trim()||'';
+  const clientPr=document.getElementById('clientPr').value.trim()||'';
+  const clientCap=document.getElementById('clientCap').value.trim()||'';
+  const clientCf=document.getElementById('clientCf').value.trim()||'';
   const total=gt();
   const cost=gcCalc();
-  const netto=total-cost;
+  const netto=calcNetto(total,cost);
   const acc=payType==='acconto'?(accontoOverride!==null?accontoOverride:roundUp5(total*0.5)):total;
   const saldo=payType==='acconto'?Math.max(0,total-acc):0;
   const now=new Date();
@@ -475,6 +516,7 @@ async function saveOrder(){
     orderId,
     createdAt:now.toISOString(),
     clientName,clientPhone,orderNote,
+    clientIndirizzo,clientComune,clientPr,clientCap,clientCf,payFlag,
     payType,
     incasso:total,
     costo:cost,
@@ -517,6 +559,12 @@ async function saveOrder(){
 function printOrder(){
   const cn=document.getElementById('clientName').value||'—';
   const cp=document.getElementById('clientPhone').value||'—';
+  const cInd=document.getElementById('clientIndirizzo').value||'';
+  const cCom=document.getElementById('clientComune').value||'';
+  const cPr=document.getElementById('clientPr').value||'';
+  const cCap=document.getElementById('clientCap').value||'';
+  const cCf=document.getElementById('clientCf').value||'';
+  const clientAddr=[cInd,cCom,cPr?'('+cPr+')':'',cCap].filter(Boolean).join(' ');
   const total=gt();
   const now=new Date();
   const ds=now.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
@@ -530,11 +578,14 @@ function printOrder(){
     payH=`<div class="prow"><span>Totale ordine</span><span>€ ${fp(total)}</span></div><div class="prow"><span>Acconto</span><span style="font-weight:700">€ ${fp(acc)}</span></div><div class="prow saldo"><span>SALDO ALLA CONSEGNA</span><span>€ ${fp(saldo)}</span></div>`;
   }
   const copy=`<div class="ph"><div><div class="ph-name">Massimo Inturrisi</div><div class="ph-qual">Fotografo</div></div><div class="ph-right"><strong>Ordine di stampa</strong><div>${ds}</div></div></div>
-  <div class="pclient"><strong style="font-size:12pt;font-family:Libre Baskerville,serif">Cliente:</strong> <span style="font-size:12pt;font-family:Libre Baskerville,serif;font-weight:700">${esc(cn)}</span> &nbsp;|&nbsp; <strong>Tel:</strong> ${esc(cp)}</div>
+  <div class="pclient">
+    <div style="margin-bottom:1.5mm"><strong style="font-size:11pt;font-family:Libre Baskerville,serif">${esc(cn)}</strong> &nbsp;·&nbsp; <strong>Tel:</strong> ${esc(cp)}</div>
+    ${clientAddr?`<div style="font-size:7.5pt;color:#555;margin-bottom:.8mm">${esc(clientAddr)}</div>`:''}
+    ${cCf?`<div style="font-size:7pt;color:#555"><strong>C.F.:</strong> ${esc(cCf)}</div>`:''}
+  </div>
   <table class="ptable"><thead><tr><th>Codice</th><th>Descrizione</th><th class="c">Qtà</th><th class="r">Prezzo</th><th class="r">Totale</th></tr></thead><tbody>${rows}</tbody></table>
   <div class="ptot"><div class="ptot-line ptot-grand"><span>TOTALE ORDINE</span><span>€ ${fp(total)}</span></div></div>
   <div class="pbox"><div class="pbox-title">Pagamento</div>${payH}</div>
-  <div class="psign"><div class="psign-box">Firma operatore</div><div class="psign-box">Firma cliente</div></div>
   <div class="pfooter">Massimo Inturrisi · Fotografo · Tel 339 159 4106</div>`;
   document.getElementById('printCopy1').innerHTML=copy;
   document.getElementById('printCopy2').innerHTML=copy;
