@@ -264,7 +264,9 @@ function renderTable(orders){
   document.getElementById('statTot').textContent = ALL_ORDERS.length;
   document.getElementById('statLav').textContent = totalLav;
   document.getElementById('statIncasso').textContent = '€ '+fp(incasso);
+  const hasUnsaldo = orders.some(o=>o.payType==='acconto'&&o.stato!=='consegnato');
   document.getElementById('statNetto').textContent = '€ '+fp(netto);
+  document.getElementById('statNetto').style.color = hasUnsaldo ? '#d97706' : 'var(--green)';
 
   if(!orders.length){
     tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun ordine trovato.</td></tr>';
@@ -282,7 +284,7 @@ function renderTable(orders){
       <td style="color:var(--ink3);font-size:.78rem">${esc(o.orderNote||'—')}</td>
       <td><button class="stato ${o.stato||'in_lavorazione'}" onclick="event.stopPropagation();cycleStato('${o.orderId}')">${statoLabel}</button></td>
       <td class="r b">€ ${fp(o.incasso)}</td>
-      <td class="r" style="color:var(--green);font-weight:700">€ ${fp(o.netto)}</td>
+      <td class="r" style="color:${o.payType==='acconto'&&o.stato!=='consegnato'?'#d97706':'var(--green)'};font-weight:700">€ ${fp(o.netto)}</td>
     </tr>`;
   }).join('');
 }
@@ -341,7 +343,7 @@ function openPanel(orderId){
       const costoField = isLibero
         ? `<input type="number" step="0.01" min="0" placeholder="Costo" value="${it.unitCost||''}"
             style="width:80px;border:1px solid var(--bg3);border-radius:6px;padding:3px 6px;font-size:.75rem;background:var(--bg);font-family:inherit;outline:none;text-align:right"
-            onchange="updateItemCost('${o.orderId}',${idx},parseFloat(this.value)||0)">`
+            onblur="updateItemCost('${o.orderId}',${idx},parseFloat(this.value)||0)">`
         : `<span style="font-weight:600">€ ${fp(it.total)}</span>`;
       return `<div class="item-line"><span>${esc(it.code)} · ${esc(it.desc)} ×${it.qty}</span>${costoField}</div>`;
     }).join(''))+'</div>';
@@ -358,7 +360,17 @@ function openPanel(orderId){
     row('Pagamento', payInfo)+
     row('Incasso', '<strong>€ '+fp(o.incasso)+'</strong>')+
     row('Costo produzione', '€ '+fp(o.costo))+
-    row('Guadagno netto', '<strong style="color:var(--green)">€ '+fp(o.netto)+'</strong>')+
+    row('Guadagno netto', (()=>{
+      // Se acconto: netto proporzionale all'acconto versato
+      let nettoDisplay = o.netto || 0;
+      let labelExtra = '';
+      if(o.payType === 'acconto' && o.stato !== 'consegnato'){
+        const ratio = o.incasso > 0 ? (o.acconto||0) / o.incasso : 0;
+        nettoDisplay = (o.netto||0) * ratio;
+        labelExtra = ' <span style="font-size:.65rem;color:#92400e">(su acconto)</span>';
+      }
+      return '<strong style="color:var(--green)">€ '+fp(nettoDisplay)+'</strong>'+labelExtra;
+    })())+
     (itemsHtml ? '<div style="margin-top:12px;font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">Articoli</div>'+itemsHtml : '');
 
   // Azioni: cambio stato + elimina
