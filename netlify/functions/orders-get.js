@@ -1,20 +1,18 @@
-// netlify/functions/orders-get.js
-const { getStore } = require('@netlify/blobs');
-
-exports.handler = async () => {
+import { getStore } from "@netlify/blobs";
+ 
+export default async () => {
   try {
-    const store = getStore('studio-data');
-    const raw = await store.get('orders');
-    const orders = raw ? JSON.parse(raw) : [];
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: true, orders })
-    };
-  } catch (e) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ ok: false, error: e.message })
-    };
+    const store = getStore("raymax-calendar");
+    const orders = (await store.get("orders", { type: "json" })) || [];
+    return new Response(JSON.stringify({ ok: true, orders }), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ ok: false, error: error.message }), {
+      status: 500,
+      headers: { "content-type": "application/json" }
+    });
   }
 };
+ 
