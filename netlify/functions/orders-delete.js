@@ -1,6 +1,3 @@
-
-Copia
-
 import { getStore } from "@netlify/blobs";
  
 export default async (req) => {
@@ -12,7 +9,7 @@ export default async (req) => {
     let orders = (await store.get("orders", { type: "json" })) || [];
     orders = orders.filter(o => o.orderId !== orderId);
  
-    await store.set("orders", JSON.stringify(orders));
+    await store.set("orders", orders);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "content-type": "application/json" }
@@ -24,4 +21,3 @@ export default async (req) => {
     });
   }
 };
- 
