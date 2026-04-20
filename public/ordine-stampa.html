@@ -117,7 +117,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
 </style>
 </head>
 <body>
-
+ 
 <header>
   <div class="brand">Massimo Inturrisi<small>Fotografo</small></div>
   <div class="header-links">
@@ -125,9 +125,9 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
     <a class="header-link" href="./index.html">Home</a>
   </div>
 </header>
-
+ 
 <div class="layout">
-
+ 
   <!-- CLIENTE -->
   <div class="card">
     <div class="card-title">Dati cliente</div>
@@ -137,7 +137,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
       <div class="f"><label>Note ordine</label><input type="text" id="orderNote" placeholder="es. Album matrimonio, data consegna..."></div>
     </div>
   </div>
-
+ 
   <!-- INSERIMENTO MANUALE -->
   <div class="card no-print">
     <div class="card-title">Inserimento manuale</div>
@@ -149,7 +149,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
       <div class="f" style="display:flex;align-items:end"><button class="btn btn-gold" onclick="addManual()">Aggiungi</button></div>
     </div>
   </div>
-
+ 
   <!-- RICERCA -->
   <div class="card no-print">
     <div class="card-title">Cerca articolo</div>
@@ -160,7 +160,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
     </div>
     <div class="search-hint">Es: "pannello 30x40", "ingrandimento 25x35", "fototessera"</div>
   </div>
-
+ 
   <!-- RIEPILOGO -->
   <div class="card">
     <div class="card-title">Riepilogo ordine</div>
@@ -176,7 +176,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
     </table>
     <div class="empty-state" id="emptyState">Nessun articolo aggiunto.</div>
   </div>
-
+ 
   <!-- TOTALE -->
   <div class="card">
     <div class="card-title">Totale</div>
@@ -185,7 +185,7 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
     <div class="price-row total"><span>TOTALE ORDINE</span><span id="totalPrice" class="editable-val" onclick="editTotal(this)" title="Clicca per modificare">€ 0,00</span></div>
     <span id="totalNetto" style="display:none">0</span>
   </div>
-
+ 
   <!-- PAGAMENTO -->
   <div class="card">
     <div class="card-title">Pagamento</div>
@@ -204,21 +204,21 @@ header{background:var(--ink);height:58px;padding:0 40px;display:flex;align-items
       <div class="pay-row"><span>Acconto</span><span id="pdAcconto" class="editable-val" style="font-weight:700" onclick="editAcconto(this)" title="Clicca per modificare">€ 0,00</span></div>
       <div class="pay-row saldo"><span>SALDO ALLA CONSEGNA</span><span id="pdSaldo">€ 0,00</span></div>
     </div>
-
+ 
     <div class="save-bar">
       <button class="btn btn-primary btn-full" onclick="printOrder()">🖨️ Stampa ricevuta</button>
       <button class="btn btn-green btn-full" onclick="saveOrder()">💾 Salva ordine</button>
     </div>
   </div>
-
+ 
 </div>
-
+ 
 <div class="toast" id="toastMsg"></div>
 <div class="print-page" id="printPage">
   <div class="pcopy left" id="printCopy1"></div>
   <div class="pcopy right" id="printCopy2"></div>
 </div>
-
+ 
 <script>
 // ══════════════════════════════════════════════════════
 // LISTINO
@@ -234,7 +234,7 @@ const prodottiFissi=[
 ];
 const qtyB=[{min:1,max:5},{min:6,max:15},{min:16,max:35},{min:35,max:50},{min:51,max:100},{min:101,max:250},{min:251,max:500},{min:501,max:99999}];
 function getAmaPPU(code,qty){const a=stampeAmatoriali.find(x=>x.code===code);if(!a)return 0;for(let i=0;i<qtyB.length;i++){if(qty>=qtyB[i].min&&qty<=qtyB[i].max)return a.prices[i];}return a.prices[a.prices.length-1];}
-
+ 
 const stampeDigitali=[
   {code:"2525",desc:"25X25 INGRANDIMENTO",dim:"25x25",cost:.90},{code:"2530",desc:"25X30 INGRANDIMENTO",dim:"25x30",cost:1.10},
   {code:"2535",desc:"25X35 INGRANDIMENTO",dim:"25x35",cost:1.40},{code:"2538",desc:"25X38 INGRANDIMENTO",dim:"25x38",cost:1.50},
@@ -260,18 +260,18 @@ const stampaPannello=[
   {code:"STP50100",desc:"STAMPA 50X100 + PANNELLO",dim:"50x100",cost:40.00},{code:"STP6090",desc:"STAMPA 60X90 + PANNELLO",dim:"60x90",cost:46.50},
   {code:"STP70100",desc:"STAMPA 70X100 + PANNELLO",dim:"70x100",cost:46.50},
 ];
-
+ 
 const allP=[];
 stampeAmatoriali.forEach(a=>allP.push({...a,type:'foto',search:(a.code+' '+a.desc+' '+a.dim+' foto cliente amatoriale').toLowerCase()}));
 stampeDigitali.forEach(s=>allP.push({...s,type:'lab',search:(s.code+' '+s.desc+' '+s.dim+' ingrandimento').toLowerCase()}));
 stampaPannello.forEach(s=>allP.push({...s,type:'pannello',search:(s.code+' '+s.desc+' '+s.dim+' pannello').toLowerCase()}));
 prodottiFissi.forEach(s=>allP.push({...s,type:'fisso',search:(s.code+' '+s.desc+' fototessera tessera documento').toLowerCase()}));
-
+ 
 // ══════════════════════════════════════════════════════
 // STATO
 // ══════════════════════════════════════════════════════
 let items=[],idSeq=0,payType='anticipato',lastF=[],totalOverride=null,accontoOverride=null;
-
+ 
 // ══════════════════════════════════════════════════════
 // RICERCA
 // ══════════════════════════════════════════════════════
@@ -300,13 +300,13 @@ sI.addEventListener('input',function(){
   sR.classList.add('active');
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))sR.classList.remove('active');});
-
+ 
 function addFS(i){
   const p=lastF[i];if(!p)return;idSeq++;
   items.push({id:idSeq,code:p.code,desc:p.desc,dim:p.dim||'',type:p.type,cost:p.cost||0,sellPrice:p.sellPrice||0,prodCost:p.prodCost||0,qty:1,flagX2:false,manual:false});
   sI.value='';sR.classList.remove('active');render();showToast('Aggiunto: '+p.code);
 }
-
+ 
 function addManual(){
   const code=document.getElementById('manCode').value.trim()||'LIBERO';
   const desc=document.getElementById('manDesc').value.trim();
@@ -318,11 +318,11 @@ function addManual(){
   document.getElementById('manQty').value='1';document.getElementById('manPrice').value='';
   render();showToast('Aggiunto: '+code);
 }
-
+ 
 function removeItem(id){items=items.filter(x=>x.id!==id);totalOverride=null;accontoOverride=null;render();}
 function updateQty(id,v){const it=items.find(x=>x.id===id);if(it){it.qty=Math.max(1,parseInt(v)||1);totalOverride=null;accontoOverride=null;render();}}
 function toggleFlag(id){const it=items.find(x=>x.id===id);if(it){it.flagX2=!it.flagX2;totalOverride=null;accontoOverride=null;render();}}
-
+ 
 // Surcharge per ingrandimenti (25x-70x100)
 function ingrandimentoSurcharge(dim){
   if(!dim)return 0;
@@ -335,7 +335,7 @@ function ingrandimentoSurcharge(dim){
   if(short>=25)return 5;
   return 0;
 }
-
+ 
 // Prezzo di vendita unitario
 function up(it){
   if(it.manual)return it.manualPrice;
@@ -352,19 +352,22 @@ function up(it){
 }
 // Costo produzione unitario
 function cp(it){
-  if(it.manual)return 0; // libero: costo sconosciuto
-  if(it.type==='foto')return 0; // amatoriali: costo non tracciato
+  if(it.manual)return 0;
+  if(it.type==='foto'){
+    const costi={'10x':0.12,'12x13x':0.17,'15x':0.40,'20x':0.90};
+    return costi[it.code]||0;
+  }
   if(it.type==='pannello')return it.cost;
   if(it.type==='fisso')return it.prodCost||0;
-  return it.cost; // lab: cost = costo reale
+  return it.cost; // lab: costo reale
 }
-
+ 
 function lt(it){return up(it)*it.qty;}
 function lc(it){return cp(it)*it.qty;}
 function gtCalc(){let t=0;items.forEach(i=>t+=lt(i));return t;}
 function gcCalc(){let t=0;items.forEach(i=>t+=lc(i));return t;}
 function gt(){return totalOverride!==null?totalOverride:gtCalc();}
-
+ 
 function render(){
   const tb=document.getElementById('orderBody'),es=document.getElementById('emptyState');
   if(!items.length){
@@ -398,10 +401,10 @@ function render(){
   document.getElementById('totalNetto').textContent=fp(netto);
   updatePay(displayTotal);
 }
-
+ 
 function fp(n){return Number(n||0).toFixed(2).replace('.',',');}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-
+ 
 function selectPayment(t){payType=t;accontoOverride=null;document.querySelectorAll('.pay-opt').forEach(el=>el.classList.toggle('sel',el.dataset.type===t));updatePay(gt());}
 function roundUp5(v){return Math.ceil(v/5)*5;}
 function updatePay(total){
@@ -415,7 +418,7 @@ function updatePay(total){
     document.getElementById('pdSaldo').textContent='€ '+fp(saldo);
   }else{d.classList.remove('active');}
 }
-
+ 
 function editTotal(el){
   const cur=gt();
   const inp=document.createElement('input');
@@ -434,7 +437,7 @@ function editTotal(el){
   inp.addEventListener('blur',commit);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}});
 }
-
+ 
 function editAcconto(el){
   const total=gt();const curAcc=accontoOverride!==null?accontoOverride:roundUp5(total*0.5);
   const inp=document.createElement('input');
@@ -451,7 +454,7 @@ function editAcconto(el){
   inp.addEventListener('blur',commit);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur();}});
 }
-
+ 
 // ══════════════════════════════════════════════════════
 // SALVA ORDINE SU NETLIFY
 // ══════════════════════════════════════════════════════
@@ -467,7 +470,7 @@ async function saveOrder(){
   const saldo=payType==='acconto'?Math.max(0,total-acc):0;
   const now=new Date();
   const orderId='ORD-'+now.getTime();
-
+ 
   const payload={
     orderId,
     createdAt:now.toISOString(),
@@ -481,10 +484,10 @@ async function saveOrder(){
     stato:'in_lavorazione',
     items:items.map(it=>({code:it.code,desc:it.desc,qty:it.qty,unitPrice:up(it),total:lt(it),unitCost:cp(it)}))
   };
-
+ 
   const btn=document.querySelector('[onclick="saveOrder()"]');
   if(btn){btn.disabled=true;btn.textContent='Salvataggio...';}
-
+ 
   try{
     const res=await fetch('/.netlify/functions/orders-upsert',{
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
@@ -507,7 +510,7 @@ async function saveOrder(){
     if(btn){btn.disabled=false;btn.textContent='💾 Salva ordine';}
   }
 }
-
+ 
 // ══════════════════════════════════════════════════════
 // STAMPA
 // ══════════════════════════════════════════════════════
@@ -537,7 +540,7 @@ function printOrder(){
   document.getElementById('printCopy2').innerHTML=copy;
   setTimeout(()=>window.print(),200);
 }
-
+ 
 function showToast(msg){const el=document.getElementById('toastMsg');el.textContent=msg;el.classList.add('on');clearTimeout(showToast._t);showToast._t=setTimeout(()=>el.classList.remove('on'),2400);}
 render();
 </script>
