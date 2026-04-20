@@ -15,7 +15,7 @@ export default async (req) => {
       orders.push(payload);
     }
  
-    await store.set("orders", JSON.stringify(orders));
+    await store.set("orders", orders);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "content-type": "application/json" }
